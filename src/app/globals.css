@@ -1,134 +1,19 @@
 @import "tailwindcss";
 
-:root {
-  --background: 210 17% 96%;
-  --foreground: 215 25% 13%;
-
-  --card: 0 0% 100%;
-  --card-foreground: 215 25% 13%;
-
-  --popover: 0 0% 100%;
-  --popover-foreground: 215 25% 13%;
-
-  --primary: 217 92% 58%;
-  --primary-foreground: 0 0% 100%;
-
-  --secondary: 210 17% 96%;
-  --secondary-foreground: 215 25% 13%;
-
-  --muted: 210 17% 96%;
-  --muted-foreground: 215 14% 53%;
-
-  --accent: 210 17% 96%;
-  --accent-foreground: 215 25% 13%;
-
-  --destructive: 354 84% 60%;
-  --destructive-foreground: 0 0% 100%;
-
-  --border: 210 17% 92%;
-  --input: 210 17% 92%;
-  --ring: 217 92% 58%;
-
-  --radius: 0.75rem;
+/* Mantine body 배경을 토스 회색으로 override (light-only)
+   Mantine 의 selector specificity 와 매칭: :root[data-mantine-color-scheme='light'] */
+:root[data-mantine-color-scheme="light"],
+:host([data-mantine-color-scheme="light"]) {
+  --mantine-color-body: #f2f4f6;
 }
 
-@theme inline {
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
-  --color-card: hsl(var(--card));
-  --color-card-foreground: hsl(var(--card-foreground));
-  --color-popover: hsl(var(--popover));
-  --color-popover-foreground: hsl(var(--popover-foreground));
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
-  --color-secondary: hsl(var(--secondary));
-  --color-secondary-foreground: hsl(var(--secondary-foreground));
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
-  --color-accent: hsl(var(--accent));
-  --color-accent-foreground: hsl(var(--accent-foreground));
-  --color-destructive: hsl(var(--destructive));
-  --color-destructive-foreground: hsl(var(--destructive-foreground));
-  --color-border: hsl(var(--border));
-  --color-input: hsl(var(--input));
-  --color-ring: hsl(var(--ring));
-
-  --color-toss-blue: #3182f6;
-  --color-toss-blue-light: #e8f3ff;
-  --color-toss-blue-dark: #1b64da;
-  --color-toss-red: #f04452;
-  --color-toss-red-light: #ffe5e8;
-  --color-toss-green: #22c55e;
-  --color-toss-purple: #8b5cf6;
-  --color-toss-purple-light: #f3f0ff;
-  --color-toss-gold: #f59e0b;
-  --color-toss-bg: #f2f4f6;
-  --color-toss-card: #ffffff;
-  --color-toss-border: #f2f4f6;
-  --color-toss-border-strong: #e5e8eb;
-  --color-toss-text: #191f28;
-  --color-toss-text-sub: #4e5968;
-  --color-toss-text-muted: #8b95a1;
-
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-
-  --animate-slide-in: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  --animate-fade-in: fadeIn 0.2s ease;
-
-  @keyframes slideIn {
-    from {
-      transform: translateY(100%);
-      opacity: 0;
-    }
-    to {
-      transform: translateY(0);
-      opacity: 1;
-    }
-  }
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
+html,
+body {
+  min-height: 100dvh;
 }
 
-@layer base {
-  * {
-    border-color: hsl(var(--border));
-  }
-
-  html,
-  body {
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
-    font-family:
-      var(--font-pretendard), Pretendard, -apple-system, BlinkMacSystemFont,
-      system-ui, sans-serif;
-    font-feature-settings: "tnum" on;
-  }
-}
-
-@layer components {
-  .slide-in {
-    animation: var(--animate-slide-in);
-  }
-
-  .fade-in {
-    animation: var(--animate-fade-in);
-  }
-}
-
-@layer utilities {
-  button {
-    transition: transform 0.15s ease;
-  }
-  button:active {
-    transform: scale(0.97);
-  }
+body {
+  font-family:
+    Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-feature-settings: "tnum" on;
 }
