@@ -1,7 +1,7 @@
 // 백엔드 API 기본 응답
 interface ApiBaseResponse {
-  code: string;
-  message: string;
+  code: string | null;
+  message: string | null;
   status: number;
 }
 

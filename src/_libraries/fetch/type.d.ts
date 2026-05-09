@@ -2,7 +2,7 @@ type ErrorHandleMethod = "reject" | "toast" | "component";
 type MethodType = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
 type RetryRequestInit = Omit<NonNullable<RequestInit>, "method" | "body" | "next"> & {
-  body?: BodyInit | Record<string, unknown> | null;
+  body?: BodyInit | Record<string, unknown> | object | null;
   next?: {
     revalidate?: number | false;
     tags?: string[];
@@ -12,7 +12,7 @@ type RetryRequestInit = Omit<NonNullable<RequestInit>, "method" | "body" | "next
 };
 
 type JsonRequestInit = Omit<NonNullable<RequestInit>, "method" | "body" | "next"> & {
-  body?: BodyInit | Record<string, unknown> | null;
+  body?: BodyInit | Record<string, unknown> | object | null;
   next?: {
     revalidate?: number | false;
     tags?: string[];
