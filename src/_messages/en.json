@@ -1,0 +1,22 @@
+{
+  "app": {
+    "title": "Personal",
+    "loading": "Loading..."
+  },
+  "auth": {
+    "login": {
+      "title": "Sign in",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign in",
+      "invalidEmail": "Invalid email format.",
+      "passwordTooShort": "Password must be at least 8 characters."
+    }
+  },
+  "portal": {
+    "welcome": "Welcome"
+  },
+  "error": {
+    "default": "Failed to process the request."
+  }
+}

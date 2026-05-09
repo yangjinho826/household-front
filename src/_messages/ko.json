@@ -1,0 +1,22 @@
+{
+  "app": {
+    "title": "Personal",
+    "loading": "불러오는 중..."
+  },
+  "auth": {
+    "login": {
+      "title": "로그인",
+      "email": "이메일",
+      "password": "비밀번호",
+      "submit": "로그인",
+      "invalidEmail": "이메일 형식이 올바르지 않습니다.",
+      "passwordTooShort": "비밀번호는 8자 이상."
+    }
+  },
+  "portal": {
+    "welcome": "환영합니다"
+  },
+  "error": {
+    "default": "요청을 처리하지 못했습니다."
+  }
+}

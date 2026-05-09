@@ -1,0 +1,62 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "preserve",
+
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "useUnknownInCatchVariables": true,
+    "alwaysStrict": true,
+
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "incremental": true,
+    "allowJs": false,
+    "noEmit": true,
+
+    "plugins": [{ "name": "next" }],
+
+    "baseUrl": ".",
+    "paths": {
+      "_app/*": ["./src/app/*"],
+      "_assets/*": ["./src/_assets/*"],
+      "_constants/*": ["./src/_constants/*"],
+      "_features/*": ["./src/_features/*"],
+      "_libraries/*": ["./src/_libraries/*"],
+      "_messages/*": ["./src/_messages/*"],
+      "_providers/*": ["./src/_providers/*"],
+      "_sections/*": ["./src/_sections/*"],
+      "_styles/*": ["./src/_styles/*"],
+      "_types/*": ["./src/_types/*"],
+      "_utilities/*": ["./src/_utilities/*"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    ".next",
+    "_reference/**/*"
+  ]
+}
