@@ -1,12 +1,24 @@
+import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { UserShell } from "_features/layout/user-shell";
-import { BudgetProviders } from "_providers/budget-providers";
+import { hasRefreshCookie } from "_libraries/auth/guard";
+import { AuthProvider } from "_providers/auth-provider";
 
-export default function UserLayout({ children }: { children: ReactNode }) {
+export default async function UserLayout({
+  children,
+  params,
+}: {
+  children: ReactNode;
+  params: { locale: string };
+}) {
+  if (!(await hasRefreshCookie())) {
+    redirect(`/${params.locale}/login`);
+  }
+
   return (
-    <BudgetProviders>
+    <AuthProvider>
       <UserShell>{children}</UserShell>
-    </BudgetProviders>
+    </AuthProvider>
   );
 }
