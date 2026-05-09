@@ -1,20 +1,25 @@
-"use client";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 
-import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "_constants/queries";
+import type { ApiPaginationProps } from "_libraries/fetch/response";
 
-import { GetAllMembersApi, GetHouseholdListApi } from "../api";
-import { householdKeys } from "./query-key";
+import type { HouseholdSearchRequestType } from "../types";
 
-export function useHouseholdListQuery() {
-  return useQuery({
-    queryKey: householdKeys.list,
-    queryFn: async () => (await GetHouseholdListApi()).data.content,
-  });
-}
+export const useHouseholdList = (
+  params: HouseholdSearchRequestType & ApiPaginationProps,
+) => {
+  return useSuspenseQuery(queryKeys.household.list(params));
+};
 
-export function useAllMembersQuery() {
-  return useQuery({
-    queryKey: householdKeys.members,
-    queryFn: async () => (await GetAllMembersApi()).data,
-  });
-}
+export const useHouseholdMembers = (householdId: string) => {
+  return useSuspenseQuery(queryKeys.household.members(householdId));
+};
+
+export const useHouseholdDetail = () => {
+  const queryClient = useQueryClient();
+  return async (householdId: string) => {
+    return await queryClient.fetchQuery({
+      ...queryKeys.household.detail(householdId),
+    });
+  };
+};

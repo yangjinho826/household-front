@@ -1,14 +1,61 @@
-export type AccountType = "생활" | "적립" | "투자";
+// 통장 타입 — 백엔드 account_type 컬럼 (확장 가능)
+export type AccountType =
+  | "checking"
+  | "savings"
+  | "credit"
+  | "cash"
+  | "investment";
 
-export type Account = {
-  id: string;
+export interface AccountSearchRequestType {
+  searchTerm?: string;
+  accountType?: AccountType;
+  isArchived?: boolean;
+}
+
+export interface AccountBaseRequestType {
+  householdId: string;
   name: string;
-  type: AccountType;
-  balance: number;
+  accountType: AccountType;
   startBalance: number;
-  color: string;
-  icon: string;
-};
+  color?: string | null;
+  icon?: string | null;
+  sortOrder: number;
+  isArchived: boolean;
+}
 
-export type AccountCreateRequest = Omit<Account, "id">;
-export type AccountUpdateRequest = Partial<Account> & { id: string };
+export type AccountCreateRequest = AccountBaseRequestType;
+
+export interface AccountUpdateRequest extends AccountBaseRequestType {
+  accountId: string;
+}
+
+export interface AccountListItemType {
+  rowNo: number;
+  accountId: string;
+  householdId: string;
+  name: string;
+  accountType: AccountType;
+  startBalance: number;
+  color: string | null;
+  icon: string | null;
+  sortOrder: number;
+  isArchived: boolean;
+  frstRegDt: string;
+  lastMdfcnDt: string;
+  dataStatCd: string;
+}
+
+export interface AccountDetailItemType {
+  accountId: string;
+  householdId: string;
+  name: string;
+  accountType: AccountType;
+  startBalance: number;
+  color: string | null;
+  icon: string | null;
+  sortOrder: number;
+  isArchived: boolean;
+  frstRegDt: string;
+  lastMdfcnDt: string;
+  dataStatCd: string;
+}

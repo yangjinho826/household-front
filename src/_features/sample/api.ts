@@ -1,112 +1,120 @@
-/**
- * Sample API
- *
- * 학습용 표준 참조 모듈. CRUD 4개.
- * NEXT_PUBLIC_USE_MOCK !== "false" 면 in-memory 데이터로 동작.
- */
 import { apiFetch } from "_libraries/fetch/api-fetch";
+import { objectToParams } from "_libraries/fetch/object-to-params";
 import type {
   ApiListResponse,
   ApiResponse,
 } from "_libraries/fetch/response";
-import { newId, todayIso } from "_utilities/fmt";
+import { mockOkItem, mockOkList } from "_utilities/mock-response";
 
-import { INITIAL_SAMPLES } from "./mock";
+import { sampleMockStore } from "./mock";
 import type {
-  Sample,
   SampleCreateRequest,
+  SampleDetailItemType,
+  SampleListItemType,
+  SampleSearchRequestType,
   SampleUpdateRequest,
 } from "./types";
 
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK !== "false";
 
-// in-memory mock state
-const state = {
-  samples: [...INITIAL_SAMPLES],
-};
+const wrap = <T>(data: T) => ({ body: data });
 
-const okList = <T>(items: T[]): ApiListResponse<T> => ({
-  code: "OK",
-  message: "성공",
-  status: 200,
-  data: {
-    listSize: items.length,
-    currentPage: 1,
-    currentCount: items.length,
-    totalElements: items.length,
-    totalPages: 1,
-    content: items,
-  },
-});
+const toIsoDate = (d: Date | null | undefined): string =>
+  d ? new Date(d).toISOString().slice(0, 10) : "";
 
-const okItem = <T>(item: T): ApiResponse<T> => ({
-  code: "OK",
-  message: "성공",
-  status: 200,
-  data: item,
-});
-
-// =========================================================
-// CRUD
-// =========================================================
-
-export async function GetSampleListApi(): Promise<ApiListResponse<Sample>> {
-  if (USE_MOCK) return okList(state.samples);
-  const res = await apiFetch<ApiListResponse<Sample>>("/api/sample/list", {
-    method: "GET",
-  });
-  return res.body;
-}
-
-export async function PostSampleCreateApi(
-  body: SampleCreateRequest,
-): Promise<ApiResponse<Sample>> {
+// 샘플 검색
+export function GetSampleSearchApi(params: SampleSearchRequestType) {
   if (USE_MOCK) {
-    const created: Sample = {
-      ...body,
-      id: newId(),
-      createdAt: todayIso(),
-    };
-    state.samples = [created, ...state.samples];
-    return okItem(created);
+    const items = sampleMockStore.list();
+    const filtered = items.filter((i) => {
+      if (
+        params.searchTerm &&
+        !`${i.sampleTitle} ${i.sampleContent}`
+          .toLowerCase()
+          .includes(params.searchTerm.toLowerCase())
+      )
+        return false;
+      if (
+        params.sampleEmail &&
+        !i.sampleEmail.toLowerCase().includes(params.sampleEmail.toLowerCase())
+      )
+        return false;
+      return true;
+    });
+    return Promise.resolve(wrap(mockOkList(filtered)));
   }
-  const res = await apiFetch<ApiResponse<Sample>>("/api/sample/create", {
-    method: "POST",
-    body,
-    errorHandleMethod: "reject",
-  });
-  return res.body;
-}
-
-export async function PutSampleUpdateApi(
-  body: SampleUpdateRequest,
-): Promise<ApiResponse<Sample>> {
-  if (USE_MOCK) {
-    state.samples = state.samples.map((s) =>
-      s.id === body.id ? { ...s, ...body } : s,
-    );
-    const updated = state.samples.find((s) => s.id === body.id);
-    if (!updated) throw new Error("Sample not found");
-    return okItem(updated);
-  }
-  const res = await apiFetch<ApiResponse<Sample>>(`/api/sample/update/${body.id}`, {
-    method: "PUT",
-    body,
-    errorHandleMethod: "reject",
-  });
-  return res.body;
-}
-
-export async function DeleteSampleApi(
-  id: string,
-): Promise<ApiResponse<{ id: string }>> {
-  if (USE_MOCK) {
-    state.samples = state.samples.filter((s) => s.id !== id);
-    return okItem({ id });
-  }
-  const res = await apiFetch<ApiResponse<{ id: string }>>(
-    `/api/sample/delete/${id}`,
-    { method: "DELETE", errorHandleMethod: "reject" },
+  const queryString = objectToParams({ ...params }).toString();
+  return apiFetch<ApiListResponse<SampleListItemType>>(
+    `/api/front/v1/sample/list?${queryString}`,
+    { method: "GET" },
   );
-  return res.body;
+}
+
+// 샘플 생성
+export function PostSampleCreateApi(params: SampleCreateRequest) {
+  if (USE_MOCK) {
+    const { sampleFile: _omit, ...rest } = params;
+    void _omit;
+    const item = sampleMockStore.create({
+      ...rest,
+      sampleSelect: rest.sampleSelect ?? "",
+      sampleDate: toIsoDate(rest.sampleDate),
+    });
+    return Promise.resolve(wrap(mockOkItem(item)));
+  }
+  return apiFetch<ApiResponse<SampleDetailItemType>>(
+    `/api/front/v1/sample/create`,
+    {
+      method: "POST",
+      body: params,
+      errorHandleMethod: "reject",
+    },
+  );
+}
+
+// 샘플 상세
+export function GetSampleDetailApi(sampleId: string) {
+  if (USE_MOCK) {
+    const item = sampleMockStore.detail(sampleId);
+    if (!item) return Promise.reject(new Error("sample not found"));
+    return Promise.resolve(wrap(mockOkItem(item)));
+  }
+  return apiFetch<ApiResponse<SampleDetailItemType>>(
+    `/api/front/v1/sample/detail/${sampleId}`,
+    { method: "GET", errorHandleMethod: "reject" },
+  );
+}
+
+// 샘플 수정
+export function PutSampleUpdateApi(params: SampleUpdateRequest) {
+  if (USE_MOCK) {
+    const { sampleFile: _omit, sampleId, ...rest } = params;
+    void _omit;
+    sampleMockStore.update(sampleId, {
+      ...rest,
+      sampleSelect: rest.sampleSelect ?? "",
+      sampleDate: toIsoDate(rest.sampleDate),
+    });
+    return Promise.resolve(wrap(mockOkItem(undefined as unknown as void)));
+  }
+  return apiFetch<ApiResponse<void>>(
+    `/api/front/v1/sample/update/${params.sampleId}`,
+    {
+      method: "PUT",
+      body: params,
+      errorHandleMethod: "reject",
+    },
+  );
+}
+
+// 샘플 삭제
+export function DeleteSampleDeleteApi(sampleId: string) {
+  if (USE_MOCK) {
+    sampleMockStore.remove(sampleId);
+    return Promise.resolve(wrap(mockOkItem(undefined as unknown as void)));
+  }
+  return apiFetch<ApiResponse<void>>(
+    `/api/front/v1/sample/delete/${sampleId}`,
+    { method: "DELETE" },
+  );
 }

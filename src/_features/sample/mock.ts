@@ -1,34 +1,89 @@
-import type { Sample } from "./types";
+import { newId, todayIso } from "_utilities/fmt";
 
-export const INITIAL_SAMPLES: Sample[] = [
+import type { SampleDetailItemType, SampleListItemType } from "./types";
+
+let store: SampleDetailItemType[] = [
   {
-    id: "s1",
-    title: "샘플 표준 모듈",
-    description: "bims sample 패턴을 그대로 따라간 학습용 모듈",
-    createdAt: "2026-05-01",
+    sampleId: newId(),
+    sampleEmail: "alice@example.com",
+    sampleTitle: "샘플 1",
+    sampleContent: "샘플 내용 1",
+    sampleRadio: "react",
+    sampleCheckbox: ["react"],
+    sampleSelect: "A",
+    sampleNumberbox: 100,
+    sampleDate: todayIso(),
+    frstRgstDtm: todayIso(),
+    frstRgstUserId: "system",
+    lastMdfcnDtm: todayIso(),
+    lastMdfcnUserId: "system",
+    dataStatCd: "50",
   },
   {
-    id: "s2",
-    title: "도메인별 책임 분리",
-    description: "api / types / store / context / hooks / queries / components",
-    createdAt: "2026-05-03",
-  },
-  {
-    id: "s3",
-    title: "TanStack Query + Zustand",
-    description: "서버 상태는 Query, UI 상태는 Zustand. 절대 섞지 말 것",
-    createdAt: "2026-05-05",
-  },
-  {
-    id: "s4",
-    title: "mock 토글 패턴",
-    description: "NEXT_PUBLIC_USE_MOCK 환경변수로 mock ↔ 실제 백엔드 전환",
-    createdAt: "2026-05-07",
-  },
-  {
-    id: "s5",
-    title: "useSample ReturnType 자동 매핑",
-    description: "context.tsx 가 useSample 훅의 ReturnType 으로 자동 타입화",
-    createdAt: "2026-05-09",
+    sampleId: newId(),
+    sampleEmail: "bob@example.com",
+    sampleTitle: "샘플 2",
+    sampleContent: "샘플 내용 2",
+    sampleRadio: "vue",
+    sampleCheckbox: ["vue"],
+    sampleSelect: "B",
+    sampleNumberbox: 200,
+    sampleDate: todayIso(),
+    frstRgstDtm: todayIso(),
+    frstRgstUserId: "system",
+    lastMdfcnDtm: todayIso(),
+    lastMdfcnUserId: "system",
+    dataStatCd: "50",
   },
 ];
+
+type CreateInput = Omit<
+  SampleDetailItemType,
+  | "sampleId"
+  | "frstRgstDtm"
+  | "frstRgstUserId"
+  | "lastMdfcnDtm"
+  | "lastMdfcnUserId"
+  | "dataStatCd"
+>;
+
+export const sampleMockStore = {
+  list(): SampleListItemType[] {
+    return store.map((s, idx) => ({ ...s, rowNo: idx + 1 }));
+  },
+  detail(id: string): SampleDetailItemType | undefined {
+    return store.find((s) => s.sampleId === id);
+  },
+  create(input: CreateInput): SampleDetailItemType {
+    const item: SampleDetailItemType = {
+      ...input,
+      sampleId: newId(),
+      frstRgstDtm: todayIso(),
+      frstRgstUserId: "system",
+      lastMdfcnDtm: todayIso(),
+      lastMdfcnUserId: "system",
+      dataStatCd: "50",
+    };
+    store = [item, ...store];
+    return item;
+  },
+  update(
+    id: string,
+    patch: Partial<SampleDetailItemType>,
+  ): SampleDetailItemType | undefined {
+    const idx = store.findIndex((s) => s.sampleId === id);
+    if (idx < 0) return undefined;
+    const current = store[idx];
+    if (!current) return undefined;
+    const next: SampleDetailItemType = {
+      ...current,
+      ...patch,
+      lastMdfcnDtm: todayIso(),
+    };
+    store[idx] = next;
+    return next;
+  },
+  remove(id: string) {
+    store = store.filter((s) => s.sampleId !== id);
+  },
+};

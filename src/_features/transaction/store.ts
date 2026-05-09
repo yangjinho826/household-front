@@ -1,26 +1,12 @@
 import { create } from "zustand";
 
-export type TransactionView = "list" | "calendar";
-export type TransactionFilter = "all" | "income" | "expense" | "transfer";
+interface TransactionStoreState {
+  detailRefreshKey: number;
+  bumpDetailRefreshKey: () => void;
+}
 
-type TransactionUiState = {
-  selectedId: string | null;
-  setSelectedId: (id: string | null) => void;
-
-  view: TransactionView;
-  setView: (view: TransactionView) => void;
-
-  filter: TransactionFilter;
-  setFilter: (filter: TransactionFilter) => void;
-};
-
-export const useTransactionStore = create<TransactionUiState>((set) => ({
-  selectedId: null,
-  setSelectedId: (selectedId) => set({ selectedId }),
-
-  view: "list",
-  setView: (view) => set({ view }),
-
-  filter: "all",
-  setFilter: (filter) => set({ filter }),
+export const useTransactionStore = create<TransactionStoreState>((set) => ({
+  detailRefreshKey: 0,
+  bumpDetailRefreshKey: () =>
+    set((s) => ({ detailRefreshKey: s.detailRefreshKey + 1 })),
 }));

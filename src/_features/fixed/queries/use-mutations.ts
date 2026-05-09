@@ -1,34 +1,50 @@
-"use client";
-
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { queryKeys } from "_constants/queries";
+
 import {
-  DeleteFixedApi,
+  DeleteFixedDeleteApi,
   PostFixedCreateApi,
   PutFixedUpdateApi,
 } from "../api";
-import { fixedKeys } from "./query-key";
+import type { FixedCreateRequest, FixedUpdateRequest } from "../types";
 
-export function useCreateFixedMutation() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: PostFixedCreateApi,
-    onSuccess: () => qc.invalidateQueries({ queryKey: fixedKeys.list }),
-  });
-}
+export function useFixedMutations() {
+  const queryClient = useQueryClient();
 
-export function useUpdateFixedMutation() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: PutFixedUpdateApi,
-    onSuccess: () => qc.invalidateQueries({ queryKey: fixedKeys.list }),
+  const createMutation = useMutation({
+    mutationFn: (props: FixedCreateRequest) => PostFixedCreateApi(props),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.fixed.list._def,
+        refetchType: "all",
+      });
+    },
   });
-}
 
-export function useDeleteFixedMutation() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: DeleteFixedApi,
-    onSuccess: () => qc.invalidateQueries({ queryKey: fixedKeys.list }),
+  const updateMutation = useMutation({
+    mutationFn: (props: FixedUpdateRequest) => PutFixedUpdateApi(props),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.fixed.list._def,
+        refetchType: "all",
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.fixed.detail._def,
+        refetchType: "all",
+      });
+    },
   });
+
+  const removeMutation = useMutation({
+    mutationFn: (fixedId: string) => DeleteFixedDeleteApi(fixedId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.fixed.list._def,
+        refetchType: "all",
+      });
+    },
+  });
+
+  return { createMutation, updateMutation, removeMutation };
 }

@@ -1,72 +1,103 @@
 import { apiFetch } from "_libraries/fetch/api-fetch";
+import { objectToParams } from "_libraries/fetch/object-to-params";
 import type {
   ApiListResponse,
   ApiResponse,
 } from "_libraries/fetch/response";
-import { newId } from "_utilities/fmt";
-import { mockOkItem as okItem, mockOkList as okList } from "_utilities/mock-response";
+import { mockOkItem, mockOkList } from "_utilities/mock-response";
 
-import { INITIAL_FIXED } from "./mock";
+import { fixedMockStore } from "./mock";
 import type {
   FixedCreateRequest,
-  FixedExpense,
+  FixedDetailItemType,
+  FixedListItemType,
+  FixedSearchRequestType,
   FixedUpdateRequest,
 } from "./types";
 
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK !== "false";
 
-const state = { fixed: [...INITIAL_FIXED] };
+const wrap = <T>(data: T) => ({ body: data });
 
-export async function GetFixedListApi(): Promise<ApiListResponse<FixedExpense>> {
-  if (USE_MOCK) return okList(state.fixed);
-  const res = await apiFetch<ApiListResponse<FixedExpense>>("/api/fixed/list", {
-    method: "GET",
-  });
-  return res.body;
-}
-
-export async function PostFixedCreateApi(
-  body: FixedCreateRequest,
-): Promise<ApiResponse<FixedExpense>> {
+export function GetFixedSearchApi(params: FixedSearchRequestType) {
   if (USE_MOCK) {
-    const created: FixedExpense = { ...body, id: newId() };
-    state.fixed.push(created);
-    return okItem(created);
+    const items = fixedMockStore.list();
+    const filtered = items.filter((i) => {
+      if (
+        params.searchTerm &&
+        !i.name.toLowerCase().includes(params.searchTerm.toLowerCase())
+      )
+        return false;
+      if (params.isArchived !== undefined && i.isArchived !== params.isArchived)
+        return false;
+      return true;
+    });
+    return Promise.resolve(wrap(mockOkList(filtered)));
   }
-  const res = await apiFetch<ApiResponse<FixedExpense>>("/api/fixed/create", {
-    method: "POST",
-    body,
-    errorHandleMethod: "reject",
-  });
-  return res.body;
-}
-
-export async function PutFixedUpdateApi(
-  body: FixedUpdateRequest,
-): Promise<ApiResponse<FixedExpense>> {
-  if (USE_MOCK) {
-    state.fixed = state.fixed.map((f) => (f.id === body.id ? { ...f, ...body } : f));
-    const updated = state.fixed.find((f) => f.id === body.id);
-    if (!updated) throw new Error("Fixed not found");
-    return okItem(updated);
-  }
-  const res = await apiFetch<ApiResponse<FixedExpense>>(
-    `/api/fixed/update/${body.id}`,
-    { method: "PUT", body, errorHandleMethod: "reject" },
+  const queryString = objectToParams({ ...params }).toString();
+  return apiFetch<ApiListResponse<FixedListItemType>>(
+    `/api/front/v1/fixed/list?${queryString}`,
+    { method: "GET" },
   );
-  return res.body;
 }
 
-export async function DeleteFixedApi(
-  id: string,
-): Promise<ApiResponse<{ id: string }>> {
+export function GetFixedDetailApi(fixedId: string) {
   if (USE_MOCK) {
-    state.fixed = state.fixed.filter((f) => f.id !== id);
-    return okItem({ id });
+    const item = fixedMockStore.detail(fixedId);
+    if (!item) return Promise.reject(new Error("fixed not found"));
+    return Promise.resolve(wrap(mockOkItem(item)));
   }
-  const res = await apiFetch<ApiResponse<{ id: string }>>(
-    `/api/fixed/delete/${id}`,
+  return apiFetch<ApiResponse<FixedDetailItemType>>(
+    `/api/front/v1/fixed/detail/${fixedId}`,
+    { method: "GET", errorHandleMethod: "reject" },
+  );
+}
+
+export function PostFixedCreateApi(params: FixedCreateRequest) {
+  if (USE_MOCK) {
+    const item = fixedMockStore.create({
+      householdId: params.householdId,
+      name: params.name,
+      amount: params.amount,
+      dayOfMonth: params.dayOfMonth,
+      categoryId: params.categoryId ?? null,
+      color: params.color ?? null,
+      icon: params.icon ?? null,
+      sortOrder: params.sortOrder,
+      isArchived: params.isArchived,
+    });
+    return Promise.resolve(wrap(mockOkItem(item)));
+  }
+  return apiFetch<ApiResponse<FixedDetailItemType>>(
+    `/api/front/v1/fixed/create`,
+    { method: "POST", body: params, errorHandleMethod: "reject" },
+  );
+}
+
+export function PutFixedUpdateApi(params: FixedUpdateRequest) {
+  if (USE_MOCK) {
+    const { fixedId, ...rest } = params;
+    fixedMockStore.update(fixedId, {
+      ...rest,
+      categoryId: rest.categoryId ?? null,
+      color: rest.color ?? null,
+      icon: rest.icon ?? null,
+    });
+    return Promise.resolve(wrap(mockOkItem(undefined as unknown as void)));
+  }
+  return apiFetch<ApiResponse<void>>(
+    `/api/front/v1/fixed/update/${params.fixedId}`,
+    { method: "PUT", body: params, errorHandleMethod: "reject" },
+  );
+}
+
+export function DeleteFixedDeleteApi(fixedId: string) {
+  if (USE_MOCK) {
+    fixedMockStore.remove(fixedId);
+    return Promise.resolve(wrap(mockOkItem(undefined as unknown as void)));
+  }
+  return apiFetch<ApiResponse<void>>(
+    `/api/front/v1/fixed/delete/${fixedId}`,
     { method: "DELETE", errorHandleMethod: "reject" },
   );
-  return res.body;
 }

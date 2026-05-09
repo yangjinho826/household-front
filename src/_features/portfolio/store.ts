@@ -1,11 +1,12 @@
 import { create } from "zustand";
 
-type PortfolioUiState = {
-  selectedId: string | null;
-  setSelectedId: (id: string | null) => void;
-};
+interface PortfolioStoreState {
+  detailRefreshKey: number;
+  bumpDetailRefreshKey: () => void;
+}
 
-export const usePortfolioStore = create<PortfolioUiState>((set) => ({
-  selectedId: null,
-  setSelectedId: (selectedId) => set({ selectedId }),
+export const usePortfolioStore = create<PortfolioStoreState>((set) => ({
+  detailRefreshKey: 0,
+  bumpDetailRefreshKey: () =>
+    set((s) => ({ detailRefreshKey: s.detailRefreshKey + 1 })),
 }));

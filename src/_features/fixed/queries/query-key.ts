@@ -1,4 +1,17 @@
-export const fixedKeys = {
-  all: ["fixed"] as const,
-  list: ["fixed", "list"] as const,
-} as const;
+import { createQueryKeys } from "@lukemorales/query-key-factory";
+
+import type { ApiPaginationProps } from "_libraries/fetch/response";
+
+import { GetFixedDetailApi, GetFixedSearchApi } from "../api";
+import type { FixedSearchRequestType } from "../types";
+
+export const fixedExpenses = createQueryKeys("fixed", {
+  list: (params: FixedSearchRequestType & ApiPaginationProps) => ({
+    queryKey: [params],
+    queryFn: () => GetFixedSearchApi(params),
+  }),
+  detail: (fixedId: string) => ({
+    queryKey: [fixedId],
+    queryFn: () => GetFixedDetailApi(fixedId),
+  }),
+});

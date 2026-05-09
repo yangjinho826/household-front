@@ -1,34 +1,53 @@
-"use client";
-
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { queryKeys } from "_constants/queries";
+
 import {
-  DeleteCategoryApi,
+  DeleteCategoryDeleteApi,
   PostCategoryCreateApi,
   PutCategoryUpdateApi,
 } from "../api";
-import { categoryKeys } from "./query-key";
+import type {
+  CategoryCreateRequest,
+  CategoryUpdateRequest,
+} from "../types";
 
-export function useCreateCategoryMutation() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: PostCategoryCreateApi,
-    onSuccess: () => qc.invalidateQueries({ queryKey: categoryKeys.list }),
-  });
-}
+export function useCategoryMutations() {
+  const queryClient = useQueryClient();
 
-export function useUpdateCategoryMutation() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: PutCategoryUpdateApi,
-    onSuccess: () => qc.invalidateQueries({ queryKey: categoryKeys.list }),
+  const createMutation = useMutation({
+    mutationFn: (props: CategoryCreateRequest) => PostCategoryCreateApi(props),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.category.list._def,
+        refetchType: "all",
+      });
+    },
   });
-}
 
-export function useDeleteCategoryMutation() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: DeleteCategoryApi,
-    onSuccess: () => qc.invalidateQueries({ queryKey: categoryKeys.list }),
+  const updateMutation = useMutation({
+    mutationFn: (props: CategoryUpdateRequest) => PutCategoryUpdateApi(props),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.category.list._def,
+        refetchType: "all",
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.category.detail._def,
+        refetchType: "all",
+      });
+    },
   });
+
+  const removeMutation = useMutation({
+    mutationFn: (categoryId: string) => DeleteCategoryDeleteApi(categoryId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.category.list._def,
+        refetchType: "all",
+      });
+    },
+  });
+
+  return { createMutation, updateMutation, removeMutation };
 }

@@ -1,34 +1,50 @@
-"use client";
-
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { queryKeys } from "_constants/queries";
+
 import {
-  DeleteAccountApi,
+  DeleteAccountDeleteApi,
   PostAccountCreateApi,
   PutAccountUpdateApi,
 } from "../api";
-import { accountKeys } from "./query-key";
+import type { AccountCreateRequest, AccountUpdateRequest } from "../types";
 
-export function useCreateAccountMutation() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: PostAccountCreateApi,
-    onSuccess: () => qc.invalidateQueries({ queryKey: accountKeys.list }),
-  });
-}
+export function useAccountMutations() {
+  const queryClient = useQueryClient();
 
-export function useUpdateAccountMutation() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: PutAccountUpdateApi,
-    onSuccess: () => qc.invalidateQueries({ queryKey: accountKeys.list }),
+  const createMutation = useMutation({
+    mutationFn: (props: AccountCreateRequest) => PostAccountCreateApi(props),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.account.list._def,
+        refetchType: "all",
+      });
+    },
   });
-}
 
-export function useDeleteAccountMutation() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: DeleteAccountApi,
-    onSuccess: () => qc.invalidateQueries({ queryKey: accountKeys.list }),
+  const updateMutation = useMutation({
+    mutationFn: (props: AccountUpdateRequest) => PutAccountUpdateApi(props),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.account.list._def,
+        refetchType: "all",
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.account.detail._def,
+        refetchType: "all",
+      });
+    },
   });
+
+  const removeMutation = useMutation({
+    mutationFn: (accountId: string) => DeleteAccountDeleteApi(accountId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.account.list._def,
+        refetchType: "all",
+      });
+    },
+  });
+
+  return { createMutation, updateMutation, removeMutation };
 }

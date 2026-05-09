@@ -1,34 +1,56 @@
-"use client";
-
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { queryKeys } from "_constants/queries";
+
 import {
-  DeleteTransactionApi,
+  DeleteTransactionDeleteApi,
   PostTransactionCreateApi,
   PutTransactionUpdateApi,
 } from "../api";
-import { transactionKeys } from "./query-key";
+import type {
+  TransactionCreateRequest,
+  TransactionUpdateRequest,
+} from "../types";
 
-export function useCreateTransactionMutation() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: PostTransactionCreateApi,
-    onSuccess: () => qc.invalidateQueries({ queryKey: transactionKeys.list }),
-  });
-}
+export function useTransactionMutations() {
+  const queryClient = useQueryClient();
 
-export function useUpdateTransactionMutation() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: PutTransactionUpdateApi,
-    onSuccess: () => qc.invalidateQueries({ queryKey: transactionKeys.list }),
+  const createMutation = useMutation({
+    mutationFn: (props: TransactionCreateRequest) =>
+      PostTransactionCreateApi(props),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.transaction.list._def,
+        refetchType: "all",
+      });
+    },
   });
-}
 
-export function useDeleteTransactionMutation() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: DeleteTransactionApi,
-    onSuccess: () => qc.invalidateQueries({ queryKey: transactionKeys.list }),
+  const updateMutation = useMutation({
+    mutationFn: (props: TransactionUpdateRequest) =>
+      PutTransactionUpdateApi(props),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.transaction.list._def,
+        refetchType: "all",
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.transaction.detail._def,
+        refetchType: "all",
+      });
+    },
   });
+
+  const removeMutation = useMutation({
+    mutationFn: (transactionId: string) =>
+      DeleteTransactionDeleteApi(transactionId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.transaction.list._def,
+        refetchType: "all",
+      });
+    },
+  });
+
+  return { createMutation, updateMutation, removeMutation };
 }

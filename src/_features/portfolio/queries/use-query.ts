@@ -1,13 +1,21 @@
-"use client";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 
-import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "_constants/queries";
+import type { ApiPaginationProps } from "_libraries/fetch/response";
 
-import { GetPortfolioListApi } from "../api";
-import { portfolioKeys } from "./query-key";
+import type { PortfolioSearchRequestType } from "../types";
 
-export function usePortfolioListQuery() {
-  return useQuery({
-    queryKey: portfolioKeys.list,
-    queryFn: async () => (await GetPortfolioListApi()).data.content,
-  });
-}
+export const usePortfolioList = (
+  params: PortfolioSearchRequestType & ApiPaginationProps,
+) => {
+  return useSuspenseQuery(queryKeys.portfolio.list(params));
+};
+
+export const usePortfolioDetail = () => {
+  const queryClient = useQueryClient();
+  return async (portfolioId: string) => {
+    return await queryClient.fetchQuery({
+      ...queryKeys.portfolio.detail(portfolioId),
+    });
+  };
+};

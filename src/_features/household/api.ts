@@ -1,133 +1,146 @@
 import { apiFetch } from "_libraries/fetch/api-fetch";
+import { objectToParams } from "_libraries/fetch/object-to-params";
 import type {
   ApiListResponse,
   ApiResponse,
 } from "_libraries/fetch/response";
-import { newId, todayIso } from "_utilities/fmt";
-import { mockOkItem as okItem, mockOkList as okList } from "_utilities/mock-response";
+import { mockOkItem, mockOkList } from "_utilities/mock-response";
 
-import { INITIAL_HOUSEHOLDS, INITIAL_MEMBERS } from "./mock";
+import { householdMockStore } from "./mock";
 import type {
-  Household,
   HouseholdCreateRequest,
+  HouseholdDetailItemType,
+  HouseholdListItemType,
+  HouseholdMemberItemType,
+  HouseholdSearchRequestType,
   HouseholdUpdateRequest,
-  Member,
   MemberCreateRequest,
 } from "./types";
 
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK !== "false";
 
-const state = {
-  households: [...INITIAL_HOUSEHOLDS],
-  members: { ...INITIAL_MEMBERS } as Record<string, Member[]>,
-};
+const wrap = <T>(data: T) => ({ body: data });
 
 // =========================================================
 // Household CRUD
 // =========================================================
 
-export async function GetHouseholdListApi(): Promise<ApiListResponse<Household>> {
-  if (USE_MOCK) return okList(state.households);
-  const res = await apiFetch<ApiListResponse<Household>>("/api/household/list", {
-    method: "GET",
-  });
-  return res.body;
-}
-
-export async function PostHouseholdCreateApi(
-  body: HouseholdCreateRequest & { owner_id: string },
-): Promise<ApiResponse<Household>> {
+export function GetHouseholdSearchApi(params: HouseholdSearchRequestType) {
   if (USE_MOCK) {
-    const created: Household = { ...body, id: newId() };
-    state.households.push(created);
-    state.members[created.id] = [];
-    return okItem(created);
+    const items = householdMockStore.list();
+    const filtered = items.filter((i) => {
+      if (
+        params.searchTerm &&
+        !i.name.toLowerCase().includes(params.searchTerm.toLowerCase())
+      )
+        return false;
+      return true;
+    });
+    return Promise.resolve(wrap(mockOkList(filtered)));
   }
-  const res = await apiFetch<ApiResponse<Household>>("/api/household/create", {
-    method: "POST",
-    body,
-    errorHandleMethod: "reject",
-  });
-  return res.body;
-}
-
-export async function PutHouseholdUpdateApi(
-  body: HouseholdUpdateRequest,
-): Promise<ApiResponse<Household>> {
-  if (USE_MOCK) {
-    state.households = state.households.map((h) =>
-      h.id === body.id ? { ...h, ...body } : h,
-    );
-    const updated = state.households.find((h) => h.id === body.id);
-    if (!updated) throw new Error("Household not found");
-    return okItem(updated);
-  }
-  const res = await apiFetch<ApiResponse<Household>>(
-    `/api/household/update/${body.id}`,
-    { method: "PUT", body, errorHandleMethod: "reject" },
+  const queryString = objectToParams({ ...params }).toString();
+  return apiFetch<ApiListResponse<HouseholdListItemType>>(
+    `/api/front/v1/household/list?${queryString}`,
+    { method: "GET" },
   );
-  return res.body;
 }
 
-export async function DeleteHouseholdApi(
-  id: string,
-): Promise<ApiResponse<{ id: string }>> {
+export function GetHouseholdDetailApi(householdId: string) {
   if (USE_MOCK) {
-    state.households = state.households.filter((h) => h.id !== id);
-    delete state.members[id];
-    return okItem({ id });
+    const item = householdMockStore.detail(householdId);
+    if (!item) return Promise.reject(new Error("household not found"));
+    return Promise.resolve(wrap(mockOkItem(item)));
   }
-  const res = await apiFetch<ApiResponse<{ id: string }>>(
-    `/api/household/delete/${id}`,
+  return apiFetch<ApiResponse<HouseholdDetailItemType>>(
+    `/api/front/v1/household/detail/${householdId}`,
+    { method: "GET", errorHandleMethod: "reject" },
+  );
+}
+
+export function PostHouseholdCreateApi(params: HouseholdCreateRequest) {
+  if (USE_MOCK) {
+    const item = householdMockStore.create({
+      name: params.name,
+      description: params.description ?? null,
+      ownerId: "u-mock-owner",
+      currency: params.currency,
+      startedAt: params.startedAt,
+    });
+    return Promise.resolve(wrap(mockOkItem(item)));
+  }
+  return apiFetch<ApiResponse<HouseholdDetailItemType>>(
+    `/api/front/v1/household/create`,
+    { method: "POST", body: params, errorHandleMethod: "reject" },
+  );
+}
+
+export function PutHouseholdUpdateApi(params: HouseholdUpdateRequest) {
+  if (USE_MOCK) {
+    const { householdId, ...rest } = params;
+    householdMockStore.update(householdId, {
+      ...rest,
+      description: rest.description ?? null,
+    });
+    return Promise.resolve(wrap(mockOkItem(undefined as unknown as void)));
+  }
+  return apiFetch<ApiResponse<void>>(
+    `/api/front/v1/household/update/${params.householdId}`,
+    { method: "PUT", body: params, errorHandleMethod: "reject" },
+  );
+}
+
+export function DeleteHouseholdDeleteApi(householdId: string) {
+  if (USE_MOCK) {
+    householdMockStore.remove(householdId);
+    return Promise.resolve(wrap(mockOkItem(undefined as unknown as void)));
+  }
+  return apiFetch<ApiResponse<void>>(
+    `/api/front/v1/household/delete/${householdId}`,
     { method: "DELETE", errorHandleMethod: "reject" },
   );
-  return res.body;
 }
 
 // =========================================================
 // Member CRUD
 // =========================================================
 
-export async function GetAllMembersApi(): Promise<
-  ApiResponse<Record<string, Member[]>>
-> {
-  if (USE_MOCK) return okItem(state.members);
-  const res = await apiFetch<ApiResponse<Record<string, Member[]>>>(
-    "/api/household/members",
+export function GetHouseholdMembersApi(householdId: string) {
+  if (USE_MOCK) {
+    return Promise.resolve(
+      wrap(mockOkList(householdMockStore.members(householdId))),
+    );
+  }
+  return apiFetch<ApiListResponse<HouseholdMemberItemType>>(
+    `/api/front/v1/household/${householdId}/members/list`,
     { method: "GET" },
   );
-  return res.body;
 }
 
-export async function PostMemberCreateApi(
-  householdId: string,
-  body: MemberCreateRequest,
-): Promise<ApiResponse<Member>> {
+export function PostHouseholdMemberCreateApi(params: MemberCreateRequest) {
   if (USE_MOCK) {
-    const created: Member = { ...body, id: newId(), joined_at: todayIso() };
-    state.members[householdId] = [...(state.members[householdId] ?? []), created];
-    return okItem(created);
+    const item = householdMockStore.addMember({
+      householdId: params.householdId,
+      userId: params.userId,
+      role: params.role,
+    });
+    return Promise.resolve(wrap(mockOkItem(item)));
   }
-  const res = await apiFetch<ApiResponse<Member>>(
-    `/api/household/${householdId}/members/create`,
-    { method: "POST", body, errorHandleMethod: "reject" },
+  return apiFetch<ApiResponse<HouseholdMemberItemType>>(
+    `/api/front/v1/household/${params.householdId}/members/create`,
+    { method: "POST", body: params, errorHandleMethod: "reject" },
   );
-  return res.body;
 }
 
-export async function DeleteMemberApi(
+export function DeleteHouseholdMemberDeleteApi(
   householdId: string,
   memberId: string,
-): Promise<ApiResponse<{ id: string }>> {
+) {
   if (USE_MOCK) {
-    state.members[householdId] = (state.members[householdId] ?? []).filter(
-      (m) => m.id !== memberId,
-    );
-    return okItem({ id: memberId });
+    householdMockStore.removeMember(memberId);
+    return Promise.resolve(wrap(mockOkItem(undefined as unknown as void)));
   }
-  const res = await apiFetch<ApiResponse<{ id: string }>>(
-    `/api/household/${householdId}/members/${memberId}`,
+  return apiFetch<ApiResponse<void>>(
+    `/api/front/v1/household/${householdId}/members/delete/${memberId}`,
     { method: "DELETE", errorHandleMethod: "reject" },
   );
-  return res.body;
 }

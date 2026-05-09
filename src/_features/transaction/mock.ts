@@ -1,15 +1,129 @@
-import type { Transaction } from "./types";
+import { newId, todayIso } from "_utilities/fmt";
 
-export const INITIAL_TRANSACTIONS: Transaction[] = [
-  { id: "t1", type: "income", amount: 3500000, accountId: "a1", categoryId: "c7", date: "2026-05-01", memo: "5월 월급" },
-  { id: "t2", type: "expense", amount: 9180, accountId: "a1", categoryId: "c1", date: "2026-05-08", memo: "점심 - 김치찌개" },
-  { id: "t3", type: "expense", amount: 1500, accountId: "a2", categoryId: "c2", date: "2026-05-08", memo: "지하철" },
-  { id: "t4", type: "expense", amount: 45000, accountId: "a1", categoryId: "c4", date: "2026-05-07", memo: "저녁 데이트" },
-  { id: "t5", type: "expense", amount: 65000, accountId: "a1", categoryId: "c3", date: "2026-05-06", memo: "관리비" },
-  { id: "t6", type: "expense", amount: 32000, accountId: "a2", categoryId: "c5", date: "2026-05-05", memo: "쿠팡 생활용품" },
-  { id: "t7", type: "expense", amount: 12000, accountId: "a1", categoryId: "c1", date: "2026-05-04", memo: "저녁 - 백반" },
-  { id: "t8", type: "expense", amount: 18000, accountId: "a2", categoryId: "c6", date: "2026-05-03", memo: "영화관" },
-  { id: "t9", type: "expense", amount: 7800, accountId: "a1", categoryId: "c1", date: "2026-05-02", memo: "아침 - 샌드위치" },
-  { id: "t10", type: "transfer", amount: 300000, accountId: "a1", toAccountId: "a4", date: "2026-05-02", memo: "청년도약 적금" },
-  { id: "t11", type: "transfer", amount: 500000, accountId: "a1", toAccountId: "a5", date: "2026-05-02", memo: "ISA 자동이체" },
+import type {
+  TransactionDetailItemType,
+  TransactionListItemType,
+} from "./types";
+
+const HOUSEHOLD_ID = "h-mock-1";
+const ACCOUNT_MAIN = "a-mock-main";
+const ACCOUNT_SAVINGS = "a-mock-savings";
+
+let store: TransactionDetailItemType[] = [
+  {
+    transactionId: newId(),
+    householdId: HOUSEHOLD_ID,
+    txType: "expense",
+    amount: 12_500,
+    txDate: todayIso(),
+    accountId: ACCOUNT_MAIN,
+    toAccountId: null,
+    categoryId: null,
+    paidByUserId: null,
+    isFixed: false,
+    memo: "점심 김밥",
+    accountName: "주거래 통장",
+    categoryName: "식비",
+    frstRegDt: todayIso(),
+    lastMdfcnDt: todayIso(),
+    dataStatCd: "ACTIVE",
+  },
+  {
+    transactionId: newId(),
+    householdId: HOUSEHOLD_ID,
+    txType: "expense",
+    amount: 4_500,
+    txDate: todayIso(),
+    accountId: ACCOUNT_MAIN,
+    toAccountId: null,
+    categoryId: null,
+    paidByUserId: null,
+    isFixed: false,
+    memo: "지하철",
+    accountName: "주거래 통장",
+    categoryName: "교통",
+    frstRegDt: todayIso(),
+    lastMdfcnDt: todayIso(),
+    dataStatCd: "ACTIVE",
+  },
+  {
+    transactionId: newId(),
+    householdId: HOUSEHOLD_ID,
+    txType: "income",
+    amount: 3_200_000,
+    txDate: todayIso(),
+    accountId: ACCOUNT_MAIN,
+    toAccountId: null,
+    categoryId: null,
+    paidByUserId: null,
+    isFixed: false,
+    memo: "5월 급여",
+    accountName: "주거래 통장",
+    categoryName: "월급",
+    frstRegDt: todayIso(),
+    lastMdfcnDt: todayIso(),
+    dataStatCd: "ACTIVE",
+  },
+  {
+    transactionId: newId(),
+    householdId: HOUSEHOLD_ID,
+    txType: "transfer",
+    amount: 500_000,
+    txDate: todayIso(),
+    accountId: ACCOUNT_MAIN,
+    toAccountId: ACCOUNT_SAVINGS,
+    categoryId: null,
+    paidByUserId: null,
+    isFixed: false,
+    memo: "비상금 이체",
+    accountName: "주거래 통장",
+    toAccountName: "비상금",
+    frstRegDt: todayIso(),
+    lastMdfcnDt: todayIso(),
+    dataStatCd: "ACTIVE",
+  },
 ];
+
+type CreateInput = Omit<
+  TransactionDetailItemType,
+  "transactionId" | "frstRegDt" | "lastMdfcnDt" | "dataStatCd"
+>;
+
+export const transactionMockStore = {
+  list(): TransactionListItemType[] {
+    return store.map((t, idx) => ({ ...t, rowNo: idx + 1 }));
+  },
+  detail(id: string): TransactionDetailItemType | undefined {
+    return store.find((t) => t.transactionId === id);
+  },
+  create(input: CreateInput): TransactionDetailItemType {
+    const item: TransactionDetailItemType = {
+      ...input,
+      transactionId: newId(),
+      frstRegDt: todayIso(),
+      lastMdfcnDt: todayIso(),
+      dataStatCd: "ACTIVE",
+    };
+    store = [item, ...store];
+    return item;
+  },
+  update(
+    id: string,
+    patch: Partial<TransactionDetailItemType>,
+  ): TransactionDetailItemType | undefined {
+    const idx = store.findIndex((t) => t.transactionId === id);
+    if (idx < 0) return undefined;
+    const current = store[idx];
+    if (!current) return undefined;
+    const next: TransactionDetailItemType = {
+      ...current,
+      ...patch,
+      lastMdfcnDt: todayIso(),
+    };
+    store[idx] = next;
+    return next;
+  },
+  remove(id: string) {
+    store = store.filter((t) => t.transactionId !== id);
+  },
+};

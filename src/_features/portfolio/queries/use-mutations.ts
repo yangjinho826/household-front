@@ -1,34 +1,54 @@
-"use client";
-
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { queryKeys } from "_constants/queries";
+
 import {
-  DeletePortfolioApi,
+  DeletePortfolioDeleteApi,
   PostPortfolioCreateApi,
   PutPortfolioUpdateApi,
 } from "../api";
-import { portfolioKeys } from "./query-key";
+import type {
+  PortfolioCreateRequest,
+  PortfolioUpdateRequest,
+} from "../types";
 
-export function useCreatePortfolioMutation() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: PostPortfolioCreateApi,
-    onSuccess: () => qc.invalidateQueries({ queryKey: portfolioKeys.list }),
-  });
-}
+export function usePortfolioMutations() {
+  const queryClient = useQueryClient();
 
-export function useUpdatePortfolioMutation() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: PutPortfolioUpdateApi,
-    onSuccess: () => qc.invalidateQueries({ queryKey: portfolioKeys.list }),
+  const createMutation = useMutation({
+    mutationFn: (props: PortfolioCreateRequest) => PostPortfolioCreateApi(props),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.portfolio.list._def,
+        refetchType: "all",
+      });
+    },
   });
-}
 
-export function useDeletePortfolioMutation() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: DeletePortfolioApi,
-    onSuccess: () => qc.invalidateQueries({ queryKey: portfolioKeys.list }),
+  const updateMutation = useMutation({
+    mutationFn: (props: PortfolioUpdateRequest) => PutPortfolioUpdateApi(props),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.portfolio.list._def,
+        refetchType: "all",
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.portfolio.detail._def,
+        refetchType: "all",
+      });
+    },
   });
+
+  const removeMutation = useMutation({
+    mutationFn: (portfolioId: string) =>
+      DeletePortfolioDeleteApi(portfolioId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.portfolio.list._def,
+        refetchType: "all",
+      });
+    },
+  });
+
+  return { createMutation, updateMutation, removeMutation };
 }

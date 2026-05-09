@@ -1,30 +1,67 @@
 export type MemberRole = "owner" | "member";
 
-export type User = {
-  id: string;
-  email: string;
-  name: string;
-  language: "ko" | "en";
-};
+export interface HouseholdSearchRequestType {
+  searchTerm?: string;
+}
 
-export type Household = {
-  id: string;
+export interface HouseholdBaseRequestType {
   name: string;
+  description?: string | null;
+  ownerId: string;
   currency: string;
-  owner_id: string;
-  description: string;
-  started_at: string;
-};
+  startedAt: string;
+}
 
-export type Member = {
-  id: string;
-  user_id: string;
+export type HouseholdCreateRequest = Omit<
+  HouseholdBaseRequestType,
+  "ownerId"
+>;
+
+export interface HouseholdUpdateRequest extends HouseholdBaseRequestType {
+  householdId: string;
+}
+
+export interface HouseholdListItemType {
+  rowNo: number;
+  householdId: string;
   name: string;
-  email: string;
-  role: MemberRole;
-  joined_at: string;
-};
+  description: string | null;
+  ownerId: string;
+  currency: string;
+  startedAt: string;
+  memberCount?: number;
+  frstRegDt: string;
+  lastMdfcnDt: string;
+  dataStatCd: string;
+}
 
-export type HouseholdCreateRequest = Omit<Household, "id" | "owner_id">;
-export type HouseholdUpdateRequest = Partial<Household> & { id: string };
-export type MemberCreateRequest = Omit<Member, "id" | "joined_at">;
+export interface HouseholdDetailItemType {
+  householdId: string;
+  name: string;
+  description: string | null;
+  ownerId: string;
+  currency: string;
+  startedAt: string;
+  memberCount?: number;
+  frstRegDt: string;
+  lastMdfcnDt: string;
+  dataStatCd: string;
+}
+
+// Members
+export interface HouseholdMemberItemType {
+  memberId: string;
+  householdId: string;
+  userId: string;
+  role: MemberRole;
+  joinedAt: string;
+  // 조인된 user 정보 (응답에 포함될 수 있음)
+  userName?: string | null;
+  userEmail?: string | null;
+}
+
+export interface MemberCreateRequest {
+  householdId: string;
+  userId: string;
+  role: MemberRole;
+}

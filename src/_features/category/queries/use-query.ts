@@ -1,13 +1,21 @@
-"use client";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 
-import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "_constants/queries";
+import type { ApiPaginationProps } from "_libraries/fetch/response";
 
-import { GetCategoryListApi } from "../api";
-import { categoryKeys } from "./query-key";
+import type { CategorySearchRequestType } from "../types";
 
-export function useCategoryListQuery() {
-  return useQuery({
-    queryKey: categoryKeys.list,
-    queryFn: async () => (await GetCategoryListApi()).data.content,
-  });
-}
+export const useCategoryList = (
+  params: CategorySearchRequestType & ApiPaginationProps,
+) => {
+  return useSuspenseQuery(queryKeys.category.list(params));
+};
+
+export const useCategoryDetail = () => {
+  const queryClient = useQueryClient();
+  return async (categoryId: string) => {
+    return await queryClient.fetchQuery({
+      ...queryKeys.category.detail(categoryId),
+    });
+  };
+};

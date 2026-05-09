@@ -1,13 +1,22 @@
-"use client";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 
-import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "_constants/queries";
+import type { ApiPaginationProps } from "_libraries/fetch/response";
 
-import { GetSampleListApi } from "../api";
-import { sampleKeys } from "./query-key";
+import type { SampleSearchRequestType } from "../types";
 
-export function useSampleListQuery() {
-  return useQuery({
-    queryKey: sampleKeys.list,
-    queryFn: async () => (await GetSampleListApi()).data.content,
-  });
-}
+export const useSampleList = (
+  params: SampleSearchRequestType & ApiPaginationProps,
+) => {
+  return useSuspenseQuery(queryKeys.sample.list(params));
+};
+
+export const useSampleDetail = () => {
+  const queryClient = useQueryClient();
+
+  return async (sampleId: string) => {
+    return await queryClient.fetchQuery({
+      ...queryKeys.sample.detail(sampleId),
+    });
+  };
+};

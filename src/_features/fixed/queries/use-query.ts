@@ -1,13 +1,21 @@
-"use client";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 
-import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "_constants/queries";
+import type { ApiPaginationProps } from "_libraries/fetch/response";
 
-import { GetFixedListApi } from "../api";
-import { fixedKeys } from "./query-key";
+import type { FixedSearchRequestType } from "../types";
 
-export function useFixedListQuery() {
-  return useQuery({
-    queryKey: fixedKeys.list,
-    queryFn: async () => (await GetFixedListApi()).data.content,
-  });
-}
+export const useFixedList = (
+  params: FixedSearchRequestType & ApiPaginationProps,
+) => {
+  return useSuspenseQuery(queryKeys.fixed.list(params));
+};
+
+export const useFixedDetail = () => {
+  const queryClient = useQueryClient();
+  return async (fixedId: string) => {
+    return await queryClient.fetchQuery({
+      ...queryKeys.fixed.detail(fixedId),
+    });
+  };
+};

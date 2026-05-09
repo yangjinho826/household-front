@@ -1,11 +1,12 @@
 import { create } from "zustand";
 
-type FixedUiState = {
-  selectedId: string | null;
-  setSelectedId: (id: string | null) => void;
-};
+interface FixedStoreState {
+  detailRefreshKey: number;
+  bumpDetailRefreshKey: () => void;
+}
 
-export const useFixedStore = create<FixedUiState>((set) => ({
-  selectedId: null,
-  setSelectedId: (selectedId) => set({ selectedId }),
+export const useFixedStore = create<FixedStoreState>((set) => ({
+  detailRefreshKey: 0,
+  bumpDetailRefreshKey: () =>
+    set((s) => ({ detailRefreshKey: s.detailRefreshKey + 1 })),
 }));

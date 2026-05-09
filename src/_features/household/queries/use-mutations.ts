@@ -1,63 +1,87 @@
-"use client";
-
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { queryKeys } from "_constants/queries";
+
 import {
-  DeleteHouseholdApi,
-  DeleteMemberApi,
+  DeleteHouseholdDeleteApi,
+  DeleteHouseholdMemberDeleteApi,
   PostHouseholdCreateApi,
-  PostMemberCreateApi,
+  PostHouseholdMemberCreateApi,
   PutHouseholdUpdateApi,
 } from "../api";
-import { householdKeys } from "./query-key";
+import type {
+  HouseholdCreateRequest,
+  HouseholdUpdateRequest,
+  MemberCreateRequest,
+} from "../types";
 
-export function useCreateHouseholdMutation() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: PostHouseholdCreateApi,
+export function useHouseholdMutations() {
+  const queryClient = useQueryClient();
+
+  const createMutation = useMutation({
+    mutationFn: (props: HouseholdCreateRequest) =>
+      PostHouseholdCreateApi(props),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: householdKeys.list });
-      qc.invalidateQueries({ queryKey: householdKeys.members });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.household.list._def,
+        refetchType: "all",
+      });
     },
   });
-}
 
-export function useUpdateHouseholdMutation() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: PutHouseholdUpdateApi,
-    onSuccess: () => qc.invalidateQueries({ queryKey: householdKeys.list }),
-  });
-}
-
-export function useDeleteHouseholdMutation() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: DeleteHouseholdApi,
+  const updateMutation = useMutation({
+    mutationFn: (props: HouseholdUpdateRequest) =>
+      PutHouseholdUpdateApi(props),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: householdKeys.list });
-      qc.invalidateQueries({ queryKey: householdKeys.members });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.household.list._def,
+        refetchType: "all",
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.household.detail._def,
+        refetchType: "all",
+      });
     },
   });
-}
 
-export function useCreateMemberMutation() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: ({
-      householdId,
-      ...rest
-    }: Parameters<typeof PostMemberCreateApi>[1] & { householdId: string }) =>
-      PostMemberCreateApi(householdId, rest),
-    onSuccess: () => qc.invalidateQueries({ queryKey: householdKeys.members }),
+  const removeMutation = useMutation({
+    mutationFn: (householdId: string) =>
+      DeleteHouseholdDeleteApi(householdId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.household.list._def,
+        refetchType: "all",
+      });
+    },
   });
-}
 
-export function useDeleteMemberMutation() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: ({ householdId, memberId }: { householdId: string; memberId: string }) =>
-      DeleteMemberApi(householdId, memberId),
-    onSuccess: () => qc.invalidateQueries({ queryKey: householdKeys.members }),
+  const addMemberMutation = useMutation({
+    mutationFn: (props: MemberCreateRequest) =>
+      PostHouseholdMemberCreateApi(props),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.household.members._def,
+        refetchType: "all",
+      });
+    },
   });
+
+  const removeMemberMutation = useMutation({
+    mutationFn: (props: { householdId: string; memberId: string }) =>
+      DeleteHouseholdMemberDeleteApi(props.householdId, props.memberId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.household.members._def,
+        refetchType: "all",
+      });
+    },
+  });
+
+  return {
+    createMutation,
+    updateMutation,
+    removeMutation,
+    addMemberMutation,
+    removeMemberMutation,
+  };
 }

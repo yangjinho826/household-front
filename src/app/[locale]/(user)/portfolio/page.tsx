@@ -1,5 +1,20 @@
-import { PortfolioSection } from "_sections/portfolio/portfolio-section";
+import { Center, Loader } from "@mantine/core";
+import { Suspense } from "react";
+
+import PortfolioSection from "_sections/portfolio/portfolio-section";
+
+export const dynamic = "force-dynamic";
 
 export default function PortfolioPage() {
-  return <PortfolioSection />;
+  return (
+    <Suspense
+      fallback={
+        <Center py="xl">
+          <Loader />
+        </Center>
+      }
+    >
+      <PortfolioSection />
+    </Suspense>
+  );
 }

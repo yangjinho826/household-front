@@ -1,34 +1,50 @@
-"use client";
-
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { queryKeys } from "_constants/queries";
+
 import {
-  DeleteSampleApi,
+  DeleteSampleDeleteApi,
   PostSampleCreateApi,
   PutSampleUpdateApi,
 } from "../api";
-import { sampleKeys } from "./query-key";
+import type { SampleCreateRequest, SampleUpdateRequest } from "../types";
 
-export function useCreateSampleMutation() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: PostSampleCreateApi,
-    onSuccess: () => qc.invalidateQueries({ queryKey: sampleKeys.list }),
-  });
-}
+export function useSampleMutations() {
+  const queryClient = useQueryClient();
 
-export function useUpdateSampleMutation() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: PutSampleUpdateApi,
-    onSuccess: () => qc.invalidateQueries({ queryKey: sampleKeys.list }),
+  const createMutation = useMutation({
+    mutationFn: (props: SampleCreateRequest) => PostSampleCreateApi(props),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.sample.list._def,
+        refetchType: "all",
+      });
+    },
   });
-}
 
-export function useDeleteSampleMutation() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: DeleteSampleApi,
-    onSuccess: () => qc.invalidateQueries({ queryKey: sampleKeys.list }),
+  const updateMutation = useMutation({
+    mutationFn: (props: SampleUpdateRequest) => PutSampleUpdateApi(props),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.sample.list._def,
+        refetchType: "all",
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.sample.detail._def,
+        refetchType: "all",
+      });
+    },
   });
+
+  const removeMutation = useMutation({
+    mutationFn: (sampleId: string) => DeleteSampleDeleteApi(sampleId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.sample.list._def,
+        refetchType: "all",
+      });
+    },
+  });
+
+  return { createMutation, updateMutation, removeMutation };
 }

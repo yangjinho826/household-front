@@ -1,74 +1,109 @@
 import { apiFetch } from "_libraries/fetch/api-fetch";
+import { objectToParams } from "_libraries/fetch/object-to-params";
 import type {
   ApiListResponse,
   ApiResponse,
 } from "_libraries/fetch/response";
-import { newId } from "_utilities/fmt";
-import { mockOkItem as okItem, mockOkList as okList } from "_utilities/mock-response";
+import { mockOkItem, mockOkList } from "_utilities/mock-response";
 
-import { INITIAL_CATEGORIES } from "./mock";
+import { categoryMockStore } from "./mock";
 import type {
-  Category,
   CategoryCreateRequest,
+  CategoryDetailItemType,
+  CategoryListItemType,
+  CategorySearchRequestType,
   CategoryUpdateRequest,
 } from "./types";
 
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK !== "false";
 
-const state = { categories: [...INITIAL_CATEGORIES] };
+const wrap = <T>(data: T) => ({ body: data });
 
-export async function GetCategoryListApi(): Promise<ApiListResponse<Category>> {
-  if (USE_MOCK) return okList(state.categories);
-  const res = await apiFetch<ApiListResponse<Category>>("/api/category/list", {
-    method: "GET",
-  });
-  return res.body;
-}
-
-export async function PostCategoryCreateApi(
-  body: CategoryCreateRequest,
-): Promise<ApiResponse<Category>> {
+export function GetCategorySearchApi(params: CategorySearchRequestType) {
   if (USE_MOCK) {
-    const created: Category = { ...body, id: newId() };
-    state.categories.push(created);
-    return okItem(created);
+    const items = categoryMockStore.list();
+    const filtered = items.filter((i) => {
+      if (
+        params.searchTerm &&
+        !i.name.toLowerCase().includes(params.searchTerm.toLowerCase())
+      )
+        return false;
+      if (params.kind && i.kind !== params.kind) return false;
+      if (params.isArchived !== undefined && i.isArchived !== params.isArchived)
+        return false;
+      return true;
+    });
+    return Promise.resolve(wrap(mockOkList(filtered)));
   }
-  const res = await apiFetch<ApiResponse<Category>>("/api/category/create", {
-    method: "POST",
-    body,
-    errorHandleMethod: "reject",
-  });
-  return res.body;
-}
-
-export async function PutCategoryUpdateApi(
-  body: CategoryUpdateRequest,
-): Promise<ApiResponse<Category>> {
-  if (USE_MOCK) {
-    state.categories = state.categories.map((c) =>
-      c.id === body.id ? { ...c, ...body } : c,
-    );
-    const updated = state.categories.find((c) => c.id === body.id);
-    if (!updated) throw new Error("Category not found");
-    return okItem(updated);
-  }
-  const res = await apiFetch<ApiResponse<Category>>(
-    `/api/category/update/${body.id}`,
-    { method: "PUT", body, errorHandleMethod: "reject" },
+  const queryString = objectToParams({ ...params }).toString();
+  return apiFetch<ApiListResponse<CategoryListItemType>>(
+    `/api/front/v1/category/list?${queryString}`,
+    { method: "GET" },
   );
-  return res.body;
 }
 
-export async function DeleteCategoryApi(
-  id: string,
-): Promise<ApiResponse<{ id: string }>> {
+export function GetCategoryDetailApi(categoryId: string) {
   if (USE_MOCK) {
-    state.categories = state.categories.filter((c) => c.id !== id);
-    return okItem({ id });
+    const item = categoryMockStore.detail(categoryId);
+    if (!item) return Promise.reject(new Error("category not found"));
+    return Promise.resolve(wrap(mockOkItem(item)));
   }
-  const res = await apiFetch<ApiResponse<{ id: string }>>(
-    `/api/category/delete/${id}`,
+  return apiFetch<ApiResponse<CategoryDetailItemType>>(
+    `/api/front/v1/category/detail/${categoryId}`,
+    { method: "GET", errorHandleMethod: "reject" },
+  );
+}
+
+export function PostCategoryCreateApi(params: CategoryCreateRequest) {
+  if (USE_MOCK) {
+    const item = categoryMockStore.create({
+      householdId: params.householdId,
+      kind: params.kind,
+      name: params.name,
+      color: params.color ?? null,
+      icon: params.icon ?? null,
+      sortOrder: params.sortOrder,
+      isArchived: params.isArchived,
+    });
+    return Promise.resolve(wrap(mockOkItem(item)));
+  }
+  return apiFetch<ApiResponse<CategoryDetailItemType>>(
+    `/api/front/v1/category/create`,
+    {
+      method: "POST",
+      body: params,
+      errorHandleMethod: "reject",
+    },
+  );
+}
+
+export function PutCategoryUpdateApi(params: CategoryUpdateRequest) {
+  if (USE_MOCK) {
+    const { categoryId, ...rest } = params;
+    categoryMockStore.update(categoryId, {
+      ...rest,
+      color: rest.color ?? null,
+      icon: rest.icon ?? null,
+    });
+    return Promise.resolve(wrap(mockOkItem(undefined as unknown as void)));
+  }
+  return apiFetch<ApiResponse<void>>(
+    `/api/front/v1/category/update/${params.categoryId}`,
+    {
+      method: "PUT",
+      body: params,
+      errorHandleMethod: "reject",
+    },
+  );
+}
+
+export function DeleteCategoryDeleteApi(categoryId: string) {
+  if (USE_MOCK) {
+    categoryMockStore.remove(categoryId);
+    return Promise.resolve(wrap(mockOkItem(undefined as unknown as void)));
+  }
+  return apiFetch<ApiResponse<void>>(
+    `/api/front/v1/category/delete/${categoryId}`,
     { method: "DELETE", errorHandleMethod: "reject" },
   );
-  return res.body;
 }
