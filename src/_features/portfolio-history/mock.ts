@@ -1,3 +1,4 @@
+import { nowKst } from "_utilities/datetime";
 import { newId, todayIso } from "_utilities/fmt";
 
 import type {
@@ -8,17 +9,18 @@ import type {
 // portfolio mock 의 시드 종목 ID 와 매칭은 random — 차트용이라 OK
 const ITEM_IDS = ["p-mock-1", "p-mock-2", "p-mock-3"];
 
-function lastDayOfMonth(year: number, monthIdx: number): string {
-  const d = new Date(year, monthIdx + 1, 0);
-  return d.toISOString().slice(0, 10);
+/** KST 기준 그달 말일 (YYYY-MM-DD) */
+function lastDayOfMonthKst(deltaMonths: number): string {
+  return nowKst()
+    .add(deltaMonths, "month")
+    .endOf("month")
+    .format("YYYY-MM-DD");
 }
 
 function buildMonths(count: number): string[] {
-  const now = new Date();
   const months: string[] = [];
   for (let i = count - 1; i >= 0; i -= 1) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    months.push(lastDayOfMonth(d.getFullYear(), d.getMonth()));
+    months.push(lastDayOfMonthKst(-i));
   }
   return months;
 }

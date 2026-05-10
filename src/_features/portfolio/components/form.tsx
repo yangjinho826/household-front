@@ -6,6 +6,7 @@ import {
   Group,
   NumberInput,
   Stack,
+  Text,
   TextInput,
 } from "@mantine/core";
 import { useTranslations } from "next-intl";
@@ -44,18 +45,17 @@ export default function PortfolioForm({ portfolioId }: PortfolioFormProps) {
             placeholder="005930"
           />
           <NumberInput
-            {...form.getInputProps("quantity")}
-            label={t("quantity")}
-          />
-          <NumberInput
-            {...form.getInputProps("avgPrice")}
-            label={t("avg_price")}
+            {...form.getInputProps("currentPrice")}
+            label={t("current_price")}
+            placeholder={t("current_price_placeholder")}
             thousandSeparator=","
-          />
-          <NumberInput
-            {...form.getInputProps("currentValue")}
-            label={t("current_value")}
-            thousandSeparator=","
+            min={0}
+            rightSection={
+              <Text size="xs" c="dimmed" pr={8}>
+                원
+              </Text>
+            }
+            description={isUpdate ? undefined : t("current_price_help")}
           />
           <Group grow mt="md">
             <Button

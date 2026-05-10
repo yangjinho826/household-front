@@ -9,6 +9,9 @@ import {
   Title,
   UnstyledButton,
 } from "@mantine/core";
+import { modals } from "@mantine/modals";
+import { notifications } from "@mantine/notifications";
+import { IconCheck, IconPlus } from "@tabler/icons-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter, useParams } from "next/navigation";
 import { useMemo } from "react";
@@ -19,65 +22,124 @@ import {
   XAxis,
 } from "recharts";
 
-import { accountSnapshotMockStore } from "_features/account-snapshot/mock";
+import { useAccountSnapshotMutations } from "_features/account-snapshot/queries/use-mutations";
 import type { AccountType } from "_features/account/types";
 import { queryKeys } from "_constants/queries";
+import { ApiResponseError } from "_libraries/fetch/api-response-error";
 import { fmt } from "_utilities/fmt";
 
 const TYPE_LABEL: Record<AccountType, string> = {
-  checking: "입출금",
-  savings: "예적금",
-  credit: "신용카드",
-  cash: "현금",
-  investment: "투자",
+  LIVING: "생활",
+  SAVINGS: "적립",
+  INVESTMENT: "투자",
 };
 
 const TYPE_COLOR: Record<AccountType, string> = {
-  checking: "tossBlue",
-  savings: "tossGreen",
-  credit: "tossRed",
-  cash: "gray",
-  investment: "tossPurple",
+  LIVING: "tossBlue",
+  SAVINGS: "tossGreen",
+  INVESTMENT: "tossPurple",
 };
 
 export default function WealthSection() {
   const router = useRouter();
   const routeParams = useParams<{ locale: string }>();
-  const { data } = useSuspenseQuery(
+
+  const { data: accountData } = useSuspenseQuery(
     queryKeys.account.list({ pageNo: 1, listSize: 100 }),
   );
-  // snapshot list 받아오고 클라에서 월별 합산 (mock 단계)
-  useSuspenseQuery(queryKeys.accountSnapshot.list({}));
+  const { data: portfolioData } = useSuspenseQuery(
+    queryKeys.portfolio.list({ pageNo: 1, listSize: 200 }),
+  );
+  const { data: snapshotData } = useSuspenseQuery(
+    queryKeys.accountSnapshot.yearly({}),
+  );
 
-  const accounts = data.body.data.content;
-  const total = accounts.reduce((sum, a) => sum + a.startBalance, 0);
+  const { createMutation } = useAccountSnapshotMutations();
+
+  const rawAccounts = accountData.body.data.content;
+  const portfolios = portfolioData.body.data.content;
+  const yearly = snapshotData.body.data;
+
+  // 투자 계좌의 balance 는 portfolio currentValue 합으로 derive (mock 단계)
+  const accounts = useMemo(() => {
+    return rawAccounts.map((a) => {
+      if (a.accountType !== "INVESTMENT") return a;
+      const owned = portfolios.filter((p) => p.accountId === a.accountId);
+      const investValue = owned.reduce((s, p) => s + p.currentValue, 0);
+      return { ...a, balance: investValue };
+    });
+  }, [rawAccounts, portfolios]);
+
+  const generalAccounts = useMemo(
+    () => accounts.filter((a) => a.accountType !== "INVESTMENT"),
+    [accounts],
+  );
+
+  const total = accounts.reduce((sum, a) => sum + a.balance, 0);
 
   const trendData = useMemo(
     () =>
-      accountSnapshotMockStore.aggregateByMonth().map((m) => ({
-        month: m.month.slice(5) + "월",
-        value: m.total,
+      yearly.months.map((m) => ({
+        month: `${Number(m.snapshotDate.slice(5, 7))}월`, // "5월"
+        value: m.totalBalance,
       })),
-    [],
+    [yearly.months],
   );
 
   const byType = useMemo(() => {
-    const types: AccountType[] = [
-      "checking",
-      "savings",
-      "investment",
-      "credit",
-      "cash",
-    ];
+    const types: AccountType[] = ["LIVING", "SAVINGS", "INVESTMENT"];
     return types
       .map((type) => {
         const accs = accounts.filter((a) => a.accountType === type);
-        const sum = accs.reduce((s, a) => s + a.startBalance, 0);
+        const sum = accs.reduce((s, a) => s + a.balance, 0);
         const pct = total > 0 ? (sum / total) * 100 : 0;
         return { type, sum, accs, pct };
       })
       .filter((t) => t.accs.length > 0);
   }, [accounts, total]);
+
+  const hasThisMonth = yearly.currentMonthSaved;
+  const thisMonthLabel = `${Number(yearly.currentMonthDate.slice(5, 7))}월`;
+
+  const handleTakeSnapshot = () => {
+    if (hasThisMonth || createMutation.isPending) return;
+    modals.openConfirmModal({
+      centered: true,
+      title: `${thisMonthLabel} 자산 기록`,
+      labels: { confirm: "기록하기", cancel: "취소" },
+      children: (
+        <Text size="sm">
+          {thisMonthLabel} 자산 스냅샷을 저장할까요?
+          <br />
+          모든 통장의 현재 잔액이 기록됩니다.
+        </Text>
+      ),
+      onConfirm: async () => {
+        try {
+          await createMutation.mutateAsync();
+          notifications.show({
+            title: "기록 완료",
+            message: `${thisMonthLabel} 자산이 기록되었습니다.`,
+            color: "green",
+          });
+        } catch (error) {
+          const msg =
+            error instanceof ApiResponseError
+              ? (error.errorMessage ?? error.message)
+              : error instanceof Error && error.message === "SNAPSHOT_ALREADY_EXISTS"
+                ? "이번 달 자산 스냅샷은 이미 저장되었습니다"
+                : error instanceof Error && error.message === "NO_ACTIVE_ACCOUNT"
+                  ? "저장할 통장이 없습니다"
+                  : "스냅샷 저장에 실패했습니다";
+          notifications.show({
+            title: "기록 실패",
+            message: msg,
+            color: "red",
+          });
+        }
+      },
+    });
+  };
 
   return (
     <Stack gap="md">
@@ -85,9 +147,40 @@ export default function WealthSection() {
 
       <Card radius="xl" p="lg">
         <Stack gap={4}>
-          <Text size="xs" fw={500} c="dimmed">
-            총 자산
-          </Text>
+          <Group justify="space-between" align="center">
+            <Text size="xs" fw={500} c="dimmed">
+              총 자산
+            </Text>
+            <UnstyledButton
+              onClick={handleTakeSnapshot}
+              disabled={hasThisMonth || createMutation.isPending}
+              style={{
+                padding: "6px 12px",
+                borderRadius: 999,
+                background: hasThisMonth
+                  ? "var(--mantine-color-gray-0)"
+                  : "var(--mantine-color-tossBlue-0)",
+                opacity: createMutation.isPending ? 0.5 : 1,
+              }}
+            >
+              <Group gap={4} wrap="nowrap">
+                {hasThisMonth ? (
+                  <IconCheck size={12} stroke={3} color="#8B95A1" />
+                ) : (
+                  <IconPlus size={12} stroke={3} color="#3182F6" />
+                )}
+                <Text
+                  size="10px"
+                  fw={700}
+                  c={hasThisMonth ? "dimmed" : "tossBlue.5"}
+                >
+                  {hasThisMonth
+                    ? `${thisMonthLabel} 저장됨`
+                    : `${thisMonthLabel} 자산 기록`}
+                </Text>
+              </Group>
+            </UnstyledButton>
+          </Group>
           <Text
             size="2rem"
             fw={800}
@@ -116,9 +209,10 @@ export default function WealthSection() {
                 />
                 <XAxis
                   dataKey="month"
-                  tick={{ fontSize: 10, fill: "#8B95A1" }}
+                  tick={{ fontSize: 9, fill: "#8B95A1" }}
                   axisLine={false}
                   tickLine={false}
+                  interval={1}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -173,7 +267,7 @@ export default function WealthSection() {
 
       <Group justify="space-between" align="center" px={4}>
         <Text size="sm" fw={700}>
-          통장 ({accounts.length})
+          통장 ({generalAccounts.length})
         </Text>
         <UnstyledButton
           onClick={() => router.push(`/${routeParams.locale}/account/new`)}
@@ -186,7 +280,7 @@ export default function WealthSection() {
 
       <Card radius="lg" p="xs">
         <Stack gap={0}>
-          {accounts.map((a) => (
+          {generalAccounts.map((a) => (
             <UnstyledButton
               key={a.accountId}
               onClick={() =>
@@ -233,9 +327,9 @@ export default function WealthSection() {
                   size="sm"
                   fw={700}
                   style={{ fontVariantNumeric: "tabular-nums" }}
-                  c={a.startBalance < 0 ? "tossRed.5" : undefined}
+                  c={a.balance < 0 ? "tossRed.5" : undefined}
                 >
-                  {fmt(a.startBalance)}원
+                  {fmt(a.balance)}원
                 </Text>
               </Group>
             </UnstyledButton>

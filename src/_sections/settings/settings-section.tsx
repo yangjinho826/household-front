@@ -53,6 +53,7 @@ export default function SettingsSection() {
 
   const onLogout = () => {
     actions.logout();
+    // logoutMutation 의 mutationFn 이 finally 에서 clearSession 호출 — 즉시 redirect 안전
     router.replace(`/${routeParams.locale}/login`);
   };
 

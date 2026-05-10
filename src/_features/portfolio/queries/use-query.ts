@@ -6,7 +6,7 @@ import type { ApiPaginationProps } from "_libraries/fetch/response";
 import type { PortfolioSearchRequestType } from "../types";
 
 export const usePortfolioList = (
-  params: PortfolioSearchRequestType & ApiPaginationProps,
+  params: PortfolioSearchRequestType & Partial<ApiPaginationProps>,
 ) => {
   return useSuspenseQuery(queryKeys.portfolio.list(params));
 };

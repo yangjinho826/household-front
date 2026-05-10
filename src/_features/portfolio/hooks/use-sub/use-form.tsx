@@ -6,17 +6,22 @@ import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { z } from "zod";
 
+import { MOCK_INVESTMENT_ACCOUNT_ID } from "_features/account/mock";
 import { usePortfolioMutations } from "_features/portfolio/queries/use-mutations";
 import { ApiResponseError } from "_libraries/fetch/api-response-error";
 
 import { usePortfolioDetail as usePortfolioDetailQuery } from "../../queries/use-query";
-import type { PortfolioBaseRequestType } from "../../types";
-
-const HOUSEHOLD_ID = "h-mock-1";
-const ACCOUNT_ID = "a-mock-broker";
 
 interface UsePortfolioFormOptions {
   portfolioId?: string;
+}
+
+interface FormValues {
+  accountId: string;
+  ticker: string;
+  symbol: string | null;
+  currentPrice: number;
+  isArchived: boolean;
 }
 
 export function usePortfolioForm({ portfolioId }: UsePortfolioFormOptions) {
@@ -26,28 +31,22 @@ export function usePortfolioForm({ portfolioId }: UsePortfolioFormOptions) {
   const routeParams = useParams<{ locale: string }>();
 
   const fetchDetail = usePortfolioDetailQuery();
-  const { createMutation, updateMutation, removeMutation } =
-    usePortfolioMutations();
+  const { createMutation, updateMutation } = usePortfolioMutations();
 
   const isUpdate = Boolean(portfolioId);
 
-  const form = useForm<PortfolioBaseRequestType>({
+  const form = useForm<FormValues>({
     initialValues: {
-      householdId: HOUSEHOLD_ID,
-      accountId: ACCOUNT_ID,
+      accountId: MOCK_INVESTMENT_ACCOUNT_ID,
       ticker: "",
       symbol: null,
-      quantity: 0,
-      avgPrice: 0,
-      currentValue: 0,
+      currentPrice: 0,
       isArchived: false,
     },
     validate: zodResolver(
       z.object({
         ticker: z.string().min(1, t("ticker_required_message")),
-        quantity: z.number(),
-        avgPrice: z.number(),
-        currentValue: z.number(),
+        currentPrice: z.number(),
       }),
     ),
   });
@@ -60,13 +59,10 @@ export function usePortfolioForm({ portfolioId }: UsePortfolioFormOptions) {
       if (cancelled || !res) return;
       const d = res.body.data;
       form.setValues({
-        householdId: d.householdId,
         accountId: d.accountId,
         ticker: d.ticker,
         symbol: d.symbol,
-        quantity: d.quantity,
-        avgPrice: d.avgPrice,
-        currentValue: d.currentValue,
+        currentPrice: d.currentPrice,
         isArchived: d.isArchived,
       });
     })();
@@ -80,14 +76,26 @@ export function usePortfolioForm({ portfolioId }: UsePortfolioFormOptions) {
     try {
       if (isUpdate) {
         if (!portfolioId) throw new Error("No portfolioId for update");
-        await updateMutation.mutateAsync({ portfolioId, ...form.values });
+        await updateMutation.mutateAsync({
+          portfolioId,
+          currentPrice: form.values.currentPrice,
+          ticker: form.values.ticker,
+          symbol: form.values.symbol,
+          isArchived: form.values.isArchived,
+        });
         notifications.show({
           title: tg("notificationstitle"),
           message: tg("update_has_been_completed"),
           color: "green",
         });
       } else {
-        await createMutation.mutateAsync({ ...form.values });
+        // 종목 메타 등록 (qty=0 시작) — 매수는 디테일에서 별도
+        await createMutation.mutateAsync({
+          ticker: form.values.ticker,
+          symbol: form.values.symbol,
+          currentPrice: form.values.currentPrice,
+          accountId: form.values.accountId,
+        });
         notifications.show({
           title: tg("notificationstitle"),
           message: tg("register_has_been_completed"),
@@ -114,7 +122,7 @@ export function usePortfolioForm({ portfolioId }: UsePortfolioFormOptions) {
       labels: { confirm: tg("confirm"), cancel: tg("cancel") },
       children: <span>{tg("want_to_delete")}</span>,
       onConfirm: async () => {
-        await removeMutation.mutateAsync(portfolioId);
+        await updateMutation.mutateAsync({ portfolioId, isArchived: true });
         notifications.show({
           title: tg("notificationstitle"),
           message: tg("confirmyescontent"),
@@ -132,10 +140,7 @@ export function usePortfolioForm({ portfolioId }: UsePortfolioFormOptions) {
   return {
     form,
     isUpdate,
-    isPending:
-      createMutation.isPending ||
-      updateMutation.isPending ||
-      removeMutation.isPending,
+    isPending: createMutation.isPending || updateMutation.isPending,
     handleSubmit,
     handleRemove,
     handleCancel,
