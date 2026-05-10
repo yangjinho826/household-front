@@ -43,10 +43,13 @@ export function useAuthMutations(options?: AuthMutationsOptions) {
   });
 
   const logoutMutation = useMutation({
-    mutationFn: () => PostLogoutApi(),
-    onSettled: () => {
-      // 백엔드 호출 실패해도 클라 상태는 비움
-      clearSession();
+    mutationFn: async () => {
+      try {
+        await PostLogoutApi();
+      } finally {
+        // 백엔드 호출 실패/성공 무관하게 클라 상태는 즉시 비움 (unmount 전 보장)
+        clearSession();
+      }
     },
   });
 
