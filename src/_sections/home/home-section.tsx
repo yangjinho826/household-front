@@ -23,15 +23,15 @@ import { queryKeys } from "_constants/queries";
 import { fmt } from "_utilities/fmt";
 
 const SIGN: Record<string, string> = {
-  expense: "-",
-  income: "+",
-  transfer: "→",
+  EXPENSE: "-",
+  INCOME: "+",
+  TRANSFER: "→",
 };
 
 const TX_COLOR: Record<string, string> = {
-  expense: "tossRed.5",
-  income: "tossGreen.5",
-  transfer: "tossPurple.5",
+  EXPENSE: "tossRed.5",
+  INCOME: "tossGreen.5",
+  TRANSFER: "tossPurple.5",
 };
 
 export default function HomeSection() {
@@ -52,12 +52,12 @@ export default function HomeSection() {
   const accounts = aData.body.data.content;
   const txns = tData.body.data.content;
 
-  const totalAssets = accounts.reduce((sum, a) => sum + a.startBalance, 0);
+  const totalAssets = accounts.reduce((sum, a) => sum + a.balance, 0);
   const income = txns
-    .filter((t) => t.txType === "income")
+    .filter((t) => t.txType === "INCOME")
     .reduce((sum, t) => sum + t.amount, 0);
   const expense = txns
-    .filter((t) => t.txType === "expense")
+    .filter((t) => t.txType === "EXPENSE")
     .reduce((sum, t) => sum + t.amount, 0);
   const save = income - expense;
   const savingRate = income > 0 ? (save / income) * 100 : 0;

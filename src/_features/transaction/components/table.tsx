@@ -16,9 +16,9 @@ import { fmt } from "_utilities/fmt";
 import type { TransactionListItemType, TxType } from "../types";
 
 const TYPE_COLOR: Record<TxType, string> = {
-  expense: "tossRed.5",
-  income: "tossGreen.5",
-  transfer: "tossPurple.5",
+  EXPENSE: "tossRed.5",
+  INCOME: "tossGreen.5",
+  TRANSFER: "tossPurple.5",
 };
 
 interface TransactionTableProps {
@@ -49,9 +49,9 @@ export default function TransactionTable({
   }
 
   const sign: Record<TxType, string> = {
-    expense: "-",
-    income: "+",
-    transfer: "→",
+    EXPENSE: "-",
+    INCOME: "+",
+    TRANSFER: "→",
   };
 
   return (

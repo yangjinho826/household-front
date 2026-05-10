@@ -8,6 +8,7 @@ import { z } from "zod";
 
 import { useTransactionMutations } from "_features/transaction/queries/use-mutations";
 import { ApiResponseError } from "_libraries/fetch/api-response-error";
+import { todayIsoKst } from "_utilities/datetime";
 
 import { useTransactionDetail as useTransactionDetailQuery } from "../../queries/use-query";
 import type {
@@ -36,12 +37,12 @@ export function useTransactionForm({
 
   const isUpdate = Boolean(transactionId);
 
-  const todayDate = new Date().toISOString().slice(0, 10);
+  const todayDate = todayIsoKst();
 
   const form = useForm<TransactionBaseRequestType>({
     initialValues: {
       householdId: HOUSEHOLD_ID,
-      txType: "expense" as TxType,
+      txType: "EXPENSE" as TxType,
       amount: 0,
       txDate: todayDate,
       accountId: ACCOUNT_ID,
@@ -53,7 +54,7 @@ export function useTransactionForm({
     },
     validate: zodResolver(
       z.object({
-        txType: z.enum(["expense", "income", "transfer"]),
+        txType: z.enum(["EXPENSE", "INCOME", "TRANSFER"]),
         amount: z.number().positive(t("amount_required_message")),
         txDate: z.string().min(1),
       }),

@@ -35,9 +35,9 @@ export default function TransactionSearch({
           label={t("tx_type")}
           placeholder={t("tx_type_placeholder")}
           data={[
-            { value: "expense", label: t("tx_type_expense") },
-            { value: "income", label: t("tx_type_income") },
-            { value: "transfer", label: t("tx_type_transfer") },
+            { value: "EXPENSE", label: t("tx_type_expense") },
+            { value: "INCOME", label: t("tx_type_income") },
+            { value: "TRANSFER", label: t("tx_type_transfer") },
           ]}
           clearable
         />

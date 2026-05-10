@@ -13,7 +13,7 @@ let store: TransactionDetailItemType[] = [
   {
     transactionId: newId(),
     householdId: HOUSEHOLD_ID,
-    txType: "expense",
+    txType: "EXPENSE",
     amount: 12_500,
     txDate: todayIso(),
     accountId: ACCOUNT_MAIN,
@@ -31,7 +31,7 @@ let store: TransactionDetailItemType[] = [
   {
     transactionId: newId(),
     householdId: HOUSEHOLD_ID,
-    txType: "expense",
+    txType: "EXPENSE",
     amount: 4_500,
     txDate: todayIso(),
     accountId: ACCOUNT_MAIN,
@@ -49,7 +49,7 @@ let store: TransactionDetailItemType[] = [
   {
     transactionId: newId(),
     householdId: HOUSEHOLD_ID,
-    txType: "income",
+    txType: "INCOME",
     amount: 3_200_000,
     txDate: todayIso(),
     accountId: ACCOUNT_MAIN,
@@ -67,7 +67,7 @@ let store: TransactionDetailItemType[] = [
   {
     transactionId: newId(),
     householdId: HOUSEHOLD_ID,
-    txType: "transfer",
+    txType: "TRANSFER",
     amount: 500_000,
     txDate: todayIso(),
     accountId: ACCOUNT_MAIN,
