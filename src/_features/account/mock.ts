@@ -7,13 +7,17 @@ import type {
 
 const HOUSEHOLD_ID = "h-mock-1";
 
+// 명시적 ID — portfolio mock 등 cross-domain 참조용
+export const MOCK_INVESTMENT_ACCOUNT_ID = "a-mock-investment-1";
+
 let store: AccountDetailItemType[] = [
   {
     accountId: newId(),
     householdId: HOUSEHOLD_ID,
     name: "주거래 통장",
-    accountType: "checking",
+    accountType: "LIVING",
     startBalance: 2_450_000,
+    balance: 2_450_000,
     color: "#3182F6",
     icon: "wallet",
     sortOrder: 1,
@@ -26,8 +30,9 @@ let store: AccountDetailItemType[] = [
     accountId: newId(),
     householdId: HOUSEHOLD_ID,
     name: "비상금",
-    accountType: "savings",
+    accountType: "SAVINGS",
     startBalance: 1_200_000,
+    balance: 1_200_000,
     color: "#22C55E",
     icon: "piggy-bank",
     sortOrder: 2,
@@ -40,8 +45,9 @@ let store: AccountDetailItemType[] = [
     accountId: newId(),
     householdId: HOUSEHOLD_ID,
     name: "월급통장",
-    accountType: "checking",
+    accountType: "LIVING",
     startBalance: 3_480_000,
+    balance: 3_480_000,
     color: "#3182F6",
     icon: "wallet",
     sortOrder: 3,
@@ -51,25 +57,12 @@ let store: AccountDetailItemType[] = [
     dataStatCd: "ACTIVE",
   },
   {
-    accountId: newId(),
+    accountId: MOCK_INVESTMENT_ACCOUNT_ID,
     householdId: HOUSEHOLD_ID,
-    name: "신용카드",
-    accountType: "credit",
-    startBalance: -380_000,
-    color: "#F04452",
-    icon: "credit-card",
-    sortOrder: 4,
-    isArchived: false,
-    frstRegDt: todayIso(),
-    lastMdfcnDt: todayIso(),
-    dataStatCd: "ACTIVE",
-  },
-  {
-    accountId: newId(),
-    householdId: HOUSEHOLD_ID,
-    name: "투자계좌",
-    accountType: "investment",
-    startBalance: 8_500_000,
+    name: "신한증권",
+    accountType: "INVESTMENT",
+    startBalance: 0,
+    balance: 0, // portfolio 합으로 derive
     color: "#8B5CF6",
     icon: "trending-up",
     sortOrder: 5,

@@ -29,6 +29,9 @@ export interface FixedListItemType {
   amount: number;
   dayOfMonth: number;
   categoryId: string | null;
+  categoryName?: string | null;
+  categoryColor?: string | null;
+  categoryIcon?: string | null;
   color: string | null;
   icon: string | null;
   sortOrder: number;
@@ -45,6 +48,9 @@ export interface FixedDetailItemType {
   amount: number;
   dayOfMonth: number;
   categoryId: string | null;
+  categoryName?: string | null;
+  categoryColor?: string | null;
+  categoryIcon?: string | null;
   color: string | null;
   icon: string | null;
   sortOrder: number;

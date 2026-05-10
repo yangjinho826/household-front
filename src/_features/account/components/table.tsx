@@ -17,11 +17,9 @@ import { fmt } from "_utilities/fmt";
 import type { AccountListItemType, AccountType } from "../types";
 
 const TYPE_COLOR: Record<AccountType, string> = {
-  checking: "tossBlue",
-  savings: "tossGreen",
-  credit: "tossRed",
-  cash: "gray",
-  investment: "tossPurple",
+  LIVING: "tossBlue",
+  SAVINGS: "tossGreen",
+  INVESTMENT: "tossPurple",
 };
 
 interface AccountTableProps {

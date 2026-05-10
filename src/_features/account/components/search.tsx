@@ -35,11 +35,9 @@ export default function AccountSearch({
           label={t("type")}
           placeholder={t("type_placeholder")}
           data={[
-            { value: "checking", label: t("type_checking") },
-            { value: "savings", label: t("type_savings") },
-            { value: "credit", label: t("type_credit") },
-            { value: "cash", label: t("type_cash") },
-            { value: "investment", label: t("type_investment") },
+            { value: "LIVING", label: t("type_living") },
+            { value: "SAVINGS", label: t("type_savings") },
+            { value: "INVESTMENT", label: t("type_investment") },
           ]}
           clearable
         />

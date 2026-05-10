@@ -1,10 +1,5 @@
-// 통장 타입 — 백엔드 account_type 컬럼 (확장 가능)
-export type AccountType =
-  | "checking"
-  | "savings"
-  | "credit"
-  | "cash"
-  | "investment";
+// 백엔드 enum: LIVING / SAVINGS / INVESTMENT
+export type AccountType = "LIVING" | "SAVINGS" | "INVESTMENT";
 
 export interface AccountSearchRequestType {
   searchTerm?: string;
@@ -36,6 +31,7 @@ export interface AccountListItemType {
   name: string;
   accountType: AccountType;
   startBalance: number;
+  balance: number;
   color: string | null;
   icon: string | null;
   sortOrder: number;
@@ -51,6 +47,7 @@ export interface AccountDetailItemType {
   name: string;
   accountType: AccountType;
   startBalance: number;
+  balance: number;
   color: string | null;
   icon: string | null;
   sortOrder: number;

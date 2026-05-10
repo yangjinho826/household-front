@@ -37,7 +37,7 @@ export function useAccountForm({ accountId }: UseAccountFormOptions) {
     initialValues: {
       householdId: HOUSEHOLD_ID,
       name: "",
-      accountType: "checking" as AccountType,
+      accountType: "LIVING" as AccountType,
       startBalance: 0,
       color: null,
       icon: null,
@@ -47,13 +47,7 @@ export function useAccountForm({ accountId }: UseAccountFormOptions) {
     validate: zodResolver(
       z.object({
         name: z.string().min(1, t("name_required_message")),
-        accountType: z.enum([
-          "checking",
-          "savings",
-          "credit",
-          "cash",
-          "investment",
-        ]),
+        accountType: z.enum(["LIVING", "SAVINGS", "INVESTMENT"]),
         startBalance: z.number(),
       }),
     ),

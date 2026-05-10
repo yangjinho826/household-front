@@ -10,16 +10,67 @@ import { categoryMockStore } from "./mock";
 import type {
   CategoryCreateRequest,
   CategoryDetailItemType,
+  CategoryKind,
   CategoryListItemType,
   CategorySearchRequestType,
   CategoryUpdateRequest,
 } from "./types";
 
-const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK !== "false";
+const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK_CATEGORY === "true";
 
 const wrap = <T>(data: T) => ({ body: data });
 
-export function GetCategorySearchApi(params: CategorySearchRequestType) {
+interface BackendCategoryResponse {
+  id: string;
+  household_id: string;
+  is_income: boolean;
+  name: string;
+  color: string | null;
+  icon: string | null;
+  sort_order: number;
+  is_archived: boolean;
+}
+
+const toKind = (isIncome: boolean): CategoryKind =>
+  isIncome ? "income" : "expense";
+
+function mapToListItem(
+  b: BackendCategoryResponse,
+  rowNo: number,
+): CategoryListItemType {
+  return {
+    rowNo,
+    categoryId: b.id,
+    householdId: b.household_id,
+    kind: toKind(b.is_income),
+    name: b.name,
+    color: b.color,
+    icon: b.icon,
+    sortOrder: b.sort_order,
+    isArchived: b.is_archived,
+    frstRegDt: "",
+    lastMdfcnDt: "",
+    dataStatCd: "ACTIVE",
+  };
+}
+
+function mapToDetailItem(b: BackendCategoryResponse): CategoryDetailItemType {
+  return {
+    categoryId: b.id,
+    householdId: b.household_id,
+    kind: toKind(b.is_income),
+    name: b.name,
+    color: b.color,
+    icon: b.icon,
+    sortOrder: b.sort_order,
+    isArchived: b.is_archived,
+    frstRegDt: "",
+    lastMdfcnDt: "",
+    dataStatCd: "ACTIVE",
+  };
+}
+
+export async function GetCategorySearchApi(params: CategorySearchRequestType) {
   if (USE_MOCK) {
     const items = categoryMockStore.list();
     const filtered = items.filter((i) => {
@@ -33,28 +84,49 @@ export function GetCategorySearchApi(params: CategorySearchRequestType) {
         return false;
       return true;
     });
-    return Promise.resolve(wrap(mockOkList(filtered)));
+    return wrap(mockOkList(filtered));
   }
+
   const queryString = objectToParams({ ...params }).toString();
-  return apiFetch<ApiListResponse<CategoryListItemType>>(
-    `/api/front/v1/category/list?${queryString}`,
+  const res = await apiFetch<ApiResponse<BackendCategoryResponse[]>>(
+    `/api/category/list${queryString ? `?${queryString}` : ""}`,
     { method: "GET" },
   );
+  const items = (res.body.data ?? []).map((b, idx) =>
+    mapToListItem(b, idx + 1),
+  );
+  const wrapped: ApiListResponse<CategoryListItemType> = {
+    code: res.body.code,
+    message: res.body.message,
+    status: res.body.status,
+    data: {
+      listSize: items.length,
+      currentPage: 1,
+      currentCount: items.length,
+      totalElements: items.length,
+      totalPages: 1,
+      content: items,
+    },
+  };
+  return { ...res, body: wrapped };
 }
 
-export function GetCategoryDetailApi(categoryId: string) {
+export async function GetCategoryDetailApi(categoryId: string) {
   if (USE_MOCK) {
     const item = categoryMockStore.detail(categoryId);
     if (!item) return Promise.reject(new Error("category not found"));
-    return Promise.resolve(wrap(mockOkItem(item)));
+    return wrap(mockOkItem(item));
   }
-  return apiFetch<ApiResponse<CategoryDetailItemType>>(
-    `/api/front/v1/category/detail/${categoryId}`,
-    { method: "GET", errorHandleMethod: "reject" },
+  const listRes = await apiFetch<ApiResponse<BackendCategoryResponse[]>>(
+    `/api/category/list`,
+    { method: "GET" },
   );
+  const found = (listRes.body.data ?? []).find((c) => c.id === categoryId);
+  if (!found) return Promise.reject(new Error("category not found"));
+  return wrap(mockOkItem(mapToDetailItem(found)));
 }
 
-export function PostCategoryCreateApi(params: CategoryCreateRequest) {
+export async function PostCategoryCreateApi(params: CategoryCreateRequest) {
   if (USE_MOCK) {
     const item = categoryMockStore.create({
       householdId: params.householdId,
@@ -65,19 +137,29 @@ export function PostCategoryCreateApi(params: CategoryCreateRequest) {
       sortOrder: params.sortOrder,
       isArchived: params.isArchived,
     });
-    return Promise.resolve(wrap(mockOkItem(item)));
+    return wrap(mockOkItem(item));
   }
-  return apiFetch<ApiResponse<CategoryDetailItemType>>(
-    `/api/front/v1/category/create`,
+  const res = await apiFetch<ApiResponse<BackendCategoryResponse>>(
+    `/api/category/create`,
     {
       method: "POST",
-      body: params,
+      body: {
+        is_income: params.kind === "income",
+        name: params.name,
+        color: params.color ?? null,
+        icon: params.icon ?? null,
+        sort_order: params.sortOrder,
+      },
       errorHandleMethod: "reject",
     },
   );
+  return {
+    ...res,
+    body: { ...res.body, data: mapToDetailItem(res.body.data) },
+  };
 }
 
-export function PutCategoryUpdateApi(params: CategoryUpdateRequest) {
+export async function PutCategoryUpdateApi(params: CategoryUpdateRequest) {
   if (USE_MOCK) {
     const { categoryId, ...rest } = params;
     categoryMockStore.update(categoryId, {
@@ -85,16 +167,27 @@ export function PutCategoryUpdateApi(params: CategoryUpdateRequest) {
       color: rest.color ?? null,
       icon: rest.icon ?? null,
     });
-    return Promise.resolve(wrap(mockOkItem(undefined as unknown as void)));
+    return wrap(mockOkItem(undefined as unknown as void));
   }
-  return apiFetch<ApiResponse<void>>(
-    `/api/front/v1/category/update/${params.categoryId}`,
+  const res = await apiFetch<ApiResponse<BackendCategoryResponse>>(
+    `/api/category/update/${params.categoryId}`,
     {
       method: "PUT",
-      body: params,
+      body: {
+        is_income: params.kind === "income",
+        name: params.name,
+        color: params.color ?? null,
+        icon: params.icon ?? null,
+        sort_order: params.sortOrder,
+        is_archived: params.isArchived,
+      },
       errorHandleMethod: "reject",
     },
   );
+  return {
+    ...res,
+    body: { ...res.body, data: undefined as unknown as void },
+  };
 }
 
 export function DeleteCategoryDeleteApi(categoryId: string) {
@@ -103,7 +196,7 @@ export function DeleteCategoryDeleteApi(categoryId: string) {
     return Promise.resolve(wrap(mockOkItem(undefined as unknown as void)));
   }
   return apiFetch<ApiResponse<void>>(
-    `/api/front/v1/category/delete/${categoryId}`,
+    `/api/category/delete/${categoryId}`,
     { method: "DELETE", errorHandleMethod: "reject" },
   );
 }

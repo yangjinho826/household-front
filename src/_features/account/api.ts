@@ -12,15 +12,70 @@ import type {
   AccountDetailItemType,
   AccountListItemType,
   AccountSearchRequestType,
+  AccountType,
   AccountUpdateRequest,
 } from "./types";
 
-const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK !== "false";
+const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK_ACCOUNT === "true";
 
 const wrap = <T>(data: T) => ({ body: data });
 
-// 통장 검색
-export function GetAccountSearchApi(params: AccountSearchRequestType) {
+interface BackendAccountResponse {
+  id: string;
+  household_id: string;
+  name: string;
+  account_type: AccountType;
+  start_balance: number | string;
+  balance: number | string;
+  color: string | null;
+  icon: string | null;
+  sort_order: number;
+  is_archived: boolean;
+}
+
+const num = (v: number | string) => (typeof v === "number" ? v : Number(v));
+
+function mapToListItem(
+  b: BackendAccountResponse,
+  rowNo: number,
+): AccountListItemType {
+  return {
+    rowNo,
+    accountId: b.id,
+    householdId: b.household_id,
+    name: b.name,
+    accountType: b.account_type,
+    startBalance: num(b.start_balance),
+    balance: num(b.balance),
+    color: b.color,
+    icon: b.icon,
+    sortOrder: b.sort_order,
+    isArchived: b.is_archived,
+    frstRegDt: "",
+    lastMdfcnDt: "",
+    dataStatCd: "ACTIVE",
+  };
+}
+
+function mapToDetailItem(b: BackendAccountResponse): AccountDetailItemType {
+  return {
+    accountId: b.id,
+    householdId: b.household_id,
+    name: b.name,
+    accountType: b.account_type,
+    startBalance: num(b.start_balance),
+    balance: num(b.balance),
+    color: b.color,
+    icon: b.icon,
+    sortOrder: b.sort_order,
+    isArchived: b.is_archived,
+    frstRegDt: "",
+    lastMdfcnDt: "",
+    dataStatCd: "ACTIVE",
+  };
+}
+
+export async function GetAccountSearchApi(params: AccountSearchRequestType) {
   if (USE_MOCK) {
     const items = accountMockStore.list();
     const filtered = items.filter((i) => {
@@ -35,55 +90,85 @@ export function GetAccountSearchApi(params: AccountSearchRequestType) {
         return false;
       return true;
     });
-    return Promise.resolve(wrap(mockOkList(filtered)));
+    return wrap(mockOkList(filtered));
   }
+
   const queryString = objectToParams({ ...params }).toString();
-  return apiFetch<ApiListResponse<AccountListItemType>>(
-    `/api/front/v1/account/list?${queryString}`,
+  const res = await apiFetch<ApiResponse<BackendAccountResponse[]>>(
+    `/api/account/list${queryString ? `?${queryString}` : ""}`,
     { method: "GET" },
   );
+  const items = (res.body.data ?? []).map((b, idx) =>
+    mapToListItem(b, idx + 1),
+  );
+  const wrapped: ApiListResponse<AccountListItemType> = {
+    code: res.body.code,
+    message: res.body.message,
+    status: res.body.status,
+    data: {
+      listSize: items.length,
+      currentPage: 1,
+      currentCount: items.length,
+      totalElements: items.length,
+      totalPages: 1,
+      content: items,
+    },
+  };
+  return { ...res, body: wrapped };
 }
 
-// 통장 상세
-export function GetAccountDetailApi(accountId: string) {
+export async function GetAccountDetailApi(accountId: string) {
   if (USE_MOCK) {
     const item = accountMockStore.detail(accountId);
     if (!item) return Promise.reject(new Error("account not found"));
-    return Promise.resolve(wrap(mockOkItem(item)));
+    return wrap(mockOkItem(item));
   }
-  return apiFetch<ApiResponse<AccountDetailItemType>>(
-    `/api/front/v1/account/detail/${accountId}`,
-    { method: "GET", errorHandleMethod: "reject" },
+  const listRes = await apiFetch<ApiResponse<BackendAccountResponse[]>>(
+    `/api/account/list`,
+    { method: "GET" },
   );
+  const found = (listRes.body.data ?? []).find((a) => a.id === accountId);
+  if (!found) return Promise.reject(new Error("account not found"));
+  return wrap(mockOkItem(mapToDetailItem(found)));
 }
 
-// 통장 생성
-export function PostAccountCreateApi(params: AccountCreateRequest) {
+export async function PostAccountCreateApi(params: AccountCreateRequest) {
   if (USE_MOCK) {
     const item = accountMockStore.create({
       householdId: params.householdId,
       name: params.name,
       accountType: params.accountType,
       startBalance: params.startBalance,
+      balance: params.startBalance,
       color: params.color ?? null,
       icon: params.icon ?? null,
       sortOrder: params.sortOrder,
       isArchived: params.isArchived,
     });
-    return Promise.resolve(wrap(mockOkItem(item)));
+    return wrap(mockOkItem(item));
   }
-  return apiFetch<ApiResponse<AccountDetailItemType>>(
-    `/api/front/v1/account/create`,
+  const res = await apiFetch<ApiResponse<BackendAccountResponse>>(
+    `/api/account/create`,
     {
       method: "POST",
-      body: params,
+      body: {
+        name: params.name,
+        account_type: params.accountType,
+        start_balance: params.startBalance,
+        color: params.color ?? null,
+        icon: params.icon ?? null,
+        sort_order: params.sortOrder,
+      },
       errorHandleMethod: "reject",
     },
   );
+  return {
+    ...res,
+    body: { ...res.body, data: mapToDetailItem(res.body.data) },
+  };
 }
 
-// 통장 수정
-export function PutAccountUpdateApi(params: AccountUpdateRequest) {
+export async function PutAccountUpdateApi(params: AccountUpdateRequest) {
   if (USE_MOCK) {
     const { accountId, ...rest } = params;
     accountMockStore.update(accountId, {
@@ -91,26 +176,37 @@ export function PutAccountUpdateApi(params: AccountUpdateRequest) {
       color: rest.color ?? null,
       icon: rest.icon ?? null,
     });
-    return Promise.resolve(wrap(mockOkItem(undefined as unknown as void)));
+    return wrap(mockOkItem(undefined as unknown as void));
   }
-  return apiFetch<ApiResponse<void>>(
-    `/api/front/v1/account/update/${params.accountId}`,
+  const res = await apiFetch<ApiResponse<BackendAccountResponse>>(
+    `/api/account/update/${params.accountId}`,
     {
       method: "PUT",
-      body: params,
+      body: {
+        name: params.name,
+        account_type: params.accountType,
+        start_balance: params.startBalance,
+        color: params.color ?? null,
+        icon: params.icon ?? null,
+        sort_order: params.sortOrder,
+        is_archived: params.isArchived,
+      },
       errorHandleMethod: "reject",
     },
   );
+  return {
+    ...res,
+    body: { ...res.body, data: undefined as unknown as void },
+  };
 }
 
-// 통장 삭제
 export function DeleteAccountDeleteApi(accountId: string) {
   if (USE_MOCK) {
     accountMockStore.remove(accountId);
     return Promise.resolve(wrap(mockOkItem(undefined as unknown as void)));
   }
   return apiFetch<ApiResponse<void>>(
-    `/api/front/v1/account/delete/${accountId}`,
+    `/api/account/delete/${accountId}`,
     { method: "DELETE", errorHandleMethod: "reject" },
   );
 }
