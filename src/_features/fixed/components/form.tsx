@@ -10,6 +10,9 @@ import {
 } from "@mantine/core";
 import { useTranslations } from "next-intl";
 
+import ColorPicker from "_features/common/components/color-picker";
+import IconPicker from "_features/common/components/icon-picker";
+
 import { useFixedForm } from "../hooks/use-sub/use-form";
 
 interface FixedFormProps {
@@ -49,15 +52,15 @@ export default function FixedForm({ fixedId }: FixedFormProps) {
             min={1}
             max={31}
           />
-          <TextInput
-            {...form.getInputProps("color")}
+          <ColorPicker
+            value={form.values.color}
+            onChange={(c) => form.setFieldValue("color", c)}
             label={t("color")}
-            placeholder="#3182F6"
           />
-          <TextInput
-            {...form.getInputProps("icon")}
+          <IconPicker
+            value={form.values.icon}
+            onChange={(i) => form.setFieldValue("icon", i)}
             label={t("icon")}
-            placeholder="home"
           />
           <Group grow mt="md">
             <Button

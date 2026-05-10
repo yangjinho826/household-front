@@ -10,7 +10,11 @@ import {
   TextInput,
   Textarea,
 } from "@mantine/core";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
+import { useMemo } from "react";
+
+import { queryKeys } from "_constants/queries";
 
 import { useTransactionForm } from "../hooks/use-sub/use-form";
 
@@ -33,6 +37,42 @@ export default function TransactionForm({
     handleCancel,
   } = useTransactionForm({ transactionId });
 
+  // 통장 + 카테고리 데이터 (mock — 백엔드 미구현)
+  const { data: accountsData } = useSuspenseQuery(
+    queryKeys.account.list({ pageNo: 1, listSize: 100 }),
+  );
+  const { data: categoriesData } = useSuspenseQuery(
+    queryKeys.category.list({ pageNo: 1, listSize: 100 }),
+  );
+
+  const accounts = accountsData.body.data.content;
+  const categories = categoriesData.body.data.content;
+
+  const txType = form.values.txType;
+  const isTransfer = txType === "TRANSFER";
+
+  const accountOptions = useMemo(
+    () =>
+      accounts.map((a) => ({ value: a.accountId, label: a.name })),
+    [accounts],
+  );
+
+  const toAccountOptions = useMemo(
+    () =>
+      accounts
+        .filter((a) => a.accountId !== form.values.accountId)
+        .map((a) => ({ value: a.accountId, label: a.name })),
+    [accounts, form.values.accountId],
+  );
+
+  const categoryOptions = useMemo(
+    () =>
+      categories
+        .filter((c) => (txType === "INCOME" ? c.kind === "income" : c.kind === "expense"))
+        .map((c) => ({ value: c.categoryId, label: c.name })),
+    [categories, txType],
+  );
+
   return (
     <Card>
       <form onSubmit={form.onSubmit(handleSubmit)}>
@@ -41,9 +81,9 @@ export default function TransactionForm({
             {...form.getInputProps("txType")}
             label={t("tx_type")}
             data={[
-              { value: "expense", label: t("tx_type_expense") },
-              { value: "income", label: t("tx_type_income") },
-              { value: "transfer", label: t("tx_type_transfer") },
+              { value: "EXPENSE", label: t("tx_type_expense") },
+              { value: "INCOME", label: t("tx_type_income") },
+              { value: "TRANSFER", label: t("tx_type_transfer") },
             ]}
           />
           <NumberInput
@@ -56,6 +96,44 @@ export default function TransactionForm({
             label={t("tx_date")}
             placeholder="YYYY-MM-DD"
           />
+
+          {isTransfer ? (
+            <>
+              <Select
+                {...form.getInputProps("accountId")}
+                label={t("from_account")}
+                placeholder={t("account_placeholder")}
+                data={accountOptions}
+                searchable
+              />
+              <Select
+                {...form.getInputProps("toAccountId")}
+                label={t("to_account")}
+                placeholder={t("account_placeholder")}
+                data={toAccountOptions}
+                searchable
+              />
+            </>
+          ) : (
+            <>
+              <Select
+                {...form.getInputProps("accountId")}
+                label={t("account")}
+                placeholder={t("account_placeholder")}
+                data={accountOptions}
+                searchable
+              />
+              <Select
+                {...form.getInputProps("categoryId")}
+                label={t("category")}
+                placeholder={t("category_placeholder")}
+                data={categoryOptions}
+                searchable
+                clearable
+              />
+            </>
+          )}
+
           <Textarea
             {...form.getInputProps("memo")}
             label={t("memo")}

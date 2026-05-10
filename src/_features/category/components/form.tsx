@@ -11,6 +11,9 @@ import {
 } from "@mantine/core";
 import { useTranslations } from "next-intl";
 
+import ColorPicker from "_features/common/components/color-picker";
+import IconPicker from "_features/common/components/icon-picker";
+
 import { useCategoryForm } from "../hooks/use-sub/use-form";
 
 interface CategoryFormProps {
@@ -47,15 +50,15 @@ export default function CategoryForm({ categoryId }: CategoryFormProps) {
             label={t("name")}
             placeholder={t("name_placeholder")}
           />
-          <TextInput
-            {...form.getInputProps("color")}
+          <ColorPicker
+            value={form.values.color}
+            onChange={(c) => form.setFieldValue("color", c)}
             label={t("color")}
-            placeholder="#FF6B6B"
           />
-          <TextInput
-            {...form.getInputProps("icon")}
+          <IconPicker
+            value={form.values.icon}
+            onChange={(i) => form.setFieldValue("icon", i)}
             label={t("icon")}
-            placeholder="utensils"
           />
           <NumberInput
             {...form.getInputProps("sortOrder")}

@@ -3,6 +3,9 @@
 import { Button, Card, Group, NumberInput, Select, Stack, TextInput } from "@mantine/core";
 import { useTranslations } from "next-intl";
 
+import ColorPicker from "_features/common/components/color-picker";
+import IconPicker from "_features/common/components/icon-picker";
+
 import { useAccountForm } from "../hooks/use-sub/use-form";
 
 interface AccountFormProps {
@@ -29,11 +32,9 @@ export default function AccountForm({ accountId }: AccountFormProps) {
             {...form.getInputProps("accountType")}
             label={t("type")}
             data={[
-              { value: "checking", label: t("type_checking") },
-              { value: "savings", label: t("type_savings") },
-              { value: "credit", label: t("type_credit") },
-              { value: "cash", label: t("type_cash") },
-              { value: "investment", label: t("type_investment") },
+              { value: "LIVING", label: t("type_living") },
+              { value: "SAVINGS", label: t("type_savings") },
+              { value: "INVESTMENT", label: t("type_investment") },
             ]}
           />
           <NumberInput
@@ -42,15 +43,15 @@ export default function AccountForm({ accountId }: AccountFormProps) {
             placeholder={t("balance_placeholder")}
             thousandSeparator=","
           />
-          <TextInput
-            {...form.getInputProps("color")}
+          <ColorPicker
+            value={form.values.color}
+            onChange={(c) => form.setFieldValue("color", c)}
             label={t("color")}
-            placeholder="#3182F6"
           />
-          <TextInput
-            {...form.getInputProps("icon")}
+          <IconPicker
+            value={form.values.icon}
+            onChange={(i) => form.setFieldValue("icon", i)}
             label={t("icon")}
-            placeholder="wallet"
           />
           <Group grow mt="md">
             <Button type="button" variant="light" onClick={handleCancel} disabled={isPending}>
