@@ -61,10 +61,8 @@
     "name_required_message": "통장명을 입력해주세요.",
     "type": "타입",
     "type_placeholder": "타입 선택",
-    "type_checking": "입출금",
-    "type_savings": "예적금",
-    "type_credit": "신용카드",
-    "type_cash": "현금",
+    "type_living": "생활",
+    "type_savings": "적립",
     "type_investment": "투자",
     "balance": "시작 잔액",
     "balance_placeholder": "0",
@@ -118,7 +116,10 @@
     "symbol": "심볼",
     "quantity": "수량",
     "avg_price": "평균 매입가",
-    "current_value": "현재 평가금액"
+    "current_value": "현재 평가금액",
+    "current_price": "현재가",
+    "current_price_help": "1주당 현재 시세입니다. 수량과 매수가는 등록 후 매수에서 추가됩니다.",
+    "current_price_placeholder": "0"
   },
   "transaction": {
     "list_title": "거래",
@@ -136,7 +137,27 @@
     "amount_required_message": "금액을 입력해주세요.",
     "tx_date": "날짜",
     "memo": "메모",
-    "memo_placeholder": "예) 점심 김밥"
+    "memo_placeholder": "예) 점심 김밥",
+    "account": "통장",
+    "account_placeholder": "통장 선택",
+    "from_account": "출발 통장",
+    "to_account": "도착 통장",
+    "category": "카테고리",
+    "category_placeholder": "카테고리 선택",
+    "view_list": "목록",
+    "view_calendar": "달력",
+    "filter_all": "전체",
+    "load_more": "더 보기"
+  },
+  "onboarding": {
+    "welcome_title": "가계부에 오신 걸 환영해요",
+    "welcome_desc": "어떤 가계부를 만들까요? 이름은 나중에 바꿀 수 있어요.",
+    "household_name": "가계부 이름",
+    "household_name_placeholder": "예) 우리 가족, 혼자 살림",
+    "name_required_message": "이름을 입력해주세요.",
+    "submit": "다음",
+    "created_message": "가계부가 만들어졌어요.",
+    "hint": "통화는 KRW (원), 시작일은 오늘로 자동 설정돼요"
   },
   "household": {
     "list_title": "가계부",

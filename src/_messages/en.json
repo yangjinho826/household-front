@@ -61,10 +61,8 @@
     "name_required_message": "Please enter name.",
     "type": "Type",
     "type_placeholder": "Select type",
-    "type_checking": "Checking",
+    "type_living": "Living",
     "type_savings": "Savings",
-    "type_credit": "Credit",
-    "type_cash": "Cash",
     "type_investment": "Investment",
     "balance": "Start Balance",
     "balance_placeholder": "0",
@@ -118,7 +116,10 @@
     "symbol": "Symbol",
     "quantity": "Quantity",
     "avg_price": "Avg Price",
-    "current_value": "Current Value"
+    "current_value": "Current Value",
+    "current_price": "Current Price",
+    "current_price_help": "Per-share current price. Quantity and buy price are added later via Buy.",
+    "current_price_placeholder": "0"
   },
   "transaction": {
     "list_title": "Transactions",
@@ -136,7 +137,27 @@
     "amount_required_message": "Please enter amount.",
     "tx_date": "Date",
     "memo": "Memo",
-    "memo_placeholder": "e.g. Lunch"
+    "memo_placeholder": "e.g. Lunch",
+    "account": "Account",
+    "account_placeholder": "Select account",
+    "from_account": "From",
+    "to_account": "To",
+    "category": "Category",
+    "category_placeholder": "Select category",
+    "view_list": "List",
+    "view_calendar": "Calendar",
+    "filter_all": "All",
+    "load_more": "Load more"
+  },
+  "onboarding": {
+    "welcome_title": "Welcome to your household",
+    "welcome_desc": "Let's create your first household. You can rename it anytime.",
+    "household_name": "Household name",
+    "household_name_placeholder": "e.g. My Family",
+    "name_required_message": "Please enter a name.",
+    "submit": "Next",
+    "created_message": "Household created.",
+    "hint": "Currency defaults to KRW, start date defaults to today"
   },
   "household": {
     "list_title": "Households",
