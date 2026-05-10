@@ -1,11 +1,11 @@
 import { createQueryKeys } from "@lukemorales/query-key-factory";
 
-import { GetAccountSnapshotSearchApi } from "../api";
-import type { AccountSnapshotSearchRequestType } from "../types";
+import { GetAccountSnapshotYearlyApi } from "../api";
+import type { AccountSnapshotYearlyRequest } from "../types";
 
 export const accountSnapshots = createQueryKeys("accountSnapshot", {
-  list: (params: AccountSnapshotSearchRequestType) => ({
+  yearly: (params: AccountSnapshotYearlyRequest = {}) => ({
     queryKey: [params],
-    queryFn: () => GetAccountSnapshotSearchApi(params),
+    queryFn: () => GetAccountSnapshotYearlyApi(params),
   }),
 });

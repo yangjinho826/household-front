@@ -1,18 +1,25 @@
-export interface AccountSnapshotSearchRequestType {
-  accountId?: string;
+export interface AccountSnapshotYearlyRequest {
+  from?: string; // YYYY-MM-DD (월 1일)
+  to?: string; // YYYY-MM-DD (월 1일)
 }
 
-export interface AccountSnapshotItemType {
-  snapshotId: string;
+// 월별 묶음 안의 계좌별 row
+export interface AccountSnapshotBalanceItem {
   accountId: string;
-  snapshotDate: string; // YYYY-MM-DD (월말)
+  accountName: string;
   balance: number;
-  frstRegDt: string;
-  lastMdfcnDt: string;
-  dataStatCd: string;
 }
 
-export interface AccountMonthlyAggregate {
-  month: string; // YYYY-MM
-  total: number; // 전체 계좌 잔액 합산
+// 한 달 스냅샷 묶음 — 백엔드가 미리 합산
+export interface AccountSnapshotMonthItem {
+  snapshotDate: string; // YYYY-MM-DD (그달 1일)
+  totalBalance: number;
+  accounts: AccountSnapshotBalanceItem[];
+}
+
+// 1년 (또는 임의 기간) 추이 응답
+export interface AccountSnapshotYearly {
+  months: AccountSnapshotMonthItem[];
+  currentMonthSaved: boolean;
+  currentMonthDate: string; // YYYY-MM-DD (KST 이번 달 1일)
 }

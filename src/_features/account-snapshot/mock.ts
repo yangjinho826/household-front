@@ -1,88 +1,102 @@
-import { newId, todayIso } from "_utilities/fmt";
+import { accountMockStore } from "_features/account/mock";
+import { firstDayOfMonthKst, parseKstDate } from "_utilities/datetime";
 
 import type {
-  AccountMonthlyAggregate,
-  AccountSnapshotItemType,
+  AccountSnapshotBalanceItem,
+  AccountSnapshotMonthItem,
+  AccountSnapshotYearly,
+  AccountSnapshotYearlyRequest,
 } from "./types";
 
-const ACCOUNT_IDS = [
-  "a-mock-1",
-  "a-mock-2",
-  "a-mock-3",
-  "a-mock-4",
-  "a-mock-5",
-];
+// 메모리 store: snapshotDate -> 계좌별 row 목록
+const store = new Map<string, AccountSnapshotBalanceItem[]>();
 
-function lastDayOfMonth(year: number, monthIdx: number): string {
-  const d = new Date(year, monthIdx + 1, 0);
-  return d.toISOString().slice(0, 10);
-}
+// 시드 — 11개월 전 ~ 지난달 (이번달 제외, 사용자가 create 버튼으로 추가)
+function seed() {
+  const accounts = accountMockStore.list();
 
-function buildMonths(count: number): string[] {
-  const now = new Date();
-  const months: string[] = [];
-  for (let i = count - 1; i >= 0; i -= 1) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    months.push(lastDayOfMonth(d.getFullYear(), d.getMonth()));
+  for (let i = 11; i >= 1; i -= 1) {
+    const key = firstDayOfMonthKst(-i);
+    const ratio = (12 - i) / 12;
+    const items: AccountSnapshotBalanceItem[] = accounts.map((acc) => {
+      const target = acc.balance ?? 0;
+      const noise = (acc.sortOrder ?? 1) * 50_000 * (i % 2 === 0 ? 1 : -1);
+      return {
+        accountId: acc.accountId,
+        accountName: acc.name,
+        balance: Math.round(target * ratio + noise),
+      };
+    });
+    store.set(key, items);
   }
-  return months;
+}
+seed();
+
+function buildMonthItem(
+  snapshotDate: string,
+  items: AccountSnapshotBalanceItem[],
+): AccountSnapshotMonthItem {
+  return {
+    snapshotDate,
+    totalBalance: items.reduce((sum, it) => sum + it.balance, 0),
+    accounts: items,
+  };
 }
 
-const months = buildMonths(6);
-
-// 시드: 계좌별 월말 잔액 (mock)
-const seedByAccount: Record<string, number[]> = {
-  "a-mock-1": [2_100_000, 2_200_000, 2_300_000, 2_400_000, 2_420_000, 2_450_000],
-  "a-mock-2": [800_000, 900_000, 1_000_000, 1_100_000, 1_150_000, 1_200_000],
-  "a-mock-3": [3_200_000, 3_300_000, 3_350_000, 3_400_000, 3_450_000, 3_480_000],
-  "a-mock-4": [
-    -100_000,
-    -200_000,
-    -150_000,
-    -300_000,
-    -350_000,
-    -380_000,
-  ],
-  "a-mock-5": [
-    7_500_000,
-    7_800_000,
-    8_000_000,
-    8_200_000,
-    8_400_000,
-    8_500_000,
-  ],
-};
-
-const store: AccountSnapshotItemType[] = ACCOUNT_IDS.flatMap((accountId) =>
-  months.map((monthEnd, idx) => ({
-    snapshotId: newId(),
-    accountId,
-    snapshotDate: monthEnd,
-    balance: seedByAccount[accountId]?.[idx] ?? 0,
-    frstRegDt: todayIso(),
-    lastMdfcnDt: todayIso(),
-    dataStatCd: "ACTIVE",
-  })),
-);
+/** "YYYY-MM-DD" → KST 기준 그달 1일 "YYYY-MM-DD" */
+function normalizeToMonthFirst(yyyyMmDd: string): string {
+  return parseKstDate(yyyyMmDd).startOf("month").format("YYYY-MM-DD");
+}
 
 export const accountSnapshotMockStore = {
-  list(params?: { accountId?: string }): AccountSnapshotItemType[] {
-    if (params?.accountId) {
-      return store.filter((i) => i.accountId === params.accountId);
-    }
-    return store;
-  },
   /**
-   * 월별 전체 자산 합산 (차트용).
+   * 1년 추이 — default 12개월 (이번달 - 11 ~ 이번달).
    */
-  aggregateByMonth(): AccountMonthlyAggregate[] {
-    const map = new Map<string, number>();
-    for (const item of store) {
-      const key = item.snapshotDate.slice(0, 7);
-      map.set(key, (map.get(key) ?? 0) + item.balance);
+  yearly(params: AccountSnapshotYearlyRequest = {}): AccountSnapshotYearly {
+    const currentFirst = firstDayOfMonthKst(0);
+
+    const toDate = params.to ? normalizeToMonthFirst(params.to) : currentFirst;
+    const fromDate = params.from
+      ? normalizeToMonthFirst(params.from)
+      : parseKstDate(toDate)
+          .subtract(11, "month")
+          .startOf("month")
+          .format("YYYY-MM-DD");
+
+    const monthsInRange = Array.from(store.entries())
+      .filter(([k]) => k >= fromDate && k <= toDate)
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([k, items]) => buildMonthItem(k, items));
+
+    return {
+      months: monthsInRange,
+      currentMonthSaved: store.has(currentFirst),
+      currentMonthDate: currentFirst,
+    };
+  },
+
+  /**
+   * 이번달 row 이미 있으면 throw — UX 동일.
+   * 없으면 active 계좌들 현재 balance 를 그달 1일자로 push.
+   */
+  create(): AccountSnapshotMonthItem {
+    const target = firstDayOfMonthKst(0);
+    if (store.has(target)) {
+      throw new Error("SNAPSHOT_ALREADY_EXISTS");
     }
-    return Array.from(map.entries())
-      .map(([month, total]) => ({ month, total }))
-      .sort((a, b) => a.month.localeCompare(b.month));
+    const accounts = accountMockStore
+      .list()
+      .filter((a) => !a.isArchived);
+    if (accounts.length === 0) {
+      throw new Error("NO_ACTIVE_ACCOUNT");
+    }
+
+    const items: AccountSnapshotBalanceItem[] = accounts.map((acc) => ({
+      accountId: acc.accountId,
+      accountName: acc.name,
+      balance: acc.balance ?? 0,
+    }));
+    store.set(target, items);
+    return buildMonthItem(target, items);
   },
 };
