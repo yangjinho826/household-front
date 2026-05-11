@@ -4,9 +4,20 @@ import { useAuthStore } from "_features/auth/store";
 import { authLoginUrl } from "_constants/url";
 
 import { cookieFetch } from "./api-fetch";
-import { ApiResponseError } from "./api-response-error";
 
 let refreshPromise: Promise<Response> | null = null;
+
+function redirectToLogin(): Promise<Response> {
+  useAuthStore.getState().clearSession();
+
+  const loginUrl = authLoginUrl
+    ? `${authLoginUrl}/login?error=error_session_expired`
+    : "/login?error=error_session_expired";
+  window.location.replace(loginUrl);
+
+  // 영원 pending — React 재마운트/재렌더 사이클 차단. redirect 완료될 때까지 idle
+  return new Promise<Response>(() => {});
+}
 
 export const returnFetchRefresh = (args?: ReturnFetchDefaultOptions) =>
   returnFetch({
@@ -32,29 +43,22 @@ export const returnFetchRefresh = (args?: ReturnFetchDefaultOptions) =>
         refreshPromise = null;
 
         if (refreshResponse.status !== 200) {
-          // refresh 자체 실패 → 세션 클리어 후 로그인 화면으로
-          useAuthStore.getState().clearSession();
-
-          const loginUrl = authLoginUrl
-            ? `${authLoginUrl}/login?error=error_session_expired`
-            : "/login?error=error_session_expired";
-          window.location.href = loginUrl;
-
-          throw new ApiResponseError(refreshResponse, "reject");
+          return redirectToLogin();
         }
 
-        // 새 access 토큰 추출 후 store 갱신
+        // 새 access 토큰 추출
+        let newAccessToken: string | undefined;
         try {
           const json = await refreshResponse.clone().json();
-          const newAccessToken = json?.data?.access_token as
-            | string
-            | undefined;
-          if (newAccessToken) {
-            useAuthStore.getState().setAccessToken(newAccessToken);
-          }
+          newAccessToken = json?.data?.access_token;
         } catch {
-          // refresh 응답 파싱 실패 — 다음 호출에서 401 다시 발생 시 위 분기 탐
+          // 파싱 실패 → 아래 가드에서 redirect
         }
+        if (!newAccessToken) {
+          return redirectToLogin();
+        }
+
+        useAuthStore.getState().setAccessToken(newAccessToken);
 
         // 원 요청 retry — returnFetchAuth 가 새 토큰을 헤더에 박음
         return fetch(_url, _configs);

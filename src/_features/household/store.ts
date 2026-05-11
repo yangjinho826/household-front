@@ -8,7 +8,7 @@ interface HouseholdStoreState {
 }
 
 export const useHouseholdStore = create<HouseholdStoreState>((set) => ({
-  currentHouseholdId: "h-mock-1",
+  currentHouseholdId: "",
   setCurrentHouseholdId: (currentHouseholdId) => set({ currentHouseholdId }),
   detailRefreshKey: 0,
   bumpDetailRefreshKey: () =>

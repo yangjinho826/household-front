@@ -95,6 +95,7 @@ export function BottomTab() {
               key={id}
               component={Link}
               href={`/${params.locale}${href === "/" ? "" : href}`}
+              prefetch={false}
               style={{
                 flex: 1,
                 display: "flex",
