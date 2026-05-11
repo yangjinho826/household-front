@@ -90,15 +90,13 @@ export async function GetCategorySearchApi(params: CategorySearchRequestType) {
 }
 
 export async function GetCategoryDetailApi(categoryId: string) {
-  const listRes = await apiFetch<ApiResponse<BackendCategoryResponse[]>>(
-    `/api/category/list`,
+  const res = await apiFetch<ApiResponse<BackendCategoryResponse>>(
+    `/api/category/detail/${categoryId}`,
     { method: "GET" },
   );
-  const found = (listRes.body.data ?? []).find((c) => c.id === categoryId);
-  if (!found) return Promise.reject(new Error("category not found"));
   return {
-    ...listRes,
-    body: { ...listRes.body, data: mapToDetailItem(found) },
+    ...res,
+    body: { ...res.body, data: mapToDetailItem(res.body.data) },
   };
 }
 

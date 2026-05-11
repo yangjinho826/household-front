@@ -150,16 +150,13 @@ export async function GetTransactionSearchApi(
 }
 
 export async function GetTransactionDetailApi(transactionId: string) {
-  // 백엔드 detail endpoint 미구현 — list 받아서 find 우회
-  const res = await apiFetch<ApiResponse<BackendTransactionListResponse>>(
-    `/api/transaction/list?limit=100`,
+  const res = await apiFetch<ApiResponse<BackendTransactionResponse>>(
+    `/api/transaction/detail/${transactionId}`,
     { method: "GET" },
   );
-  const found = (res.body.data?.items ?? []).find((t) => t.id === transactionId);
-  if (!found) return Promise.reject(new Error("transaction not found"));
   return {
     ...res,
-    body: { ...res.body, data: mapToDetailItem(found) },
+    body: { ...res.body, data: mapToDetailItem(res.body.data) },
   };
 }
 

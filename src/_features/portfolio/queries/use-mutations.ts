@@ -18,14 +18,11 @@ import type {
 export function usePortfolioMutations() {
   const queryClient = useQueryClient();
 
-  // 포트폴리오 변경 시 — INVESTMENT 통장 잔액 + 자산 스냅샷 + 매수/매도 이력 모두 영향
+  // 포트폴리오 변경 시 — INVESTMENT 통장 잔액 + 자산 스냅샷 + 매수/매도 이력 + value-history 모두 영향
+  // valueHistoryByAccount/Item 도 queryKeys.portfolio._def 안에 있어서 한 번에 invalidate
   const invalidateAll = () => {
     queryClient.invalidateQueries({
       queryKey: queryKeys.portfolio._def,
-      refetchType: "all",
-    });
-    queryClient.invalidateQueries({
-      queryKey: queryKeys.portfolioHistory._def,
       refetchType: "all",
     });
     queryClient.invalidateQueries({

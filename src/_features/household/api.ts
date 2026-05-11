@@ -4,20 +4,18 @@ import type {
   ApiListResponse,
   ApiResponse,
 } from "_libraries/fetch/response";
-import { mockOkItem, mockOkList } from "_utilities/mock-response";
 
-import { householdMockStore } from "./mock";
 import type {
   HouseholdCreateRequest,
   HouseholdDetailItemType,
   HouseholdListItemType,
+  HouseholdMemberItemType,
   HouseholdRole,
   HouseholdSearchRequestType,
   HouseholdUpdateRequest,
   MemberCreateRequest,
+  MemberRole,
 } from "./types";
-
-const wrap = <T>(data: T) => ({ body: data });
 
 // 백엔드 응답 (snake_case) → 프론트 타입 (camelCase + 도메인 prefix) 매핑
 interface BackendHouseholdResponse {
@@ -98,16 +96,13 @@ export async function GetHouseholdSearchApi(
 }
 
 export async function GetHouseholdDetailApi(householdId: string) {
-  // 백엔드 detail endpoint 미구현 — list 받아서 find
-  const listRes = await apiFetch<ApiResponse<BackendHouseholdResponse[]>>(
-    `/api/household/list`,
+  const res = await apiFetch<ApiResponse<BackendHouseholdResponse>>(
+    `/api/household/detail/${householdId}`,
     { method: "GET" },
   );
-  const found = (listRes.body.data ?? []).find((h) => h.id === householdId);
-  if (!found) return Promise.reject(new Error("household not found"));
   return {
-    ...listRes,
-    body: { ...listRes.body, data: mapToDetailItem(found) },
+    ...res,
+    body: { ...res.body, data: mapToDetailItem(res.body.data) },
   };
 }
 
@@ -159,29 +154,81 @@ export function DeleteHouseholdDeleteApi(householdId: string) {
 }
 
 // =========================================================
-// Members — 백엔드 미구현. mock 강제 유지.
-// 백엔드에 endpoint 추가되면 mock 제거.
+// Members — 백엔드 연동
 // =========================================================
 
-export function GetHouseholdMembersApi(householdId: string) {
-  return Promise.resolve(
-    wrap(mockOkList(householdMockStore.members(householdId))),
-  );
+interface BackendHouseholdMemberResponse {
+  id: string;
+  household_id: string;
+  user_id: string;
+  user_name: string | null;
+  user_email: string | null;
+  role: MemberRole;
+  joined_at: string;
 }
 
-export function PostHouseholdMemberCreateApi(params: MemberCreateRequest) {
-  const item = householdMockStore.addMember({
-    householdId: params.householdId,
-    userId: params.userId,
-    role: params.role,
-  });
-  return Promise.resolve(wrap(mockOkItem(item)));
+function mapToMemberItem(
+  b: BackendHouseholdMemberResponse,
+): HouseholdMemberItemType {
+  return {
+    memberId: b.id,
+    householdId: b.household_id,
+    userId: b.user_id,
+    role: b.role,
+    joinedAt: b.joined_at,
+    userName: b.user_name,
+    userEmail: b.user_email,
+  };
+}
+
+export async function GetHouseholdMembersApi(householdId: string) {
+  const res = await apiFetch<ApiResponse<BackendHouseholdMemberResponse[]>>(
+    `/api/household/${householdId}/members`,
+    { method: "GET" },
+  );
+  const items = (res.body.data ?? []).map(mapToMemberItem);
+  const wrapped: ApiListResponse<HouseholdMemberItemType> = {
+    code: res.body.code,
+    message: res.body.message,
+    status: res.body.status,
+    data: {
+      listSize: items.length,
+      currentPage: 1,
+      currentCount: items.length,
+      totalElements: items.length,
+      totalPages: 1,
+      content: items,
+    },
+  };
+  return { ...res, body: wrapped };
+}
+
+export async function PostHouseholdMemberCreateApi(
+  params: MemberCreateRequest,
+) {
+  const res = await apiFetch<ApiResponse<BackendHouseholdMemberResponse>>(
+    `/api/household/${params.householdId}/members`,
+    {
+      method: "POST",
+      body: {
+        user_id: params.userId,
+        role: params.role,
+      },
+      errorHandleMethod: "reject",
+    },
+  );
+  return {
+    ...res,
+    body: { ...res.body, data: mapToMemberItem(res.body.data) },
+  };
 }
 
 export function DeleteHouseholdMemberDeleteApi(
-  _householdId: string,
+  householdId: string,
   memberId: string,
 ) {
-  householdMockStore.removeMember(memberId);
-  return Promise.resolve(wrap(mockOkItem(undefined as unknown as void)));
+  return apiFetch<ApiResponse<void>>(
+    `/api/household/${householdId}/members/${memberId}`,
+    { method: "DELETE", errorHandleMethod: "reject" },
+  );
 }

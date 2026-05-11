@@ -113,16 +113,13 @@ export async function GetAccountSearchApi(params: AccountSearchRequestType) {
 }
 
 export async function GetAccountDetailApi(accountId: string) {
-  // 백엔드에 단건 detail 엔드포인트 미구현 → list 받아서 find
-  const listRes = await apiFetch<ApiResponse<BackendAccountResponse[]>>(
-    `/api/account/list`,
+  const res = await apiFetch<ApiResponse<BackendAccountResponse>>(
+    `/api/account/detail/${accountId}`,
     { method: "GET" },
   );
-  const found = (listRes.body.data ?? []).find((a) => a.id === accountId);
-  if (!found) return Promise.reject(new Error("account not found"));
   return {
-    ...listRes,
-    body: { ...listRes.body, data: mapToDetailItem(found) },
+    ...res,
+    body: { ...res.body, data: mapToDetailItem(res.body.data) },
   };
 }
 

@@ -6,8 +6,14 @@ import {
   GetPortfolioDetailApi,
   GetPortfolioSearchApi,
   GetPortfolioTransactionsApi,
+  GetPortfolioValueHistoryByAccountApi,
+  GetPortfolioValueHistoryByItemApi,
 } from "../api";
-import type { PortfolioSearchRequestType } from "../types";
+import type {
+  PortfolioSearchRequestType,
+  PortfolioValueHistoryByAccountRequest,
+  PortfolioValueHistoryByItemRequest,
+} from "../types";
 
 export const portfolios = createQueryKeys("portfolio", {
   list: (params: PortfolioSearchRequestType & Partial<ApiPaginationProps>) => ({
@@ -21,5 +27,13 @@ export const portfolios = createQueryKeys("portfolio", {
   transactions: (params: { accountId?: string }) => ({
     queryKey: [params],
     queryFn: () => GetPortfolioTransactionsApi(params),
+  }),
+  valueHistoryByAccount: (params: PortfolioValueHistoryByAccountRequest) => ({
+    queryKey: [params],
+    queryFn: () => GetPortfolioValueHistoryByAccountApi(params),
+  }),
+  valueHistoryByItem: (params: PortfolioValueHistoryByItemRequest) => ({
+    queryKey: [params],
+    queryFn: () => GetPortfolioValueHistoryByItemApi(params),
   }),
 });

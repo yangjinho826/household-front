@@ -7,7 +7,7 @@ import { useEffect } from "react";
 import { z } from "zod";
 
 import { useHouseholdMutations } from "_features/household/queries/use-mutations";
-import { ApiResponseError } from "_libraries/fetch/api-response-error";
+import { getErrorMessage } from "_libraries/fetch/error-message";
 
 import { useHouseholdDetail as useHouseholdDetailQuery } from "../../queries/use-query";
 import type {
@@ -22,6 +22,7 @@ interface UseHouseholdFormOptions {
 export function useHouseholdForm({ householdId }: UseHouseholdFormOptions) {
   const t = useTranslations("household");
   const tg = useTranslations("general.common");
+  const te = useTranslations("error");
   const router = useRouter();
   const routeParams = useParams<{ locale: string }>();
 
@@ -74,7 +75,6 @@ export function useHouseholdForm({ householdId }: UseHouseholdFormOptions) {
         if (!householdId) throw new Error("No householdId for update");
         const updatePayload = {
           householdId,
-          ownerId: "u-mock-owner",
           ...form.values,
         } satisfies HouseholdBaseRequestType & { householdId: string };
         await updateMutation.mutateAsync(updatePayload);
@@ -93,13 +93,11 @@ export function useHouseholdForm({ householdId }: UseHouseholdFormOptions) {
       }
       router.replace(`/${routeParams.locale}/household`);
     } catch (error) {
-      if (error instanceof ApiResponseError) {
-        notifications.show({
-          title: tg("notificationstitle"),
-          message: error.errorMessage ?? error.message,
-          color: "red",
-        });
-      }
+      notifications.show({
+        title: tg("notificationstitle"),
+        message: getErrorMessage(error, te),
+        color: "red",
+      });
     }
   };
 

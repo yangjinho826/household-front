@@ -81,3 +81,34 @@ export interface PortfolioTransactionItemType {
   txDate: string;
   memo: string | null;
 }
+
+/** 월별 평가액 추이 1 point */
+export interface PortfolioValueHistoryPoint {
+  snapshotDate: string; // YYYY-MM-DD (월말)
+  quantity: number;
+  avgPrice: number;
+  currentPrice: number;
+  cost: number;
+  valuation: number;
+}
+
+/** 종목별 그루핑 — 차트 라인 1개 */
+export interface PortfolioValueHistoryByItem {
+  portfolioItemId: string;
+  accountId: string;
+  ticker: string;
+  symbol: string | null;
+  history: PortfolioValueHistoryPoint[];
+}
+
+export interface PortfolioValueHistoryByAccountRequest {
+  accountId: string;
+  from?: string;
+  to?: string;
+}
+
+export interface PortfolioValueHistoryByItemRequest {
+  portfolioItemId: string;
+  from?: string;
+  to?: string;
+}

@@ -8,15 +8,11 @@ export interface HouseholdSearchRequestType {
 export interface HouseholdBaseRequestType {
   name: string;
   description?: string | null;
-  ownerId: string;
   currency: string;
   startedAt: string;
 }
 
-export type HouseholdCreateRequest = Omit<
-  HouseholdBaseRequestType,
-  "ownerId"
->;
+export type HouseholdCreateRequest = HouseholdBaseRequestType;
 
 export interface HouseholdUpdateRequest extends HouseholdBaseRequestType {
   householdId: string;

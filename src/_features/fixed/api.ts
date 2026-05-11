@@ -103,15 +103,13 @@ export async function GetFixedSearchApi(params: FixedSearchRequestType) {
 }
 
 export async function GetFixedDetailApi(fixedId: string) {
-  const listRes = await apiFetch<ApiResponse<BackendFixedResponse[]>>(
-    `/api/fixed/list`,
+  const res = await apiFetch<ApiResponse<BackendFixedResponse>>(
+    `/api/fixed/detail/${fixedId}`,
     { method: "GET" },
   );
-  const found = (listRes.body.data ?? []).find((f) => f.id === fixedId);
-  if (!found) return Promise.reject(new Error("fixed not found"));
   return {
-    ...listRes,
-    body: { ...listRes.body, data: mapToDetailItem(found) },
+    ...res,
+    body: { ...res.body, data: mapToDetailItem(res.body.data) },
   };
 }
 
