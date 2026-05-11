@@ -4,21 +4,25 @@ import {
   Anchor,
   Card,
   Group,
+  Progress,
   SimpleGrid,
   Stack,
   Text,
-  Title,
   UnstyledButton,
 } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
 import {
   IconArrowDown,
   IconArrowUp,
+  IconChevronDown,
   IconChevronRight,
 } from "@tabler/icons-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 
+import { HouseholdSwitcher } from "_features/household/components/household-switcher";
+import { useHouseholdStore } from "_features/household/store";
 import { queryKeys } from "_constants/queries";
 import { fmt } from "_utilities/fmt";
 
@@ -37,6 +41,11 @@ const TX_COLOR: Record<string, string> = {
 export default function HomeSection() {
   const router = useRouter();
   const routeParams = useParams<{ locale: string }>();
+  const [switcherOpened, switcher] = useDisclosure(false);
+
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth() + 1;
 
   const { data: hData } = useSuspenseQuery(
     queryKeys.household.list({ pageNo: 1, listSize: 100 }),
@@ -47,24 +56,69 @@ export default function HomeSection() {
   const { data: tData } = useSuspenseQuery(
     queryKeys.transaction.list({ pageNo: 1, listSize: 100 }),
   );
+  const { data: statsData } = useSuspenseQuery(
+    queryKeys.stats.monthly({ year: currentYear, month: currentMonth }),
+  );
 
   const households = hData.body.data.content;
   const accounts = aData.body.data.content;
   const txns = tData.body.data.content;
+  const stats = statsData.body.data;
+
+  const currentId = useHouseholdStore((s) => s.currentHouseholdId);
+  const currentHousehold =
+    households.find((h) => h.householdId === currentId) ?? households[0];
 
   const totalAssets = accounts.reduce((sum, a) => sum + a.balance, 0);
-  const income = txns
-    .filter((t) => t.txType === "INCOME")
-    .reduce((sum, t) => sum + t.amount, 0);
-  const expense = txns
-    .filter((t) => t.txType === "EXPENSE")
-    .reduce((sum, t) => sum + t.amount, 0);
+  const income = stats.monthlyIncome;
+  const expense = stats.monthlyExpense;
   const save = income - expense;
   const savingRate = income > 0 ? (save / income) * 100 : 0;
 
+  // 상위 5개 지출 카테고리 + 합계
+  const topExpenseCategories = stats.byCategory
+    .filter((c) => !c.isIncome)
+    .sort((a, b) => b.amount - a.amount)
+    .slice(0, 5);
+  const totalCatExpense = topExpenseCategories.reduce(
+    (s, c) => s + c.amount,
+    0,
+  );
+
   return (
     <Stack gap="md">
-      <Title order={3}>{households[0]?.name ?? "가계부"}</Title>
+      {/* 가계부 스위처 트리거 */}
+      <UnstyledButton
+        onClick={switcher.open}
+        style={{ padding: "4px 8px", borderRadius: 12 }}
+      >
+        <Group gap={6} wrap="nowrap">
+          <Text size="lg" fw={800} truncate>
+            {currentHousehold?.name ?? "가계부"}
+          </Text>
+          <IconChevronDown size={16} color="#8B95A1" />
+          {households.length > 1 && (
+            <Text
+              size="10px"
+              fw={700}
+              c="dimmed"
+              px={6}
+              py={2}
+              style={{
+                background: "var(--mantine-color-gray-1)",
+                borderRadius: 999,
+              }}
+            >
+              {households.length}
+            </Text>
+          )}
+        </Group>
+      </UnstyledButton>
+
+      <HouseholdSwitcher
+        opened={switcherOpened}
+        onClose={switcher.close}
+      />
 
       {/* 총자산 hero */}
       <Card radius="xl" p="lg">
@@ -172,6 +226,87 @@ export default function HomeSection() {
           </Stack>
         </Group>
       </Card>
+
+      {/* 이번 달 카테고리별 지출 */}
+      {topExpenseCategories.length > 0 && (
+        <>
+          <Group justify="space-between" align="center" px={4}>
+            <Text size="sm" fw={700}>
+              이번 달 지출
+            </Text>
+            <Anchor
+              component={Link}
+              href={`/${routeParams.locale}/transactions`}
+              size="xs"
+              fw={600}
+              c="dimmed"
+            >
+              전체 →
+            </Anchor>
+          </Group>
+          <Card radius="lg">
+            <Stack gap="sm">
+              {topExpenseCategories.map((c) => {
+                const pct =
+                  totalCatExpense > 0 ? (c.amount / totalCatExpense) * 100 : 0;
+                const dotColor = c.color ?? "var(--mantine-color-gray-5)";
+                return (
+                  <Stack key={c.categoryId} gap={6}>
+                    <Group justify="space-between">
+                      <Group gap={8} wrap="nowrap">
+                        <div
+                          style={{
+                            width: 28,
+                            height: 28,
+                            borderRadius: 8,
+                            background: c.color ? `${c.color}20` : "var(--mantine-color-gray-1)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            flexShrink: 0,
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: 6,
+                              height: 6,
+                              borderRadius: 3,
+                              background: dotColor,
+                            }}
+                          />
+                        </div>
+                        <Text size="sm" fw={600}>
+                          {c.name}
+                        </Text>
+                      </Group>
+                      <Text
+                        size="sm"
+                        fw={700}
+                        style={{ fontVariantNumeric: "tabular-nums" }}
+                      >
+                        {fmt(c.amount)}원
+                      </Text>
+                    </Group>
+                    <Progress
+                      value={pct}
+                      size="xs"
+                      radius="xl"
+                      color={c.color ? undefined : "gray"}
+                      style={
+                        c.color
+                          ? {
+                              ["--progress-color" as string]: c.color,
+                            }
+                          : undefined
+                      }
+                    />
+                  </Stack>
+                );
+              })}
+            </Stack>
+          </Card>
+        </>
+      )}
 
       {/* 최근 거래 */}
       <Group justify="space-between" align="center" px={4}>

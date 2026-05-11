@@ -9,7 +9,7 @@ import {
   Text,
   Title,
 } from "@mantine/core";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQueries, useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import {
   Area,
@@ -18,7 +18,6 @@ import {
   XAxis,
 } from "recharts";
 
-import { portfolioHistoryMockStore } from "_features/portfolio-history/mock";
 import {
   formatProfitAmount,
   formatProfitRate,
@@ -35,8 +34,6 @@ export default function PortfolioSection() {
   const { data: portfolioData } = useSuspenseQuery(
     queryKeys.portfolio.list({ pageNo: 1, listSize: 200 }),
   );
-  // history fetch (mock 차트 데이터)
-  useSuspenseQuery(queryKeys.portfolioHistory.list({}));
 
   const accounts = accountData.body.data.content;
   const portfolios = portfolioData.body.data.content;
@@ -71,14 +68,30 @@ export default function PortfolioSection() {
     };
   }, [investmentAccounts]);
 
-  const trendData = useMemo(
-    () =>
-      portfolioHistoryMockStore.aggregateByMonth().map((m) => ({
-        month: m.month.slice(5) + "월",
-        value: m.value,
-      })),
-    [],
-  );
+  // 모든 투자 계좌의 종목별 월별 평가액 → 월별 합산
+  const historyResults = useSuspenseQueries({
+    queries: investmentAccounts.map((a) =>
+      queryKeys.portfolio.valueHistoryByAccount({ accountId: a.accountId }),
+    ),
+  });
+
+  const trendData = useMemo(() => {
+    const monthMap = new Map<string, number>(); // "YYYY-MM" → 평가액 합
+    for (const res of historyResults) {
+      for (const item of res.data?.body.data ?? []) {
+        for (const p of item.history) {
+          const key = p.snapshotDate.slice(0, 7); // YYYY-MM
+          monthMap.set(key, (monthMap.get(key) ?? 0) + p.valuation);
+        }
+      }
+    }
+    return Array.from(monthMap.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([month, value]) => ({
+        month: `${Number(month.slice(5))}월`,
+        value,
+      }));
+  }, [historyResults]);
 
   return (
     <Stack gap="md">

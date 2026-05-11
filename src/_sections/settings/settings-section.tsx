@@ -10,11 +10,14 @@ import {
   Title,
   UnstyledButton,
 } from "@mantine/core";
-import { IconChevronRight, IconLogout } from "@tabler/icons-react";
+import { useDisclosure } from "@mantine/hooks";
+import { IconChevronRight, IconLogout, IconUsers } from "@tabler/icons-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter, useParams } from "next/navigation";
 
 import { useAuthContext } from "_features/auth/context";
+import { HouseholdSwitcher } from "_features/household/components/household-switcher";
+import { useHouseholdStore } from "_features/household/store";
 import { queryKeys } from "_constants/queries";
 import { fmt } from "_utilities/fmt";
 
@@ -22,6 +25,8 @@ export default function SettingsSection() {
   const router = useRouter();
   const routeParams = useParams<{ locale: string }>();
   const { user, actions } = useAuthContext();
+  const [switcherOpened, switcher] = useDisclosure(false);
+  const currentId = useHouseholdStore((s) => s.currentHouseholdId);
 
   const { data: hData } = useSuspenseQuery(
     queryKeys.household.list({ pageNo: 1, listSize: 100 }),
@@ -49,7 +54,8 @@ export default function SettingsSection() {
   const txns = tData.body.data.content;
   const portfolio = pData.body.data.content;
   const totalFixed = fixedItems.reduce((sum, f) => sum + f.amount, 0);
-  const currentHousehold = households[0];
+  const currentHousehold =
+    households.find((h) => h.householdId === currentId) ?? households[0];
 
   const onLogout = () => {
     actions.logout();
@@ -104,10 +110,7 @@ export default function SettingsSection() {
         <Card radius="lg" p="xs">
           <Stack gap={0}>
             <UnstyledButton
-              onClick={() =>
-                currentHousehold &&
-                navTo(`/household/${currentHousehold.householdId}`)
-              }
+              onClick={switcher.open}
               style={{ padding: 12, borderRadius: 12 }}
             >
               <Group gap={12}>
@@ -132,17 +135,33 @@ export default function SettingsSection() {
                     {currentHousehold?.name ?? "—"}
                   </Text>
                   <Text size="xs" c="dimmed">
-                    멤버 {currentHousehold?.memberCount ?? 0}명 · 전체{" "}
-                    {households.length}개
+                    {currentHousehold?.role === "OWNER" ? "소유자" : "멤버"} ·
+                    전체 {households.length}개
                   </Text>
                 </Stack>
-                <IconChevronRight size={14} color="#8B95A1" />
+                <Text size="xs" fw={700} c="tossBlue.5">
+                  전환
+                </Text>
               </Group>
             </UnstyledButton>
             <SettingsRow label="가계부 관리" onClick={() => navTo("/household")} />
+            {currentHousehold && (
+              <SettingsRow
+                label="멤버 관리"
+                icon={IconUsers}
+                onClick={() =>
+                  navTo(`/household/${currentHousehold.householdId}/members`)
+                }
+              />
+            )}
           </Stack>
         </Card>
       </Stack>
+
+      <HouseholdSwitcher
+        opened={switcherOpened}
+        onClose={switcher.close}
+      />
 
       {/* 통계 */}
       <SimpleGrid cols={3} spacing="sm">
@@ -215,18 +234,23 @@ export default function SettingsSection() {
 function SettingsRow({
   label,
   value,
+  icon: Icon,
   onClick,
 }: {
   label: string;
   value?: string;
+  icon?: React.ComponentType<{ size?: string | number; color?: string }>;
   onClick?: () => void;
 }) {
   return (
     <UnstyledButton onClick={onClick} style={{ padding: 12, borderRadius: 12 }}>
       <Group justify="space-between">
-        <Text size="sm" fw={500}>
-          {label}
-        </Text>
+        <Group gap={8}>
+          {Icon && <Icon size={16} color="#4E5968" />}
+          <Text size="sm" fw={500}>
+            {label}
+          </Text>
+        </Group>
         <Group gap={4}>
           {value && (
             <Text size="xs" c="dimmed">
