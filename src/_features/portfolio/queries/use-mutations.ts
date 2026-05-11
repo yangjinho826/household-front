@@ -18,13 +18,22 @@ import type {
 export function usePortfolioMutations() {
   const queryClient = useQueryClient();
 
+  // 포트폴리오 변경 시 — INVESTMENT 통장 잔액 + 자산 스냅샷 + 매수/매도 이력 모두 영향
   const invalidateAll = () => {
     queryClient.invalidateQueries({
       queryKey: queryKeys.portfolio._def,
       refetchType: "all",
     });
     queryClient.invalidateQueries({
-      queryKey: queryKeys.account.list._def,
+      queryKey: queryKeys.portfolioHistory._def,
+      refetchType: "all",
+    });
+    queryClient.invalidateQueries({
+      queryKey: queryKeys.account._def,
+      refetchType: "all",
+    });
+    queryClient.invalidateQueries({
+      queryKey: queryKeys.accountSnapshot._def,
       refetchType: "all",
     });
   };

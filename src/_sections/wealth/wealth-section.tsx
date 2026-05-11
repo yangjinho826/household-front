@@ -23,7 +23,7 @@ import {
 } from "recharts";
 
 import { useAccountSnapshotMutations } from "_features/account-snapshot/queries/use-mutations";
-import type { AccountType } from "_features/account/types";
+import type { AccountListItemType, AccountType } from "_features/account/types";
 import { queryKeys } from "_constants/queries";
 import { ApiResponseError } from "_libraries/fetch/api-response-error";
 import { fmt } from "_utilities/fmt";
@@ -47,33 +47,15 @@ export default function WealthSection() {
   const { data: accountData } = useSuspenseQuery(
     queryKeys.account.list({ pageNo: 1, listSize: 100 }),
   );
-  const { data: portfolioData } = useSuspenseQuery(
-    queryKeys.portfolio.list({ pageNo: 1, listSize: 200 }),
-  );
   const { data: snapshotData } = useSuspenseQuery(
     queryKeys.accountSnapshot.yearly({}),
   );
 
   const { createMutation } = useAccountSnapshotMutations();
 
-  const rawAccounts = accountData.body.data.content;
-  const portfolios = portfolioData.body.data.content;
+  // 백엔드 account.balance 는 INVESTMENT 도 cash + 평가금 합산해서 내려옴
+  const accounts: AccountListItemType[] = accountData.body.data.content;
   const yearly = snapshotData.body.data;
-
-  // 투자 계좌의 balance 는 portfolio currentValue 합으로 derive (mock 단계)
-  const accounts = useMemo(() => {
-    return rawAccounts.map((a) => {
-      if (a.accountType !== "INVESTMENT") return a;
-      const owned = portfolios.filter((p) => p.accountId === a.accountId);
-      const investValue = owned.reduce((s, p) => s + p.currentValue, 0);
-      return { ...a, balance: investValue };
-    });
-  }, [rawAccounts, portfolios]);
-
-  const generalAccounts = useMemo(
-    () => accounts.filter((a) => a.accountType !== "INVESTMENT"),
-    [accounts],
-  );
 
   const total = accounts.reduce((sum, a) => sum + a.balance, 0);
 
@@ -191,32 +173,33 @@ export default function WealthSection() {
               원
             </Text>
           </Text>
-          <div style={{ height: 96, marginTop: 12 }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={trendData}>
-                <defs>
-                  <linearGradient id="wealthTrend" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#3182F6" stopOpacity={0.3} />
-                    <stop offset="100%" stopColor="#3182F6" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <Area
-                  type="monotone"
-                  dataKey="value"
-                  stroke="#3182F6"
-                  strokeWidth={2.5}
-                  fill="url(#wealthTrend)"
-                />
-                <XAxis
-                  dataKey="month"
-                  tick={{ fontSize: 9, fill: "#8B95A1" }}
-                  axisLine={false}
-                  tickLine={false}
-                  interval={1}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
+          <ResponsiveContainer width="100%" height={96} minWidth={0}>
+            <AreaChart
+              data={trendData}
+              margin={{ top: 12, right: 0, bottom: 0, left: 0 }}
+            >
+              <defs>
+                <linearGradient id="wealthTrend" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#3182F6" stopOpacity={0.3} />
+                  <stop offset="100%" stopColor="#3182F6" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <Area
+                type="monotone"
+                dataKey="value"
+                stroke="#3182F6"
+                strokeWidth={2.5}
+                fill="url(#wealthTrend)"
+              />
+              <XAxis
+                dataKey="month"
+                tick={{ fontSize: 9, fill: "#8B95A1" }}
+                axisLine={false}
+                tickLine={false}
+                interval={1}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
         </Stack>
       </Card>
 
@@ -267,7 +250,7 @@ export default function WealthSection() {
 
       <Group justify="space-between" align="center" px={4}>
         <Text size="sm" fw={700}>
-          통장 ({generalAccounts.length})
+          통장 ({accounts.length})
         </Text>
         <UnstyledButton
           onClick={() => router.push(`/${routeParams.locale}/account/new`)}
@@ -280,12 +263,17 @@ export default function WealthSection() {
 
       <Card radius="lg" p="xs">
         <Stack gap={0}>
-          {generalAccounts.map((a) => (
+          {accounts.map((a) => (
             <UnstyledButton
               key={a.accountId}
-              onClick={() =>
-                router.push(`/${routeParams.locale}/account/${a.accountId}`)
-              }
+              onClick={() => {
+                // INVESTMENT 는 포트폴리오 디테일로, 그 외는 일반 통장 디테일로
+                const path =
+                  a.accountType === "INVESTMENT"
+                    ? `/wealth/account/${a.accountId}`
+                    : `/account/${a.accountId}`;
+                router.push(`/${routeParams.locale}${path}`);
+              }}
               style={{ padding: 12, borderRadius: 12 }}
             >
               <Group gap={12}>

@@ -12,38 +12,43 @@ import type { AccountCreateRequest, AccountUpdateRequest } from "../types";
 export function useAccountMutations() {
   const queryClient = useQueryClient();
 
+  // 통장 변경 시 — 다른 도메인 응답에 JOIN 된 account_name/balance 도 stale
+  const invalidateRelated = () => {
+    queryClient.invalidateQueries({
+      queryKey: queryKeys.account._def,
+      refetchType: "all",
+    });
+    queryClient.invalidateQueries({
+      queryKey: queryKeys.transaction._def,
+      refetchType: "all",
+    });
+    queryClient.invalidateQueries({
+      queryKey: queryKeys.portfolio._def,
+      refetchType: "all",
+    });
+    queryClient.invalidateQueries({
+      queryKey: queryKeys.fixed._def,
+      refetchType: "all",
+    });
+    queryClient.invalidateQueries({
+      queryKey: queryKeys.accountSnapshot._def,
+      refetchType: "all",
+    });
+  };
+
   const createMutation = useMutation({
     mutationFn: (props: AccountCreateRequest) => PostAccountCreateApi(props),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.account.list._def,
-        refetchType: "all",
-      });
-    },
+    onSuccess: invalidateRelated,
   });
 
   const updateMutation = useMutation({
     mutationFn: (props: AccountUpdateRequest) => PutAccountUpdateApi(props),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.account.list._def,
-        refetchType: "all",
-      });
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.account.detail._def,
-        refetchType: "all",
-      });
-    },
+    onSuccess: invalidateRelated,
   });
 
   const removeMutation = useMutation({
     mutationFn: (accountId: string) => DeleteAccountDeleteApi(accountId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.account.list._def,
-        refetchType: "all",
-      });
-    },
+    onSuccess: invalidateRelated,
   });
 
   return { createMutation, updateMutation, removeMutation };

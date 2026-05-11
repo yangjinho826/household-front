@@ -17,7 +17,6 @@ import { useMemo } from "react";
 import {
   formatProfitAmount,
   formatProfitRate,
-  portfolioCalc,
   profitColor,
 } from "_features/portfolio/utils";
 import { queryKeys } from "_constants/queries";
@@ -49,8 +48,6 @@ export default function AccountPortfolioSection({ accountId }: Props) {
     [portfolioData, accountId],
   );
 
-  const stat = portfolioCalc(portfolios);
-
   if (!account) {
     return (
       <Stack gap="md">
@@ -58,6 +55,12 @@ export default function AccountPortfolioSection({ accountId }: Props) {
       </Stack>
     );
   }
+
+  // 백엔드가 통장 balance = cash + portfolio_valuation 으로 합산해서 내려줌
+  const profitLoss = account.portfolioProfitLoss ?? 0;
+  const profitLossRate = account.portfolioProfitLossRate ?? 0;
+  const cash = account.cash;
+  const valuation = account.portfolioValuation;
 
   return (
     <Stack gap="md">
@@ -72,18 +75,18 @@ export default function AccountPortfolioSection({ accountId }: Props) {
         <Title order={3}>{account.name}</Title>
       </Group>
 
-      {/* hero */}
+      {/* hero — 통장 전체 자산 + 손익 + 현금/평가/종목 메타 */}
       <Card radius="xl" p="lg">
         <Stack gap={4}>
           <Text size="xs" fw={500} c="dimmed">
-            평가금액
+            통장 전체 자산
           </Text>
           <Text
             size="2rem"
             fw={800}
             style={{ fontVariantNumeric: "tabular-nums" }}
           >
-            {fmt(stat.totalValue)}
+            {fmt(account.balance)}
             <Text span size="lg" c="dimmed" ml={4} fw={600}>
               원
             </Text>
@@ -92,36 +95,50 @@ export default function AccountPortfolioSection({ accountId }: Props) {
             <Text
               size="sm"
               fw={700}
-              c={profitColor(stat.profit)}
+              c={profitColor(profitLoss)}
               style={{ fontVariantNumeric: "tabular-nums" }}
             >
-              {formatProfitAmount(stat.profit, fmt)}원
+              {formatProfitAmount(profitLoss, fmt)}원
             </Text>
             <Text
               size="sm"
               fw={700}
-              c={profitColor(stat.profit)}
+              c={profitColor(profitLoss)}
               style={{ fontVariantNumeric: "tabular-nums" }}
             >
-              ({formatProfitRate(stat.profitRate)})
+              ({formatProfitRate(profitLossRate)})
             </Text>
           </Group>
-          <Group gap={16} mt={6}>
+          <Group gap={12} mt={6}>
             <Group gap={4}>
               <Text size="11px" c="dimmed" fw={600}>
-                매입금액
+                현금
               </Text>
               <Text
                 size="11px"
                 fw={700}
                 style={{ fontVariantNumeric: "tabular-nums" }}
               >
-                {fmt(stat.totalCost)}원
+                {fmt(cash ?? 0)}원
               </Text>
             </Group>
+            <Text size="11px" c="dimmed">·</Text>
             <Group gap={4}>
               <Text size="11px" c="dimmed" fw={600}>
-                보유종목
+                평가
+              </Text>
+              <Text
+                size="11px"
+                fw={700}
+                style={{ fontVariantNumeric: "tabular-nums" }}
+              >
+                {fmt(valuation ?? 0)}원
+              </Text>
+            </Group>
+            <Text size="11px" c="dimmed">·</Text>
+            <Group gap={4}>
+              <Text size="11px" c="dimmed" fw={600}>
+                종목
               </Text>
               <Text
                 size="11px"
