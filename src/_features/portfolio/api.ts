@@ -4,9 +4,7 @@ import type {
   ApiListResponse,
   ApiResponse,
 } from "_libraries/fetch/response";
-import { mockOkItem, mockOkList } from "_utilities/mock-response";
 
-import { portfolioMockStore } from "./mock";
 import type {
   PortfolioBuyRequest,
   PortfolioCreateRequest,
@@ -17,10 +15,6 @@ import type {
   PortfolioTxType,
   PortfolioUpdateRequest,
 } from "./types";
-
-const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK_PORTFOLIO === "true";
-
-const wrap = <T>(data: T) => ({ body: data });
 
 const num = (v: number | string) => (typeof v === "number" ? v : Number(v));
 
@@ -94,23 +88,6 @@ function mapToTx(b: BackendPortfolioTxResponse, rowNo: number): PortfolioTransac
 }
 
 export async function GetPortfolioSearchApi(params: PortfolioSearchRequestType) {
-  if (USE_MOCK) {
-    const items = portfolioMockStore.list({ accountId: params.accountId });
-    const filtered = items.filter((i) => {
-      if (
-        params.searchTerm &&
-        !`${i.ticker} ${i.symbol ?? ""}`
-          .toLowerCase()
-          .includes(params.searchTerm.toLowerCase())
-      )
-        return false;
-      if (params.isArchived !== undefined && i.isArchived !== params.isArchived)
-        return false;
-      return true;
-    });
-    return wrap(mockOkList(filtered));
-  }
-
   const queryParams: Record<string, unknown> = {};
   if (params.accountId) queryParams.accountId = params.accountId;
 
@@ -137,11 +114,6 @@ export async function GetPortfolioSearchApi(params: PortfolioSearchRequestType) 
 }
 
 export async function GetPortfolioDetailApi(portfolioId: string) {
-  if (USE_MOCK) {
-    const item = portfolioMockStore.detail(portfolioId);
-    if (!item) return Promise.reject(new Error("portfolio not found"));
-    return wrap(mockOkItem(item));
-  }
   // 백엔드 detail endpoint 미구현 → list 받아서 find 우회
   const listRes = await apiFetch<ApiResponse<BackendPortfolioResponse[]>>(
     `/api/portfolio/list`,
@@ -149,15 +121,14 @@ export async function GetPortfolioDetailApi(portfolioId: string) {
   );
   const found = (listRes.body.data ?? []).find((p) => p.id === portfolioId);
   if (!found) return Promise.reject(new Error("portfolio not found"));
-  return wrap(mockOkItem(mapToItem(found, 1)));
+  return {
+    ...listRes,
+    body: { ...listRes.body, data: mapToItem(found, 1) },
+  };
 }
 
 /** 종목 등록 — 메타만 (qty=0 시작) */
 export async function PostPortfolioCreateApi(params: PortfolioCreateRequest) {
-  if (USE_MOCK) {
-    const item = portfolioMockStore.create(params);
-    return wrap(mockOkItem(item));
-  }
   const res = await apiFetch<ApiResponse<BackendPortfolioResponse>>(
     `/api/portfolio/create`,
     {
@@ -176,10 +147,6 @@ export async function PostPortfolioCreateApi(params: PortfolioCreateRequest) {
 
 /** 매수 액션 — 기존 종목에 qty 누적 + avg_price 재계산 + 이력 기록 */
 export async function PostPortfolioBuyApi(params: PortfolioBuyRequest) {
-  if (USE_MOCK) {
-    const item = portfolioMockStore.buy(params);
-    return wrap(mockOkItem(item));
-  }
   const res = await apiFetch<ApiResponse<BackendPortfolioResponse>>(
     `/api/portfolio/buy/${params.portfolioId}`,
     {
@@ -198,10 +165,6 @@ export async function PostPortfolioBuyApi(params: PortfolioBuyRequest) {
 
 /** 매도 (부분/전량) */
 export async function PostPortfolioSellApi(params: PortfolioSellRequest) {
-  if (USE_MOCK) {
-    const item = portfolioMockStore.sell(params);
-    return wrap(mockOkItem(item));
-  }
   const res = await apiFetch<ApiResponse<BackendPortfolioResponse | null>>(
     `/api/portfolio/sell/${params.portfolioId}`,
     {
@@ -221,10 +184,6 @@ export async function PostPortfolioSellApi(params: PortfolioSellRequest) {
 
 /** 평가액/메타 수정 (transaction 무관) */
 export async function PutPortfolioUpdateApi(params: PortfolioUpdateRequest) {
-  if (USE_MOCK) {
-    const item = portfolioMockStore.update(params);
-    return wrap(mockOkItem(item));
-  }
   const res = await apiFetch<ApiResponse<BackendPortfolioResponse>>(
     `/api/portfolio/update/${params.portfolioId}`,
     {
@@ -243,10 +202,6 @@ export async function PutPortfolioUpdateApi(params: PortfolioUpdateRequest) {
 
 /** 매수/매도 거래 이력 */
 export async function GetPortfolioTransactionsApi(params: { accountId?: string }) {
-  if (USE_MOCK) {
-    const items = portfolioMockStore.transactions({ accountId: params.accountId });
-    return wrap(mockOkList(items));
-  }
   const queryParams: Record<string, unknown> = {};
   if (params.accountId) queryParams.accountId = params.accountId;
   const queryString = objectToParams(queryParams).toString();

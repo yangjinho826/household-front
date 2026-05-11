@@ -17,9 +17,6 @@ import type {
   MemberCreateRequest,
 } from "./types";
 
-// household 도메인 백엔드 토글 — 기본 false (백엔드). mock 보려면 NEXT_PUBLIC_USE_MOCK_HOUSEHOLD=true.
-const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK_HOUSEHOLD === "true";
-
 const wrap = <T>(data: T) => ({ body: data });
 
 // 백엔드 응답 (snake_case) → 프론트 타입 (camelCase + 도메인 prefix) 매핑
@@ -70,25 +67,12 @@ function mapToDetailItem(
 }
 
 // =========================================================
-// Household CRUD
+// Household CRUD — 백엔드 연동
 // =========================================================
 
 export async function GetHouseholdSearchApi(
   params: HouseholdSearchRequestType,
 ) {
-  if (USE_MOCK) {
-    const items = householdMockStore.list();
-    const filtered = items.filter((i) => {
-      if (
-        params.searchTerm &&
-        !i.name.toLowerCase().includes(params.searchTerm.toLowerCase())
-      )
-        return false;
-      return true;
-    });
-    return wrap(mockOkList(filtered));
-  }
-  // 백엔드: GET /api/household/list → ApiResponse<list[HouseholdResponse]>
   const queryString = objectToParams({ ...params }).toString();
   const res = await apiFetch<ApiResponse<BackendHouseholdResponse[]>>(
     `/api/household/list${queryString ? `?${queryString}` : ""}`,
@@ -97,7 +81,6 @@ export async function GetHouseholdSearchApi(
   const items = (res.body.data ?? []).map((b, idx) =>
     mapToListItem(b, idx + 1),
   );
-  // 단순 list → ApiListResponse 페이징 wrap (sections 호환)
   const wrapped: ApiListResponse<HouseholdListItemType> = {
     code: res.body.code,
     message: res.body.message,
@@ -115,11 +98,6 @@ export async function GetHouseholdSearchApi(
 }
 
 export async function GetHouseholdDetailApi(householdId: string) {
-  if (USE_MOCK) {
-    const item = householdMockStore.detail(householdId);
-    if (!item) return Promise.reject(new Error("household not found"));
-    return wrap(mockOkItem(item));
-  }
   // 백엔드 detail endpoint 미구현 — list 받아서 find
   const listRes = await apiFetch<ApiResponse<BackendHouseholdResponse[]>>(
     `/api/household/list`,
@@ -127,21 +105,13 @@ export async function GetHouseholdDetailApi(householdId: string) {
   );
   const found = (listRes.body.data ?? []).find((h) => h.id === householdId);
   if (!found) return Promise.reject(new Error("household not found"));
-  return wrap(mockOkItem(mapToDetailItem(found)));
+  return {
+    ...listRes,
+    body: { ...listRes.body, data: mapToDetailItem(found) },
+  };
 }
 
 export async function PostHouseholdCreateApi(params: HouseholdCreateRequest) {
-  if (USE_MOCK) {
-    const item = householdMockStore.create({
-      name: params.name,
-      description: params.description ?? null,
-      ownerId: "u-mock-owner",
-      currency: params.currency,
-      startedAt: params.startedAt,
-    });
-    return wrap(mockOkItem(item));
-  }
-  // 백엔드: POST /api/household/create — body snake_case 변환
   const res = await apiFetch<ApiResponse<BackendHouseholdResponse>>(
     `/api/household/create`,
     {
@@ -162,15 +132,6 @@ export async function PostHouseholdCreateApi(params: HouseholdCreateRequest) {
 }
 
 export async function PutHouseholdUpdateApi(params: HouseholdUpdateRequest) {
-  if (USE_MOCK) {
-    const { householdId, ...rest } = params;
-    householdMockStore.update(householdId, {
-      ...rest,
-      description: rest.description ?? null,
-    });
-    return wrap(mockOkItem(undefined as unknown as void));
-  }
-  // 백엔드: PUT /api/household/update/{id}
   const res = await apiFetch<ApiResponse<BackendHouseholdResponse>>(
     `/api/household/update/${params.householdId}`,
     {
@@ -191,10 +152,6 @@ export async function PutHouseholdUpdateApi(params: HouseholdUpdateRequest) {
 }
 
 export function DeleteHouseholdDeleteApi(householdId: string) {
-  if (USE_MOCK) {
-    householdMockStore.remove(householdId);
-    return Promise.resolve(wrap(mockOkItem(undefined as unknown as void)));
-  }
   return apiFetch<ApiResponse<void>>(
     `/api/household/delete/${householdId}`,
     { method: "DELETE", errorHandleMethod: "reject" },
@@ -202,8 +159,8 @@ export function DeleteHouseholdDeleteApi(householdId: string) {
 }
 
 // =========================================================
-// Members — 백엔드 미구현. mock 강제 (NEXT_PUBLIC_USE_MOCK_HOUSEHOLD 무시).
-// 백엔드에 endpoint 추가되면 USE_MOCK 분기 도입.
+// Members — 백엔드 미구현. mock 강제 유지.
+// 백엔드에 endpoint 추가되면 mock 제거.
 // =========================================================
 
 export function GetHouseholdMembersApi(householdId: string) {

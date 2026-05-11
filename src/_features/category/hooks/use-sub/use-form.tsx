@@ -15,8 +15,6 @@ import type {
   CategoryKind,
 } from "../../types";
 
-const HOUSEHOLD_ID = "h-mock-1";
-
 interface UseCategoryFormOptions {
   categoryId?: string;
 }
@@ -35,7 +33,6 @@ export function useCategoryForm({ categoryId }: UseCategoryFormOptions) {
 
   const form = useForm<CategoryBaseRequestType>({
     initialValues: {
-      householdId: HOUSEHOLD_ID,
       kind: "expense" as CategoryKind,
       name: "",
       color: null,
@@ -59,7 +56,6 @@ export function useCategoryForm({ categoryId }: UseCategoryFormOptions) {
       if (cancelled || !res) return;
       const d = res.body.data;
       form.setValues({
-        householdId: d.householdId,
         kind: d.kind,
         name: d.name,
         color: d.color,

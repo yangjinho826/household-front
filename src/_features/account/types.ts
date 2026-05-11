@@ -8,7 +8,6 @@ export interface AccountSearchRequestType {
 }
 
 export interface AccountBaseRequestType {
-  householdId: string;
   name: string;
   accountType: AccountType;
   startBalance: number;
@@ -36,6 +35,12 @@ export interface AccountListItemType {
   icon: string | null;
   sortOrder: number;
   isArchived: boolean;
+  // INVESTMENT 통장 한정 — 그 외 타입은 null
+  cash: number | null;
+  portfolioCost: number | null;
+  portfolioValuation: number | null;
+  portfolioProfitLoss: number | null;
+  portfolioProfitLossRate: number | null;
   frstRegDt: string;
   lastMdfcnDt: string;
   dataStatCd: string;
@@ -52,6 +57,12 @@ export interface AccountDetailItemType {
   icon: string | null;
   sortOrder: number;
   isArchived: boolean;
+  // INVESTMENT 통장 한정
+  cash: number | null;
+  portfolioCost: number | null;
+  portfolioValuation: number | null;
+  portfolioProfitLoss: number | null;
+  portfolioProfitLossRate: number | null;
   frstRegDt: string;
   lastMdfcnDt: string;
   dataStatCd: string;

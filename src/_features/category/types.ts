@@ -7,7 +7,6 @@ export interface CategorySearchRequestType {
 }
 
 export interface CategoryBaseRequestType {
-  householdId: string;
   kind: CategoryKind;
   name: string;
   color?: string | null;

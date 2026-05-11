@@ -15,8 +15,6 @@ import type {
   AccountType,
 } from "../../types";
 
-const HOUSEHOLD_ID = "h-mock-1"; // 백엔드 붙으면 useAuthContext().user.id 또는 currentHousehold
-
 interface UseAccountFormOptions {
   accountId?: string; // 있으면 update, 없으면 create
 }
@@ -35,7 +33,6 @@ export function useAccountForm({ accountId }: UseAccountFormOptions) {
 
   const form = useForm<AccountBaseRequestType>({
     initialValues: {
-      householdId: HOUSEHOLD_ID,
       name: "",
       accountType: "LIVING" as AccountType,
       startBalance: 0,
@@ -62,7 +59,6 @@ export function useAccountForm({ accountId }: UseAccountFormOptions) {
       if (cancelled || !res) return;
       const d = res.body.data;
       form.setValues({
-        householdId: d.householdId,
         name: d.name,
         accountType: d.accountType,
         startBalance: d.startBalance,

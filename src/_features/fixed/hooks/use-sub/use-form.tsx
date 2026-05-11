@@ -12,8 +12,6 @@ import { ApiResponseError } from "_libraries/fetch/api-response-error";
 import { useFixedDetail as useFixedDetailQuery } from "../../queries/use-query";
 import type { FixedBaseRequestType } from "../../types";
 
-const HOUSEHOLD_ID = "h-mock-1";
-
 interface UseFixedFormOptions {
   fixedId?: string;
 }
@@ -31,7 +29,6 @@ export function useFixedForm({ fixedId }: UseFixedFormOptions) {
 
   const form = useForm<FixedBaseRequestType>({
     initialValues: {
-      householdId: HOUSEHOLD_ID,
       name: "",
       amount: 0,
       dayOfMonth: 1,
@@ -58,7 +55,6 @@ export function useFixedForm({ fixedId }: UseFixedFormOptions) {
       if (cancelled || !res) return;
       const d = res.body.data;
       form.setValues({
-        householdId: d.householdId,
         name: d.name,
         amount: d.amount,
         dayOfMonth: d.dayOfMonth,

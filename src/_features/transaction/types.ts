@@ -12,7 +12,6 @@ export interface TransactionSearchRequestType {
 }
 
 export interface TransactionBaseRequestType {
-  householdId: string;
   txType: TxType;
   amount: number;
   txDate: string;

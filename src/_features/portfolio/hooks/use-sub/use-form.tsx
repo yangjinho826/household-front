@@ -6,7 +6,6 @@ import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { z } from "zod";
 
-import { MOCK_INVESTMENT_ACCOUNT_ID } from "_features/account/mock";
 import { usePortfolioMutations } from "_features/portfolio/queries/use-mutations";
 import { ApiResponseError } from "_libraries/fetch/api-response-error";
 
@@ -37,14 +36,16 @@ export function usePortfolioForm({ portfolioId }: UsePortfolioFormOptions) {
 
   const form = useForm<FormValues>({
     initialValues: {
-      accountId: MOCK_INVESTMENT_ACCOUNT_ID,
+      accountId: "",
       ticker: "",
       symbol: null,
       currentPrice: 0,
       isArchived: false,
     },
+    validateInputOnBlur: true,
     validate: zodResolver(
       z.object({
+        accountId: z.string().min(1, t("account_required_message")),
         ticker: z.string().min(1, t("ticker_required_message")),
         currentPrice: z.number(),
       }),

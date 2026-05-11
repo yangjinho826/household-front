@@ -4,9 +4,7 @@ import type {
   ApiListResponse,
   ApiResponse,
 } from "_libraries/fetch/response";
-import { mockOkItem, mockOkList } from "_utilities/mock-response";
 
-import { fixedMockStore } from "./mock";
 import type {
   FixedCreateRequest,
   FixedDetailItemType,
@@ -14,10 +12,6 @@ import type {
   FixedSearchRequestType,
   FixedUpdateRequest,
 } from "./types";
-
-const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK_FIXED === "true";
-
-const wrap = <T>(data: T) => ({ body: data });
 
 const num = (v: number | string) => (typeof v === "number" ? v : Number(v));
 
@@ -84,20 +78,6 @@ function mapToDetailItem(b: BackendFixedResponse): FixedDetailItemType {
 }
 
 export async function GetFixedSearchApi(params: FixedSearchRequestType) {
-  if (USE_MOCK) {
-    const items = fixedMockStore.list();
-    const filtered = items.filter((i) => {
-      if (
-        params.searchTerm &&
-        !i.name.toLowerCase().includes(params.searchTerm.toLowerCase())
-      )
-        return false;
-      if (params.isArchived !== undefined && i.isArchived !== params.isArchived)
-        return false;
-      return true;
-    });
-    return wrap(mockOkList(filtered));
-  }
   const queryString = objectToParams({ ...params }).toString();
   const res = await apiFetch<ApiResponse<BackendFixedResponse[]>>(
     `/api/fixed/list${queryString ? `?${queryString}` : ""}`,
@@ -123,35 +103,19 @@ export async function GetFixedSearchApi(params: FixedSearchRequestType) {
 }
 
 export async function GetFixedDetailApi(fixedId: string) {
-  if (USE_MOCK) {
-    const item = fixedMockStore.detail(fixedId);
-    if (!item) return Promise.reject(new Error("fixed not found"));
-    return wrap(mockOkItem(item));
-  }
   const listRes = await apiFetch<ApiResponse<BackendFixedResponse[]>>(
     `/api/fixed/list`,
     { method: "GET" },
   );
   const found = (listRes.body.data ?? []).find((f) => f.id === fixedId);
   if (!found) return Promise.reject(new Error("fixed not found"));
-  return wrap(mockOkItem(mapToDetailItem(found)));
+  return {
+    ...listRes,
+    body: { ...listRes.body, data: mapToDetailItem(found) },
+  };
 }
 
 export async function PostFixedCreateApi(params: FixedCreateRequest) {
-  if (USE_MOCK) {
-    const item = fixedMockStore.create({
-      householdId: params.householdId,
-      name: params.name,
-      amount: params.amount,
-      dayOfMonth: params.dayOfMonth,
-      categoryId: params.categoryId ?? null,
-      color: params.color ?? null,
-      icon: params.icon ?? null,
-      sortOrder: params.sortOrder,
-      isArchived: params.isArchived,
-    });
-    return wrap(mockOkItem(item));
-  }
   const res = await apiFetch<ApiResponse<BackendFixedResponse>>(
     `/api/fixed/create`,
     {
@@ -175,16 +139,6 @@ export async function PostFixedCreateApi(params: FixedCreateRequest) {
 }
 
 export async function PutFixedUpdateApi(params: FixedUpdateRequest) {
-  if (USE_MOCK) {
-    const { fixedId, ...rest } = params;
-    fixedMockStore.update(fixedId, {
-      ...rest,
-      categoryId: rest.categoryId ?? null,
-      color: rest.color ?? null,
-      icon: rest.icon ?? null,
-    });
-    return wrap(mockOkItem(undefined as unknown as void));
-  }
   const res = await apiFetch<ApiResponse<BackendFixedResponse>>(
     `/api/fixed/update/${params.fixedId}`,
     {
@@ -209,10 +163,6 @@ export async function PutFixedUpdateApi(params: FixedUpdateRequest) {
 }
 
 export function DeleteFixedDeleteApi(fixedId: string) {
-  if (USE_MOCK) {
-    fixedMockStore.remove(fixedId);
-    return Promise.resolve(wrap(mockOkItem(undefined as unknown as void)));
-  }
   return apiFetch<ApiResponse<void>>(
     `/api/fixed/delete/${fixedId}`,
     { method: "DELETE", errorHandleMethod: "reject" },

@@ -16,9 +16,6 @@ import type {
   TxType,
 } from "../../types";
 
-const HOUSEHOLD_ID = "h-mock-1";
-const ACCOUNT_ID = "a-mock-main";
-
 interface UseTransactionFormOptions {
   transactionId?: string;
 }
@@ -41,11 +38,10 @@ export function useTransactionForm({
 
   const form = useForm<TransactionBaseRequestType>({
     initialValues: {
-      householdId: HOUSEHOLD_ID,
       txType: "EXPENSE" as TxType,
       amount: 0,
       txDate: todayDate,
-      accountId: ACCOUNT_ID,
+      accountId: "",
       toAccountId: null,
       categoryId: null,
       paidByUserId: null,
@@ -69,7 +65,6 @@ export function useTransactionForm({
       if (cancelled || !res) return;
       const d = res.body.data;
       form.setValues({
-        householdId: d.householdId,
         txType: d.txType,
         amount: d.amount,
         txDate: d.txDate,

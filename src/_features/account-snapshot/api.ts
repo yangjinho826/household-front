@@ -1,18 +1,12 @@
 import { apiFetch } from "_libraries/fetch/api-fetch";
 import { objectToParams } from "_libraries/fetch/object-to-params";
 import type { ApiResponse } from "_libraries/fetch/response";
-import { mockOkItem } from "_utilities/mock-response";
 
-import { accountSnapshotMockStore } from "./mock";
 import type {
   AccountSnapshotMonthItem,
   AccountSnapshotYearly,
   AccountSnapshotYearlyRequest,
 } from "./types";
-
-const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK_ACCOUNT_SNAPSHOT === "true";
-
-const wrap = <T>(data: T) => ({ body: data });
 
 const num = (v: number | string) => (typeof v === "number" ? v : Number(v));
 
@@ -61,10 +55,6 @@ function mapYearly(b: BackendSnapshotYearly): AccountSnapshotYearly {
 export async function GetAccountSnapshotYearlyApi(
   params: AccountSnapshotYearlyRequest = {},
 ) {
-  if (USE_MOCK) {
-    return wrap(mockOkItem(accountSnapshotMockStore.yearly(params)));
-  }
-
   const queryParams: Record<string, unknown> = {};
   if (params.from) queryParams.from = params.from;
   if (params.to) queryParams.to = params.to;
@@ -85,9 +75,6 @@ export async function GetAccountSnapshotYearlyApi(
  * 같은 달 이미 있으면 백엔드 SNAPSHOT_ALREADY_EXISTS 에러.
  */
 export async function PostAccountSnapshotCreateApi() {
-  if (USE_MOCK) {
-    return wrap(mockOkItem(accountSnapshotMockStore.create()));
-  }
   const res = await apiFetch<ApiResponse<BackendSnapshotMonth>>(
     `/api/account-snapshot/create`,
     {

@@ -5,9 +5,7 @@ import type {
   ApiPaginationProps,
   ApiResponse,
 } from "_libraries/fetch/response";
-import { mockOkItem, mockOkList } from "_utilities/mock-response";
 
-import { transactionMockStore } from "./mock";
 import type {
   TransactionCalendarResponse,
   TransactionCreateRequest,
@@ -17,10 +15,6 @@ import type {
   TransactionUpdateRequest,
   TxType,
 } from "./types";
-
-const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK_TRANSACTION === "true";
-
-const wrap = <T>(data: T) => ({ body: data });
 
 const num = (v: number | string) => (typeof v === "number" ? v : Number(v));
 
@@ -108,24 +102,6 @@ export async function GetTransactionSearchApi(
   params: TransactionSearchRequestType &
     Partial<ApiPaginationProps> & { cursor?: string | null; limit?: number },
 ) {
-  if (USE_MOCK) {
-    const items = transactionMockStore.list();
-    const filtered = items.filter((i) => {
-      if (
-        params.searchTerm &&
-        !`${i.memo ?? ""} ${i.categoryName ?? ""}`
-          .toLowerCase()
-          .includes(params.searchTerm.toLowerCase())
-      )
-        return false;
-      if (params.txType && i.txType !== params.txType) return false;
-      if (params.accountId && i.accountId !== params.accountId) return false;
-      if (params.categoryId && i.categoryId !== params.categoryId) return false;
-      return true;
-    });
-    return wrap(mockOkList(filtered));
-  }
-
   const limit = params.limit ?? params.listSize;
   const queryParams: Record<string, unknown> = {};
   if (params.cursor) queryParams.cursor = params.cursor;
@@ -174,11 +150,6 @@ export async function GetTransactionSearchApi(
 }
 
 export async function GetTransactionDetailApi(transactionId: string) {
-  if (USE_MOCK) {
-    const item = transactionMockStore.detail(transactionId);
-    if (!item) return Promise.reject(new Error("transaction not found"));
-    return wrap(mockOkItem(item));
-  }
   // 백엔드 detail endpoint 미구현 — list 받아서 find 우회
   const res = await apiFetch<ApiResponse<BackendTransactionListResponse>>(
     `/api/transaction/list?limit=100`,
@@ -186,27 +157,15 @@ export async function GetTransactionDetailApi(transactionId: string) {
   );
   const found = (res.body.data?.items ?? []).find((t) => t.id === transactionId);
   if (!found) return Promise.reject(new Error("transaction not found"));
-  return wrap(mockOkItem(mapToDetailItem(found)));
+  return {
+    ...res,
+    body: { ...res.body, data: mapToDetailItem(found) },
+  };
 }
 
 export async function PostTransactionCreateApi(
   params: TransactionCreateRequest,
 ) {
-  if (USE_MOCK) {
-    const item = transactionMockStore.create({
-      householdId: params.householdId,
-      txType: params.txType,
-      amount: params.amount,
-      txDate: params.txDate,
-      accountId: params.accountId,
-      toAccountId: params.toAccountId ?? null,
-      categoryId: params.categoryId ?? null,
-      paidByUserId: params.paidByUserId ?? null,
-      isFixed: params.isFixed,
-      memo: params.memo ?? null,
-    });
-    return wrap(mockOkItem(item));
-  }
   const res = await apiFetch<ApiResponse<BackendTransactionResponse>>(
     `/api/transaction/create`,
     {
@@ -234,17 +193,6 @@ export async function PostTransactionCreateApi(
 export async function PutTransactionUpdateApi(
   params: TransactionUpdateRequest,
 ) {
-  if (USE_MOCK) {
-    const { transactionId, ...rest } = params;
-    transactionMockStore.update(transactionId, {
-      ...rest,
-      toAccountId: rest.toAccountId ?? null,
-      categoryId: rest.categoryId ?? null,
-      paidByUserId: rest.paidByUserId ?? null,
-      memo: rest.memo ?? null,
-    });
-    return wrap(mockOkItem(undefined as unknown as void));
-  }
   const res = await apiFetch<ApiResponse<BackendTransactionResponse>>(
     `/api/transaction/update/${params.transactionId}`,
     {
@@ -270,10 +218,6 @@ export async function PutTransactionUpdateApi(
 }
 
 export function DeleteTransactionDeleteApi(transactionId: string) {
-  if (USE_MOCK) {
-    transactionMockStore.remove(transactionId);
-    return Promise.resolve(wrap(mockOkItem(undefined as unknown as void)));
-  }
   return apiFetch<ApiResponse<void>>(
     `/api/transaction/delete/${transactionId}`,
     { method: "DELETE", errorHandleMethod: "reject" },
@@ -302,47 +246,6 @@ export async function GetTransactionCalendarApi(params: {
   year: number;
   month: number;
 }) {
-  if (USE_MOCK) {
-    // mock: list 받아서 클라 합산 (백엔드 동등 결과)
-    const items = transactionMockStore.list();
-    const prefix = `${params.year}-${String(params.month).padStart(2, "0")}`;
-    const monthItems = items.filter((it) => it.txDate.startsWith(prefix));
-
-    const dayMap = new Map<
-      string,
-      { income: number; expense: number; transfer: number; count: number }
-    >();
-    let monthlyIncome = 0;
-    let monthlyExpense = 0;
-    let monthlyTransfer = 0;
-    for (const it of monthItems) {
-      const d = it.txDate.slice(0, 10);
-      const cur = dayMap.get(d) ?? { income: 0, expense: 0, transfer: 0, count: 0 };
-      cur.count += 1;
-      if (it.txType === "INCOME") {
-        cur.income += it.amount;
-        monthlyIncome += it.amount;
-      } else if (it.txType === "EXPENSE") {
-        cur.expense += it.amount;
-        monthlyExpense += it.amount;
-      } else {
-        cur.transfer += it.amount;
-        monthlyTransfer += it.amount;
-      }
-      dayMap.set(d, cur);
-    }
-    const data: TransactionCalendarResponse = {
-      year: params.year,
-      month: params.month,
-      monthlyIncome,
-      monthlyExpense,
-      monthlyTransfer,
-      days: Array.from(dayMap.entries())
-        .map(([date, v]) => ({ date, ...v }))
-        .sort((a, b) => a.date.localeCompare(b.date)),
-    };
-    return wrap(mockOkItem(data));
-  }
   const res = await apiFetch<ApiResponse<BackendCalendarResponse>>(
     `/api/transaction/calendar?year=${params.year}&month=${params.month}`,
     { method: "GET" },

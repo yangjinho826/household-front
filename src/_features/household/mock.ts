@@ -1,40 +1,10 @@
+// 백엔드 미구현 — household members 만 mock. 다른 CRUD 는 백엔드 연동 끝남.
 import { newId, todayIso } from "_utilities/fmt";
 
-import type {
-  HouseholdDetailItemType,
-  HouseholdListItemType,
-  HouseholdMemberItemType,
-} from "./types";
+import type { HouseholdMemberItemType } from "./types";
 
 const OWNER_ID = "u-mock-owner";
 const MEMBER_ID_1 = "u-mock-member-1";
-
-let store: HouseholdDetailItemType[] = [
-  {
-    householdId: "h-mock-1",
-    name: "우리 가족",
-    description: "가족 가계부",
-    ownerId: OWNER_ID,
-    currency: "KRW",
-    startedAt: todayIso(),
-    memberCount: 2,
-    frstRegDt: todayIso(),
-    lastMdfcnDt: todayIso(),
-    dataStatCd: "ACTIVE",
-  },
-  {
-    householdId: "h-mock-2",
-    name: "개인",
-    description: "혼자 쓰는 가계부",
-    ownerId: OWNER_ID,
-    currency: "KRW",
-    startedAt: todayIso(),
-    memberCount: 1,
-    frstRegDt: todayIso(),
-    lastMdfcnDt: todayIso(),
-    dataStatCd: "ACTIVE",
-  },
-];
 
 let memberStore: HouseholdMemberItemType[] = [
   {
@@ -66,54 +36,7 @@ let memberStore: HouseholdMemberItemType[] = [
   },
 ];
 
-type CreateInput = Omit<
-  HouseholdDetailItemType,
-  | "householdId"
-  | "memberCount"
-  | "frstRegDt"
-  | "lastMdfcnDt"
-  | "dataStatCd"
->;
-
 export const householdMockStore = {
-  list(): HouseholdListItemType[] {
-    return store.map((h, idx) => ({ ...h, rowNo: idx + 1 }));
-  },
-  detail(id: string): HouseholdDetailItemType | undefined {
-    return store.find((h) => h.householdId === id);
-  },
-  create(input: CreateInput): HouseholdDetailItemType {
-    const item: HouseholdDetailItemType = {
-      ...input,
-      householdId: newId(),
-      memberCount: 1,
-      frstRegDt: todayIso(),
-      lastMdfcnDt: todayIso(),
-      dataStatCd: "ACTIVE",
-    };
-    store = [item, ...store];
-    return item;
-  },
-  update(
-    id: string,
-    patch: Partial<HouseholdDetailItemType>,
-  ): HouseholdDetailItemType | undefined {
-    const idx = store.findIndex((h) => h.householdId === id);
-    if (idx < 0) return undefined;
-    const current = store[idx];
-    if (!current) return undefined;
-    const next: HouseholdDetailItemType = {
-      ...current,
-      ...patch,
-      lastMdfcnDt: todayIso(),
-    };
-    store[idx] = next;
-    return next;
-  },
-  remove(id: string) {
-    store = store.filter((h) => h.householdId !== id);
-    memberStore = memberStore.filter((m) => m.householdId !== id);
-  },
   members(householdId: string): HouseholdMemberItemType[] {
     return memberStore.filter((m) => m.householdId === householdId);
   },

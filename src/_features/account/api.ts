@@ -4,9 +4,7 @@ import type {
   ApiListResponse,
   ApiResponse,
 } from "_libraries/fetch/response";
-import { mockOkItem, mockOkList } from "_utilities/mock-response";
 
-import { accountMockStore } from "./mock";
 import type {
   AccountCreateRequest,
   AccountDetailItemType,
@@ -15,10 +13,6 @@ import type {
   AccountType,
   AccountUpdateRequest,
 } from "./types";
-
-const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK_ACCOUNT === "true";
-
-const wrap = <T>(data: T) => ({ body: data });
 
 interface BackendAccountResponse {
   id: string;
@@ -31,9 +25,17 @@ interface BackendAccountResponse {
   icon: string | null;
   sort_order: number;
   is_archived: boolean;
+  // INVESTMENT 통장 한정 (LIVING/SAVINGS 는 null)
+  cash?: number | string | null;
+  portfolio_cost?: number | string | null;
+  portfolio_valuation?: number | string | null;
+  portfolio_profit_loss?: number | string | null;
+  portfolio_profit_loss_rate?: number | string | null;
 }
 
 const num = (v: number | string) => (typeof v === "number" ? v : Number(v));
+const numOrNull = (v: number | string | null | undefined) =>
+  v === null || v === undefined ? null : num(v);
 
 function mapToListItem(
   b: BackendAccountResponse,
@@ -51,6 +53,11 @@ function mapToListItem(
     icon: b.icon,
     sortOrder: b.sort_order,
     isArchived: b.is_archived,
+    cash: numOrNull(b.cash),
+    portfolioCost: numOrNull(b.portfolio_cost),
+    portfolioValuation: numOrNull(b.portfolio_valuation),
+    portfolioProfitLoss: numOrNull(b.portfolio_profit_loss),
+    portfolioProfitLossRate: numOrNull(b.portfolio_profit_loss_rate),
     frstRegDt: "",
     lastMdfcnDt: "",
     dataStatCd: "ACTIVE",
@@ -69,6 +76,11 @@ function mapToDetailItem(b: BackendAccountResponse): AccountDetailItemType {
     icon: b.icon,
     sortOrder: b.sort_order,
     isArchived: b.is_archived,
+    cash: numOrNull(b.cash),
+    portfolioCost: numOrNull(b.portfolio_cost),
+    portfolioValuation: numOrNull(b.portfolio_valuation),
+    portfolioProfitLoss: numOrNull(b.portfolio_profit_loss),
+    portfolioProfitLossRate: numOrNull(b.portfolio_profit_loss_rate),
     frstRegDt: "",
     lastMdfcnDt: "",
     dataStatCd: "ACTIVE",
@@ -76,23 +88,6 @@ function mapToDetailItem(b: BackendAccountResponse): AccountDetailItemType {
 }
 
 export async function GetAccountSearchApi(params: AccountSearchRequestType) {
-  if (USE_MOCK) {
-    const items = accountMockStore.list();
-    const filtered = items.filter((i) => {
-      if (
-        params.searchTerm &&
-        !i.name.toLowerCase().includes(params.searchTerm.toLowerCase())
-      )
-        return false;
-      if (params.accountType && i.accountType !== params.accountType)
-        return false;
-      if (params.isArchived !== undefined && i.isArchived !== params.isArchived)
-        return false;
-      return true;
-    });
-    return wrap(mockOkList(filtered));
-  }
-
   const queryString = objectToParams({ ...params }).toString();
   const res = await apiFetch<ApiResponse<BackendAccountResponse[]>>(
     `/api/account/list${queryString ? `?${queryString}` : ""}`,
@@ -118,35 +113,20 @@ export async function GetAccountSearchApi(params: AccountSearchRequestType) {
 }
 
 export async function GetAccountDetailApi(accountId: string) {
-  if (USE_MOCK) {
-    const item = accountMockStore.detail(accountId);
-    if (!item) return Promise.reject(new Error("account not found"));
-    return wrap(mockOkItem(item));
-  }
+  // 백엔드에 단건 detail 엔드포인트 미구현 → list 받아서 find
   const listRes = await apiFetch<ApiResponse<BackendAccountResponse[]>>(
     `/api/account/list`,
     { method: "GET" },
   );
   const found = (listRes.body.data ?? []).find((a) => a.id === accountId);
   if (!found) return Promise.reject(new Error("account not found"));
-  return wrap(mockOkItem(mapToDetailItem(found)));
+  return {
+    ...listRes,
+    body: { ...listRes.body, data: mapToDetailItem(found) },
+  };
 }
 
 export async function PostAccountCreateApi(params: AccountCreateRequest) {
-  if (USE_MOCK) {
-    const item = accountMockStore.create({
-      householdId: params.householdId,
-      name: params.name,
-      accountType: params.accountType,
-      startBalance: params.startBalance,
-      balance: params.startBalance,
-      color: params.color ?? null,
-      icon: params.icon ?? null,
-      sortOrder: params.sortOrder,
-      isArchived: params.isArchived,
-    });
-    return wrap(mockOkItem(item));
-  }
   const res = await apiFetch<ApiResponse<BackendAccountResponse>>(
     `/api/account/create`,
     {
@@ -169,15 +149,6 @@ export async function PostAccountCreateApi(params: AccountCreateRequest) {
 }
 
 export async function PutAccountUpdateApi(params: AccountUpdateRequest) {
-  if (USE_MOCK) {
-    const { accountId, ...rest } = params;
-    accountMockStore.update(accountId, {
-      ...rest,
-      color: rest.color ?? null,
-      icon: rest.icon ?? null,
-    });
-    return wrap(mockOkItem(undefined as unknown as void));
-  }
   const res = await apiFetch<ApiResponse<BackendAccountResponse>>(
     `/api/account/update/${params.accountId}`,
     {
@@ -201,10 +172,6 @@ export async function PutAccountUpdateApi(params: AccountUpdateRequest) {
 }
 
 export function DeleteAccountDeleteApi(accountId: string) {
-  if (USE_MOCK) {
-    accountMockStore.remove(accountId);
-    return Promise.resolve(wrap(mockOkItem(undefined as unknown as void)));
-  }
   return apiFetch<ApiResponse<void>>(
     `/api/account/delete/${accountId}`,
     { method: "DELETE", errorHandleMethod: "reject" },

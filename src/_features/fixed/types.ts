@@ -4,7 +4,6 @@ export interface FixedSearchRequestType {
 }
 
 export interface FixedBaseRequestType {
-  householdId: string;
   name: string;
   amount: number;
   dayOfMonth: number;
