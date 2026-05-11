@@ -194,6 +194,31 @@
     "date": "Date"
   },
   "error": {
-    "default": "Failed to process the request."
+    "default": "Failed to process the request.",
+    "unknown": "An unknown error occurred.",
+    "network": "Please check your network connection.",
+    "CM001": "Bad request.",
+    "CM002": "Authentication required.",
+    "CM003": "Permission denied.",
+    "CM004": "Data not found.",
+    "CM005": "Service unavailable.",
+    "CM999": "Server error occurred.",
+    "AU001": "Invalid token.",
+    "AU002": "Token expired.",
+    "AU003": "Password does not match.",
+    "AU004": "Incorrect ID or password.",
+    "AU005": "Invalid refresh token.",
+    "US001": "ID already exists.",
+    "US002": "Email already in use.",
+    "US003": "Invalid email format.",
+    "US004": "Password must be 8-64 chars with letters and numbers.",
+    "US005": "Name must be 1-100 characters.",
+    "HH001": "You are not a member of this household.",
+    "HH002": "Household not found.",
+    "HH003": "Only the household owner can perform this action.",
+    "HH004": "Already a household member.",
+    "HH005": "Member not found.",
+    "HH006": "Owner cannot leave the household.",
+    "SN001": "This month's snapshot has already been saved."
   }
 }

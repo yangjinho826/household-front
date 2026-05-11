@@ -7,7 +7,7 @@ import { useEffect } from "react";
 import { z } from "zod";
 
 import { usePortfolioMutations } from "_features/portfolio/queries/use-mutations";
-import { ApiResponseError } from "_libraries/fetch/api-response-error";
+import { getErrorMessage } from "_libraries/fetch/error-message";
 
 import { usePortfolioDetail as usePortfolioDetailQuery } from "../../queries/use-query";
 
@@ -26,6 +26,7 @@ interface FormValues {
 export function usePortfolioForm({ portfolioId }: UsePortfolioFormOptions) {
   const t = useTranslations("portfolio");
   const tg = useTranslations("general.common");
+  const te = useTranslations("error");
   const router = useRouter();
   const routeParams = useParams<{ locale: string }>();
 
@@ -105,13 +106,11 @@ export function usePortfolioForm({ portfolioId }: UsePortfolioFormOptions) {
       }
       router.replace(`/${routeParams.locale}/portfolio`);
     } catch (error) {
-      if (error instanceof ApiResponseError) {
-        notifications.show({
-          title: tg("notificationstitle"),
-          message: error.errorMessage ?? error.message,
-          color: "red",
-        });
-      }
+      notifications.show({
+        title: tg("notificationstitle"),
+        message: getErrorMessage(error, te),
+        color: "red",
+      });
     }
   };
 

@@ -11,9 +11,10 @@ import {
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
-import { ApiResponseError } from "_libraries/fetch/api-response-error";
+import { getErrorMessage } from "_libraries/fetch/error-message";
 import { todayIsoKst } from "_utilities/datetime";
 
 import { usePortfolioMutations } from "../queries/use-mutations";
@@ -40,6 +41,7 @@ export default function TradeForm({
   initialType = "BUY",
   onSuccess,
 }: TradeFormProps) {
+  const te = useTranslations("error");
   const { buyMutation, sellMutation } = usePortfolioMutations();
   const [submitting, setSubmitting] = useState(false);
 
@@ -92,12 +94,7 @@ export default function TradeForm({
     } catch (error) {
       notifications.show({
         title: "거래 기록 실패",
-        message:
-          error instanceof ApiResponseError
-            ? (error.errorMessage ?? error.message)
-            : error instanceof Error
-              ? error.message
-              : "거래 저장에 실패했습니다",
+        message: getErrorMessage(error, te),
         color: "red",
       });
     } finally {

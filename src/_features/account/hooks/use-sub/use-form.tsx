@@ -7,7 +7,7 @@ import { useEffect } from "react";
 import { z } from "zod";
 
 import { useAccountMutations } from "_features/account/queries/use-mutations";
-import { ApiResponseError } from "_libraries/fetch/api-response-error";
+import { getErrorMessage } from "_libraries/fetch/error-message";
 
 import { useAccountDetail as useAccountDetailQuery } from "../../queries/use-query";
 import type {
@@ -22,6 +22,7 @@ interface UseAccountFormOptions {
 export function useAccountForm({ accountId }: UseAccountFormOptions) {
   const t = useTranslations("account");
   const tg = useTranslations("general.common");
+  const te = useTranslations("error");
   const router = useRouter();
   const routeParams = useParams<{ locale: string }>();
 
@@ -97,13 +98,11 @@ export function useAccountForm({ accountId }: UseAccountFormOptions) {
       }
       router.replace(`/${routeParams.locale}/account`);
     } catch (error) {
-      if (error instanceof ApiResponseError) {
-        notifications.show({
-          title: tg("notificationstitle"),
-          message: error.errorMessage ?? error.message,
-          color: "red",
-        });
-      }
+      notifications.show({
+        title: tg("notificationstitle"),
+        message: getErrorMessage(error, te),
+        color: "red",
+      });
     }
   };
 

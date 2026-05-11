@@ -7,7 +7,7 @@ import { useEffect } from "react";
 import { z } from "zod";
 
 import { useCategoryMutations } from "_features/category/queries/use-mutations";
-import { ApiResponseError } from "_libraries/fetch/api-response-error";
+import { getErrorMessage } from "_libraries/fetch/error-message";
 
 import { useCategoryDetail as useCategoryDetailQuery } from "../../queries/use-query";
 import type {
@@ -22,6 +22,7 @@ interface UseCategoryFormOptions {
 export function useCategoryForm({ categoryId }: UseCategoryFormOptions) {
   const t = useTranslations("category");
   const tg = useTranslations("general.common");
+  const te = useTranslations("error");
   const router = useRouter();
   const routeParams = useParams<{ locale: string }>();
 
@@ -90,13 +91,11 @@ export function useCategoryForm({ categoryId }: UseCategoryFormOptions) {
       }
       router.replace(`/${routeParams.locale}/category`);
     } catch (error) {
-      if (error instanceof ApiResponseError) {
-        notifications.show({
-          title: tg("notificationstitle"),
-          message: error.errorMessage ?? error.message,
-          color: "red",
-        });
-      }
+      notifications.show({
+        title: tg("notificationstitle"),
+        message: getErrorMessage(error, te),
+        color: "red",
+      });
     }
   };
 

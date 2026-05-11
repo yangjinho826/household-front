@@ -15,7 +15,7 @@ import { useTranslations } from "next-intl";
 import { z } from "zod";
 
 import { useHouseholdMutations } from "_features/household/queries/use-mutations";
-import { ApiResponseError } from "_libraries/fetch/api-response-error";
+import { getErrorMessage } from "_libraries/fetch/error-message";
 import { todayIsoKst } from "_utilities/datetime";
 
 interface FormValues {
@@ -25,6 +25,7 @@ interface FormValues {
 export default function HouseholdOnboardingSection() {
   const t = useTranslations("onboarding");
   const tg = useTranslations("general.common");
+  const te = useTranslations("error");
   const router = useRouter();
   const params = useParams<{ locale: string }>();
 
@@ -54,13 +55,11 @@ export default function HouseholdOnboardingSection() {
       });
       router.replace(`/${params.locale}`);
     } catch (error) {
-      if (error instanceof ApiResponseError) {
-        notifications.show({
-          title: tg("notificationstitle"),
-          message: error.errorMessage ?? error.message,
-          color: "red",
-        });
-      }
+      notifications.show({
+        title: tg("notificationstitle"),
+        message: getErrorMessage(error, te),
+        color: "red",
+      });
     }
   };
 

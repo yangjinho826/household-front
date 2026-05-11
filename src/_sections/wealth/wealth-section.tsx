@@ -13,6 +13,7 @@ import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconCheck, IconPlus } from "@tabler/icons-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { useRouter, useParams } from "next/navigation";
 import { useMemo } from "react";
 import {
@@ -25,7 +26,7 @@ import {
 import { useAccountSnapshotMutations } from "_features/account-snapshot/queries/use-mutations";
 import type { AccountListItemType, AccountType } from "_features/account/types";
 import { queryKeys } from "_constants/queries";
-import { ApiResponseError } from "_libraries/fetch/api-response-error";
+import { getErrorMessage } from "_libraries/fetch/error-message";
 import { fmt } from "_utilities/fmt";
 
 const TYPE_LABEL: Record<AccountType, string> = {
@@ -43,6 +44,7 @@ const TYPE_COLOR: Record<AccountType, string> = {
 export default function WealthSection() {
   const router = useRouter();
   const routeParams = useParams<{ locale: string }>();
+  const te = useTranslations("error");
 
   const { data: accountData } = useSuspenseQuery(
     queryKeys.account.list({ pageNo: 1, listSize: 100 }),
@@ -105,17 +107,9 @@ export default function WealthSection() {
             color: "green",
           });
         } catch (error) {
-          const msg =
-            error instanceof ApiResponseError
-              ? (error.errorMessage ?? error.message)
-              : error instanceof Error && error.message === "SNAPSHOT_ALREADY_EXISTS"
-                ? "이번 달 자산 스냅샷은 이미 저장되었습니다"
-                : error instanceof Error && error.message === "NO_ACTIVE_ACCOUNT"
-                  ? "저장할 통장이 없습니다"
-                  : "스냅샷 저장에 실패했습니다";
           notifications.show({
             title: "기록 실패",
-            message: msg,
+            message: getErrorMessage(error, te),
             color: "red",
           });
         }
@@ -306,9 +300,6 @@ export default function WealthSection() {
                 <Stack gap={0} style={{ flex: 1, minWidth: 0 }}>
                   <Text size="sm" fw={600} truncate>
                     {a.name}
-                  </Text>
-                  <Text size="xs" c="dimmed">
-                    {TYPE_LABEL[a.accountType] ?? a.accountType}
                   </Text>
                 </Stack>
                 <Text

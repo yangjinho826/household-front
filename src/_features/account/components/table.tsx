@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  Badge,
   Card,
   Center,
   Group,
@@ -14,13 +13,7 @@ import { useTranslations } from "next-intl";
 
 import { fmt } from "_utilities/fmt";
 
-import type { AccountListItemType, AccountType } from "../types";
-
-const TYPE_COLOR: Record<AccountType, string> = {
-  LIVING: "tossBlue",
-  SAVINGS: "tossGreen",
-  INVESTMENT: "tossPurple",
-};
+import type { AccountListItemType } from "../types";
 
 interface AccountTableProps {
   items: AccountListItemType[];
@@ -39,7 +32,6 @@ export default function AccountTable({
   onClickRow,
   onPageChange,
 }: AccountTableProps) {
-  const t = useTranslations("account");
   const tg = useTranslations("general.common");
 
   if (!items.length) {
@@ -60,16 +52,7 @@ export default function AccountTable({
           <Card>
             <Group justify="space-between">
               <Stack gap={2}>
-                <Group gap="xs">
-                  <Text fw={700}>{it.name}</Text>
-                  <Badge
-                    size="xs"
-                    variant="light"
-                    color={TYPE_COLOR[it.accountType] ?? "gray"}
-                  >
-                    {t(`type_${it.accountType}`)}
-                  </Badge>
-                </Group>
+                <Text fw={700}>{it.name}</Text>
                 {it.icon && (
                   <Text size="xs" c="dimmed">
                     {it.icon}

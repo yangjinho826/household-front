@@ -7,7 +7,7 @@ import { useEffect } from "react";
 import { z } from "zod";
 
 import { useTransactionMutations } from "_features/transaction/queries/use-mutations";
-import { ApiResponseError } from "_libraries/fetch/api-response-error";
+import { getErrorMessage } from "_libraries/fetch/error-message";
 import { todayIsoKst } from "_utilities/datetime";
 
 import { useTransactionDetail as useTransactionDetailQuery } from "../../queries/use-query";
@@ -25,6 +25,7 @@ export function useTransactionForm({
 }: UseTransactionFormOptions) {
   const t = useTranslations("transaction");
   const tg = useTranslations("general.common");
+  const te = useTranslations("error");
   const router = useRouter();
   const routeParams = useParams<{ locale: string }>();
 
@@ -102,13 +103,11 @@ export function useTransactionForm({
       }
       router.replace(`/${routeParams.locale}/transactions`);
     } catch (error) {
-      if (error instanceof ApiResponseError) {
-        notifications.show({
-          title: tg("notificationstitle"),
-          message: error.errorMessage ?? error.message,
-          color: "red",
-        });
-      }
+      notifications.show({
+        title: tg("notificationstitle"),
+        message: getErrorMessage(error, te),
+        color: "red",
+      });
     }
   };
 

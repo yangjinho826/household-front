@@ -7,7 +7,7 @@ import { useEffect } from "react";
 import { z } from "zod";
 
 import { useFixedMutations } from "_features/fixed/queries/use-mutations";
-import { ApiResponseError } from "_libraries/fetch/api-response-error";
+import { getErrorMessage } from "_libraries/fetch/error-message";
 
 import { useFixedDetail as useFixedDetailQuery } from "../../queries/use-query";
 import type { FixedBaseRequestType } from "../../types";
@@ -19,6 +19,7 @@ interface UseFixedFormOptions {
 export function useFixedForm({ fixedId }: UseFixedFormOptions) {
   const t = useTranslations("fixed");
   const tg = useTranslations("general.common");
+  const te = useTranslations("error");
   const router = useRouter();
   const routeParams = useParams<{ locale: string }>();
 
@@ -91,13 +92,11 @@ export function useFixedForm({ fixedId }: UseFixedFormOptions) {
       }
       router.replace(`/${routeParams.locale}/fixed`);
     } catch (error) {
-      if (error instanceof ApiResponseError) {
-        notifications.show({
-          title: tg("notificationstitle"),
-          message: error.errorMessage ?? error.message,
-          color: "red",
-        });
-      }
+      notifications.show({
+        title: tg("notificationstitle"),
+        message: getErrorMessage(error, te),
+        color: "red",
+      });
     }
   };
 
