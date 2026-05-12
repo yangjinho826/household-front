@@ -20,6 +20,6 @@ export interface AccountSnapshotMonthItem {
 // 1년 (또는 임의 기간) 추이 응답
 export interface AccountSnapshotYearly {
   months: AccountSnapshotMonthItem[];
-  currentMonthSaved: boolean;
-  currentMonthDate: string; // YYYY-MM-DD (KST 이번 달 1일)
+  targetMonthSaved: boolean;
+  targetMonthDate: string; // YYYY-MM-DD (박제 대상 = 지난달 1일)
 }

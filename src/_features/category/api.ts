@@ -65,7 +65,11 @@ function mapToDetailItem(b: BackendCategoryResponse): CategoryDetailItemType {
 }
 
 export async function GetCategorySearchApi(params: CategorySearchRequestType) {
-  const queryString = objectToParams({ ...params }).toString();
+  // 백엔드 enum 은 대문자 (EXPENSE/INCOME), 프론트 도메인은 소문자 — 송신 시 변환
+  const queryString = objectToParams({
+    ...params,
+    kind: params.kind ? params.kind.toUpperCase() : undefined,
+  }).toString();
   const res = await apiFetch<ApiResponse<BackendCategoryResponse[]>>(
     `/api/category/list${queryString ? `?${queryString}` : ""}`,
     { method: "GET" },

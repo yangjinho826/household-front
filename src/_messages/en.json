@@ -101,7 +101,8 @@
     "day_of_month": "Day of Month",
     "day_format": "Day {day}",
     "color": "Color",
-    "icon": "Icon"
+    "icon": "Icon",
+    "used_this_month": "{amount} won this month"
   },
   "portfolio": {
     "list_title": "Portfolio",
@@ -147,6 +148,8 @@
     "to_account": "To",
     "category": "Category",
     "category_placeholder": "Select category",
+    "fixed_expense_mapping": "Fixed expense mapping",
+    "fixed_expense_mapping_placeholder": "Map to a fixed expense (optional)",
     "view_list": "List",
     "view_calendar": "Calendar",
     "filter_all": "All",

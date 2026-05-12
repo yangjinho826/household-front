@@ -19,7 +19,7 @@ export interface TransactionBaseRequestType {
   toAccountId?: string | null;
   categoryId?: string | null;
   paidByUserId?: string | null;
-  isFixed: boolean;
+  fixedExpenseId: string | null;
   memo?: string | null;
 }
 
@@ -40,7 +40,7 @@ export interface TransactionListItemType {
   toAccountId: string | null;
   categoryId: string | null;
   paidByUserId: string | null;
-  isFixed: boolean;
+  fixedExpenseId: string | null;
   memo: string | null;
   // 조인된 표시 필드 (백엔드 응답에 포함)
   accountName?: string | null;
@@ -81,7 +81,7 @@ export interface TransactionDetailItemType {
   toAccountId: string | null;
   categoryId: string | null;
   paidByUserId: string | null;
-  isFixed: boolean;
+  fixedExpenseId: string | null;
   memo: string | null;
   accountName?: string | null;
   toAccountName?: string | null;

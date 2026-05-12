@@ -11,8 +11,6 @@ import {
 } from "@mantine/core";
 import { useTranslations } from "next-intl";
 
-import { fmt } from "_utilities/fmt";
-
 import type { AccountListItemType } from "../types";
 
 interface AccountTableProps {
@@ -50,23 +48,14 @@ export default function AccountTable({
           onClick={() => onClickRow(it.accountId)}
         >
           <Card>
-            <Group justify="space-between">
-              <Stack gap={2}>
-                <Text fw={700}>{it.name}</Text>
-                {it.icon && (
-                  <Text size="xs" c="dimmed">
-                    {it.icon}
-                  </Text>
-                )}
-              </Stack>
-              <Text
-                fw={700}
-                style={{ fontVariantNumeric: "tabular-nums" }}
-                c={it.startBalance < 0 ? "tossRed.5" : undefined}
-              >
-                {fmt(it.startBalance)}원
-              </Text>
-            </Group>
+            <Stack gap={2}>
+              <Text fw={700}>{it.name}</Text>
+              {it.icon && (
+                <Text size="xs" c="dimmed">
+                  {it.icon}
+                </Text>
+              )}
+            </Stack>
           </Card>
         </UnstyledButton>
       ))}

@@ -166,3 +166,36 @@ export function DeleteFixedDeleteApi(fixedId: string) {
     { method: "DELETE", errorHandleMethod: "reject" },
   );
 }
+
+interface BackendFixedMonthlyUsage {
+  fixed_expense_id: string;
+  used: number | string;
+}
+
+interface BackendFixedMonthlySummary {
+  month: string;
+  items: BackendFixedMonthlyUsage[];
+}
+
+export interface FixedMonthlySummaryType {
+  month: string;
+  usages: Record<string, number>; // fixedId → used
+}
+
+/**
+ * 고정지출별 해당 월 누적 사용액. month 생략 시 백엔드가 KST 이번달.
+ */
+export async function GetFixedMonthlySummaryApi(month?: string) {
+  const queryString = month ? `?month=${month}` : "";
+  const res = await apiFetch<ApiResponse<BackendFixedMonthlySummary>>(
+    `/api/fixed/monthly-summary${queryString}`,
+    { method: "GET" },
+  );
+  const b = res.body.data;
+  const usages: Record<string, number> = {};
+  for (const item of b.items) {
+    usages[item.fixed_expense_id] = num(item.used);
+  }
+  const data: FixedMonthlySummaryType = { month: b.month, usages };
+  return { ...res, body: { ...res.body, data } };
+}

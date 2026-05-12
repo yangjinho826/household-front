@@ -82,18 +82,18 @@ export default function WealthSection() {
       .filter((t) => t.accs.length > 0);
   }, [accounts, total]);
 
-  const hasThisMonth = yearly.currentMonthSaved;
-  const thisMonthLabel = `${Number(yearly.currentMonthDate.slice(5, 7))}월`;
+  const hasTargetMonth = yearly.targetMonthSaved;
+  const targetMonthLabel = `${Number(yearly.targetMonthDate.slice(5, 7))}월`;
 
   const handleTakeSnapshot = () => {
-    if (hasThisMonth || createMutation.isPending) return;
+    if (hasTargetMonth || createMutation.isPending) return;
     modals.openConfirmModal({
       centered: true,
-      title: `${thisMonthLabel} 자산 기록`,
+      title: `${targetMonthLabel} 자산 기록`,
       labels: { confirm: "기록하기", cancel: "취소" },
       children: (
         <Text size="sm">
-          {thisMonthLabel} 자산 스냅샷을 저장할까요?
+          {targetMonthLabel} 자산 스냅샷을 저장할까요?
           <br />
           모든 통장의 현재 잔액이 기록됩니다.
         </Text>
@@ -103,7 +103,7 @@ export default function WealthSection() {
           await createMutation.mutateAsync();
           notifications.show({
             title: "기록 완료",
-            message: `${thisMonthLabel} 자산이 기록되었습니다.`,
+            message: `${targetMonthLabel} 자산이 기록되었습니다.`,
             color: "green",
           });
         } catch (error) {
@@ -129,18 +129,18 @@ export default function WealthSection() {
             </Text>
             <UnstyledButton
               onClick={handleTakeSnapshot}
-              disabled={hasThisMonth || createMutation.isPending}
+              disabled={hasTargetMonth || createMutation.isPending}
               style={{
                 padding: "6px 12px",
                 borderRadius: 999,
-                background: hasThisMonth
+                background: hasTargetMonth
                   ? "var(--mantine-color-gray-0)"
                   : "var(--mantine-color-tossBlue-0)",
                 opacity: createMutation.isPending ? 0.5 : 1,
               }}
             >
               <Group gap={4} wrap="nowrap">
-                {hasThisMonth ? (
+                {hasTargetMonth ? (
                   <IconCheck size={12} stroke={3} color="#8B95A1" />
                 ) : (
                   <IconPlus size={12} stroke={3} color="#3182F6" />
@@ -148,11 +148,11 @@ export default function WealthSection() {
                 <Text
                   size="10px"
                   fw={700}
-                  c={hasThisMonth ? "dimmed" : "tossBlue.5"}
+                  c={hasTargetMonth ? "dimmed" : "tossBlue.5"}
                 >
-                  {hasThisMonth
-                    ? `${thisMonthLabel} 저장됨`
-                    : `${thisMonthLabel} 자산 기록`}
+                  {hasTargetMonth
+                    ? `${targetMonthLabel} 저장됨`
+                    : `${targetMonthLabel} 자산 기록`}
                 </Text>
               </Group>
             </UnstyledButton>

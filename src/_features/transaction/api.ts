@@ -33,7 +33,7 @@ interface BackendTransactionResponse {
   category_color: string | null;
   category_icon: string | null;
   paid_by_user_id: string | null;
-  is_fixed: boolean;
+  fixed_expense_id: string | null;
   memo: string | null;
 }
 
@@ -59,7 +59,7 @@ function mapToListItem(
     toAccountId: b.to_account_id,
     categoryId: b.category_id,
     paidByUserId: b.paid_by_user_id,
-    isFixed: b.is_fixed,
+    fixedExpenseId: b.fixed_expense_id,
     memo: b.memo,
     accountName: b.account_name,
     toAccountName: b.to_account_name,
@@ -85,7 +85,7 @@ function mapToDetailItem(
     toAccountId: b.to_account_id,
     categoryId: b.category_id,
     paidByUserId: b.paid_by_user_id,
-    isFixed: b.is_fixed,
+    fixedExpenseId: b.fixed_expense_id,
     memo: b.memo,
     accountName: b.account_name,
     toAccountName: b.to_account_name,
@@ -175,7 +175,7 @@ export async function PostTransactionCreateApi(
         to_account_id: params.toAccountId ?? null,
         category_id: params.categoryId ?? null,
         paid_by_user_id: params.paidByUserId ?? null,
-        is_fixed: params.isFixed,
+        fixed_expense_id: params.fixedExpenseId ?? null,
         memo: params.memo ?? null,
       },
       errorHandleMethod: "reject",
@@ -202,7 +202,7 @@ export async function PutTransactionUpdateApi(
         to_account_id: params.toAccountId ?? null,
         category_id: params.categoryId ?? null,
         paid_by_user_id: params.paidByUserId ?? null,
-        is_fixed: params.isFixed,
+        fixed_expense_id: params.fixedExpenseId ?? null,
         memo: params.memo ?? null,
       },
       errorHandleMethod: "reject",

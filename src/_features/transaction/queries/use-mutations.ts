@@ -15,7 +15,7 @@ import type {
 export function useTransactionMutations() {
   const queryClient = useQueryClient();
 
-  // 거래 변경 시 통장 잔액(account.list) 도 같이 갱신 — 백엔드가 sum 으로 balance 계산
+  // 거래 변경 시 통장 잔액(account.list) 과 고정지출 월별 사용액(fixed.monthlySummary) 도 갱신
   const invalidateRelated = () => {
     queryClient.invalidateQueries({
       queryKey: queryKeys.transaction._def,
@@ -27,6 +27,10 @@ export function useTransactionMutations() {
     });
     queryClient.invalidateQueries({
       queryKey: queryKeys.accountSnapshot._def,
+      refetchType: "all",
+    });
+    queryClient.invalidateQueries({
+      queryKey: queryKeys.fixed.monthlySummary._def,
       refetchType: "all",
     });
   };

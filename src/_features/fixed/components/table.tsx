@@ -20,6 +20,8 @@ interface FixedTableProps {
   totalPages: number;
   pageNo: number;
   listSize: number;
+  /** fixedId → 이번달 누적 사용액 (없으면 0) */
+  usagesByFixed?: Record<string, number>;
   onClickRow: (fixedId: string) => void;
   onPageChange: (page: number, pageSize: number) => void;
 }
@@ -29,6 +31,7 @@ export default function FixedTable({
   totalPages,
   pageNo,
   listSize,
+  usagesByFixed,
   onClickRow,
   onPageChange,
 }: FixedTableProps) {
@@ -45,38 +48,45 @@ export default function FixedTable({
 
   return (
     <Stack gap="sm">
-      {items.map((it) => (
-        <UnstyledButton
-          key={it.fixedId}
-          onClick={() => onClickRow(it.fixedId)}
-        >
-          <Card>
-            <Group justify="space-between">
-              <Stack gap={2}>
-                <Group gap="xs">
-                  {it.color && (
-                    <div
-                      style={{
-                        width: 10,
-                        height: 10,
-                        borderRadius: 5,
-                        background: it.color,
-                      }}
-                    />
-                  )}
-                  <Text fw={600}>{it.name}</Text>
-                </Group>
-                <Text size="xs" c="dimmed">
-                  {t("day_format", { day: it.dayOfMonth })}
+      {items.map((it) => {
+        const used = usagesByFixed?.[it.fixedId] ?? 0;
+        return (
+          <UnstyledButton
+            key={it.fixedId}
+            onClick={() => onClickRow(it.fixedId)}
+          >
+            <Card>
+              <Group justify="space-between">
+                <Stack gap={2}>
+                  <Group gap="xs">
+                    {it.color && (
+                      <div
+                        style={{
+                          width: 10,
+                          height: 10,
+                          borderRadius: 5,
+                          background: it.color,
+                        }}
+                      />
+                    )}
+                    <Text fw={600}>{it.name}</Text>
+                  </Group>
+                  <Text size="xs" c="dimmed">
+                    {t("day_format", { day: it.dayOfMonth })}
+                  </Text>
+                </Stack>
+                <Text
+                  fw={700}
+                  style={{ fontVariantNumeric: "tabular-nums" }}
+                  c={used > 0 ? undefined : "dimmed"}
+                >
+                  {t("used_this_month", { amount: fmt(used) })}
                 </Text>
-              </Stack>
-              <Text fw={700} style={{ fontVariantNumeric: "tabular-nums" }}>
-                {fmt(it.amount)}원
-              </Text>
-            </Group>
-          </Card>
-        </UnstyledButton>
-      ))}
+              </Group>
+            </Card>
+          </UnstyledButton>
+        );
+      })}
       {totalPages > 1 && (
         <Group justify="center">
           <Pagination

@@ -37,19 +37,32 @@ export default function TransactionForm({
     handleCancel,
   } = useTransactionForm({ transactionId });
 
-  // 통장 + 카테고리 데이터 (mock — 백엔드 미구현)
+  // 통장 + 카테고리 + 고정지출 데이터
   const { data: accountsData } = useSuspenseQuery(
     queryKeys.account.list({ pageNo: 1, listSize: 100 }),
   );
   const { data: categoriesData } = useSuspenseQuery(
     queryKeys.category.list({ pageNo: 1, listSize: 100 }),
   );
+  const { data: fixedData } = useSuspenseQuery(
+    queryKeys.fixed.list({ pageNo: 1, listSize: 100 }),
+  );
 
   const accounts = accountsData.body.data.content;
   const categories = categoriesData.body.data.content;
+  const fixedItems = fixedData.body.data.content;
 
   const txType = form.values.txType;
   const isTransfer = txType === "TRANSFER";
+  const isExpense = txType === "EXPENSE";
+
+  const fixedOptions = useMemo(
+    () =>
+      fixedItems
+        .filter((f) => !f.isArchived)
+        .map((f) => ({ value: f.fixedId, label: f.name })),
+    [fixedItems],
+  );
 
   const accountOptions = useMemo(
     () =>
@@ -131,6 +144,16 @@ export default function TransactionForm({
                 searchable
                 clearable
               />
+              {isExpense && (
+                <Select
+                  {...form.getInputProps("fixedExpenseId")}
+                  label={t("fixed_expense_mapping")}
+                  placeholder={t("fixed_expense_mapping_placeholder")}
+                  data={fixedOptions}
+                  searchable
+                  clearable
+                />
+              )}
             </>
           )}
 

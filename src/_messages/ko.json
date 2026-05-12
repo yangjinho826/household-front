@@ -101,7 +101,8 @@
     "day_of_month": "결제일",
     "day_format": "매월 {day}일",
     "color": "색상",
-    "icon": "아이콘"
+    "icon": "아이콘",
+    "used_this_month": "이번달 {amount}원"
   },
   "portfolio": {
     "list_title": "포트폴리오",
@@ -147,6 +148,8 @@
     "to_account": "도착 통장",
     "category": "카테고리",
     "category_placeholder": "카테고리 선택",
+    "fixed_expense_mapping": "고정 지출 매핑",
+    "fixed_expense_mapping_placeholder": "어느 고정 지출인지 선택 (선택)",
     "view_list": "목록",
     "view_calendar": "달력",
     "filter_all": "전체",

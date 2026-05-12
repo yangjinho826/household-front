@@ -15,24 +15,13 @@ import { ApiResponseError } from "_libraries/fetch/api-response-error";
 interface ErrorFallbackProps {
   error: Error & { digest?: string };
   reset: () => void;
-  /**
-   * 보조 액션 (예: 로그인 화면으로 이동) — 선택.
-   */
-  secondaryAction?: {
-    label: string;
-    onClick: () => void;
-  };
 }
 
 /**
  * App Router error.tsx 공용 폴백.
  * 백엔드 down (502/500) / 네트워크 오류 시 친화적 표시.
  */
-export function ErrorFallback({
-  error,
-  reset,
-  secondaryAction,
-}: ErrorFallbackProps) {
+export function ErrorFallback({ error, reset }: ErrorFallbackProps) {
   useEffect(() => {
     console.error("[ErrorBoundary]", error);
   }, [error]);
@@ -65,20 +54,9 @@ export function ErrorFallback({
               {description}
             </Text>
           </Stack>
-          <Stack gap="xs" w="100%">
-            <Button onClick={reset} fullWidth>
-              다시 시도
-            </Button>
-            {secondaryAction && (
-              <Button
-                onClick={secondaryAction.onClick}
-                variant="light"
-                fullWidth
-              >
-                {secondaryAction.label}
-              </Button>
-            )}
-          </Stack>
+          <Button onClick={reset} fullWidth>
+            다시 시도
+          </Button>
         </Stack>
       </Card>
     </Center>

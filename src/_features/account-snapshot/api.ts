@@ -24,8 +24,8 @@ interface BackendSnapshotMonth {
 
 interface BackendSnapshotYearly {
   months: BackendSnapshotMonth[];
-  current_month_saved: boolean;
-  current_month_date: string;
+  target_month_saved: boolean;
+  target_month_date: string;
 }
 
 function mapBalance(b: BackendSnapshotBalance) {
@@ -47,8 +47,8 @@ function mapMonth(b: BackendSnapshotMonth): AccountSnapshotMonthItem {
 function mapYearly(b: BackendSnapshotYearly): AccountSnapshotYearly {
   return {
     months: b.months.map(mapMonth),
-    currentMonthSaved: b.current_month_saved,
-    currentMonthDate: b.current_month_date,
+    targetMonthSaved: b.target_month_saved,
+    targetMonthDate: b.target_month_date,
   };
 }
 
@@ -71,7 +71,8 @@ export async function GetAccountSnapshotYearlyApi(
 }
 
 /**
- * 이번 달 자산 스냅샷 저장 — 백엔드가 KST 기준 자동 결정.
+ * 지난달 마감 자산 스냅샷 저장 — 백엔드가 KST 기준 자동 결정.
+ * 예: 6/1~6/말 사이에 호출하면 5월 박제.
  * 같은 달 이미 있으면 백엔드 SNAPSHOT_ALREADY_EXISTS 에러.
  */
 export async function PostAccountSnapshotCreateApi() {

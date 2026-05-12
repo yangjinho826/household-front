@@ -46,7 +46,7 @@ export function useTransactionForm({
       toAccountId: null,
       categoryId: null,
       paidByUserId: null,
-      isFixed: false,
+      fixedExpenseId: null,
       memo: null,
     },
     validate: zodResolver(
@@ -73,7 +73,7 @@ export function useTransactionForm({
         toAccountId: d.toAccountId,
         categoryId: d.categoryId,
         paidByUserId: d.paidByUserId,
-        isFixed: d.isFixed,
+        fixedExpenseId: d.fixedExpenseId,
         memo: d.memo,
       });
     })();
