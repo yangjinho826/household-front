@@ -2,10 +2,6 @@ services:
   # ── Next.js (외부 노출 X, nginx 뒤에 숨음) ──
   frontend:
     image: '${DOCKER_IMAGE_NAME:-household-front}:latest'
-    build:
-      context: .
-      args:
-        BUILD_COMMAND: "pnpm build"
     container_name: '${DOCKER_CONTAINER_NAME:-household-front}'
     env_file:
       - .env

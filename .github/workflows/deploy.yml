@@ -1,0 +1,73 @@
+name: Deploy to Lightsail
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: household-front
+  GHCR_REPOSITORY: ghcr.io/yangjinho826/household-front
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set image tag
+        run: |
+          echo "IMAGE_TAG=$(date +'%Y%m%d%H%M%S')-${GITHUB_SHA::8}" >> $GITHUB_ENV
+
+      # Next.js 빌드 시 NEXT_PUBLIC_* 정적으로 박힘. .env 가 빌드 컨텍스트에 들어가야 next build 가 읽음.
+      # 운영 값 고정이라 워크플로우 안에서 생성.
+      - name: Create .env for build
+        run: |
+          cat > .env <<EOF
+          NEXT_PUBLIC_USE_MOCK=false
+          NEXT_PUBLIC_BACKEND_URL=
+          EOF
+
+      - name: Build Docker image
+        run: docker build --build-arg BUILD_COMMAND="pnpm build" -t ${{ env.IMAGE_NAME }}:latest .
+
+      - name: Tag Docker image
+        run: |
+          docker tag ${{ env.IMAGE_NAME }}:latest ${{ env.GHCR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+          docker tag ${{ env.IMAGE_NAME }}:latest ${{ env.GHCR_REPOSITORY }}:latest
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push Docker image to GHCR
+        run: |
+          docker push ${{ env.GHCR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+          docker push ${{ env.GHCR_REPOSITORY }}:latest
+
+      - name: Deploy to Lightsail via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.LIGHTSAIL_HOST }}
+          username: ${{ secrets.LIGHTSAIL_USER }}
+          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+          script: |
+            set -e
+            cd ~/household-front
+            git pull origin main
+            docker compose pull frontend
+            docker compose up -d --remove-orphans
+            docker image prune -af --filter "until=24h"
+
+      - name: Verify deployment
+        run: echo "✅ Frontend deployed — image ${{ env.GHCR_REPOSITORY }}:${{ env.IMAGE_TAG }}"
