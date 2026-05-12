@@ -11,7 +11,7 @@ import {
 import { isEmail, isNotEmpty, useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { useAuthMutations } from "_features/auth/queries/use-mutations";
@@ -27,6 +27,7 @@ export default function RegisterSection() {
   const t = useTranslations("auth");
   const tg = useTranslations("general.common");
   const router = useRouter();
+  const params = useParams<{ locale: string }>();
 
   const form = useForm({
     initialValues: { email: "", password: "", confirmPassword: "", name: "" },
@@ -64,7 +65,7 @@ export default function RegisterSection() {
         message: t("register_success"),
         color: "green",
       });
-      router.push("/login");
+      router.push(`/${params.locale}/login`);
     } catch {
       // onRegisterError 에서 처리됨
     }

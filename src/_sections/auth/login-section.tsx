@@ -11,7 +11,7 @@ import {
 import { isEmail, isNotEmpty, useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { useAuthMutations } from "_features/auth/queries/use-mutations";
@@ -20,6 +20,7 @@ export default function LoginSection() {
   const t = useTranslations("auth");
   const tg = useTranslations("general.common");
   const router = useRouter();
+  const params = useParams<{ locale: string }>();
 
   const { loginMutation } = useAuthMutations({
     onLoginError: (error) => {
@@ -47,7 +48,7 @@ export default function LoginSection() {
         message: t("login_success"),
         color: "green",
       });
-      router.push("/");
+      router.push(`/${params.locale}`);
     } catch {
       // onLoginError 에서 처리됨
     }
