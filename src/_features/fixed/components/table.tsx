@@ -20,7 +20,7 @@ interface FixedTableProps {
   totalPages: number;
   pageNo: number;
   listSize: number;
-  /** fixedId → 이번달 누적 사용액 (없으면 0) */
+  /** fixedId → 선택 월 누적 사용액 (없으면 0) */
   usagesByFixed?: Record<string, number>;
   onClickRow: (fixedId: string) => void;
   onPageChange: (page: number, pageSize: number) => void;

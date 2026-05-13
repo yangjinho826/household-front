@@ -1,34 +1,35 @@
 "use client";
 
-import {
-  ActionIcon,
-  Card,
-  Group,
-  SimpleGrid,
-  Stack,
-  Text,
-  UnstyledButton,
-} from "@mantine/core";
-import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
+import { Card, SimpleGrid, Stack, Text, UnstyledButton } from "@mantine/core";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 
 import { queryKeys } from "_constants/queries";
-import { parseKstDate } from "_utilities/datetime";
 import { todayIso } from "_utilities/fmt";
 
 import TxRow from "./tx-row";
 
 const DAY_LABELS = ["일", "월", "화", "수", "목", "금", "토"];
 
+interface CalendarViewProps {
+  year: number;
+  month: number;
+}
+
 /**
  * 월별 달력 뷰 — 백엔드 calendar API (일별 합계) + list API (선택일 거래).
+ *
+ * 월 선택은 부모(transactions-section) 의 MonthPicker 에서 관리.
  */
-export default function TransactionCalendarView() {
+export default function TransactionCalendarView({ year, month }: CalendarViewProps) {
   const today = todayIso(); // YYYY-MM-DD (KST)
-  const [year, setYear] = useState(() => parseKstDate(today).year());
-  const [month, setMonth] = useState(() => parseKstDate(today).month() + 1);
-  const [selectedDate, setSelectedDate] = useState<string>(today);
+  const monthPrefix = `${year}-${String(month).padStart(2, "0")}`;
+
+  // 월 변경 시엔 부모(transactions-section) 가 key={month} 로 리마운트해서
+  // 이 컴포넌트가 새로 초기화된다. 그래서 selectedDate 는 단순 init state 로 충분.
+  const [selectedDate, setSelectedDate] = useState<string>(() =>
+    today.startsWith(monthPrefix) ? today : `${monthPrefix}-01`,
+  );
 
   // 일별 합계 (백엔드 미리 계산)
   const { data: calData } = useSuspenseQuery(
@@ -70,45 +71,15 @@ export default function TransactionCalendarView() {
     return arr;
   }, [year, month]);
 
-  const monthPrefix = `${year}-${String(month).padStart(2, "0")}`;
   const selectedTx = monthItems.filter(
     (it) => it.txDate.slice(0, 10) === selectedDate,
   );
-
-  const prev = () => {
-    if (month === 1) {
-      setYear((y) => y - 1);
-      setMonth(12);
-    } else {
-      setMonth((m) => m - 1);
-    }
-  };
-  const next = () => {
-    if (month === 12) {
-      setYear((y) => y + 1);
-      setMonth(1);
-    } else {
-      setMonth((m) => m + 1);
-    }
-  };
 
   return (
     <Stack gap="md">
       {/* 월간 합계 */}
       <Card radius="lg" p="md">
         <Stack gap="sm">
-          <Group justify="space-between" align="center">
-            <ActionIcon variant="subtle" onClick={prev} aria-label="prev">
-              <IconChevronLeft size={16} />
-            </ActionIcon>
-            <Text fw={700}>
-              {year}년 {month}월
-            </Text>
-            <ActionIcon variant="subtle" onClick={next} aria-label="next">
-              <IconChevronRight size={16} />
-            </ActionIcon>
-          </Group>
-
           <SimpleGrid cols={3} spacing="xs">
             <Stack gap={2} align="center">
               <Text size="10px" c="dimmed" fw={600}>

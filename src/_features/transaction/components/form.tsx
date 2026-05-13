@@ -7,10 +7,11 @@ import {
   NumberInput,
   Select,
   Stack,
-  TextInput,
   Textarea,
 } from "@mantine/core";
+import { DateInput } from "@mantine/dates";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import dayjs from "dayjs";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 
@@ -26,7 +27,22 @@ export default function TransactionForm({
   transactionId,
 }: TransactionFormProps) {
   const t = useTranslations("transaction");
+  const tTxType = useTranslations("enum.tx-type");
   const tg = useTranslations("general.common");
+
+  const { data: txTypeData } = useSuspenseQuery({
+    ...queryKeys.enum.options("tx-type"),
+    staleTime: Infinity,
+    gcTime: Infinity,
+  });
+  const txTypeOptions = useMemo(
+    () =>
+      (txTypeData.body.data ?? []).map((v) => ({
+        value: v,
+        label: tTxType(v),
+      })),
+    [txTypeData, tTxType],
+  );
 
   const {
     form,
@@ -81,7 +97,7 @@ export default function TransactionForm({
   const categoryOptions = useMemo(
     () =>
       categories
-        .filter((c) => (txType === "INCOME" ? c.kind === "income" : c.kind === "expense"))
+        .filter((c) => (txType === "INCOME" ? c.kind === "INCOME" : c.kind === "EXPENSE"))
         .map((c) => ({ value: c.categoryId, label: c.name })),
     [categories, txType],
   );
@@ -93,21 +109,27 @@ export default function TransactionForm({
           <Select
             {...form.getInputProps("txType")}
             label={t("tx_type")}
-            data={[
-              { value: "EXPENSE", label: t("tx_type_expense") },
-              { value: "INCOME", label: t("tx_type_income") },
-              { value: "TRANSFER", label: t("tx_type_transfer") },
-            ]}
+            data={txTypeOptions}
           />
           <NumberInput
             {...form.getInputProps("amount")}
             label={t("amount")}
             thousandSeparator=","
           />
-          <TextInput
-            {...form.getInputProps("txDate")}
+          <DateInput
+            value={
+              form.values.txDate ? dayjs(form.values.txDate).toDate() : null
+            }
+            onChange={(d) =>
+              form.setFieldValue(
+                "txDate",
+                d ? dayjs(d).format("YYYY-MM-DD") : "",
+              )
+            }
+            error={form.errors.txDate}
             label={t("tx_date")}
             placeholder="YYYY-MM-DD"
+            valueFormat="YYYY-MM-DD"
           />
 
           {isTransfer ? (

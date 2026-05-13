@@ -1,61 +1,34 @@
-import { useForm } from "@mantine/form";
 import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
 
 import { useCategoryList } from "_features/category/queries/use-query";
-import type { ApiPaginationProps } from "_libraries/fetch/response";
+import type { CategoryKind } from "_features/category/types";
 
-import type {
-  CategoryKind,
-  CategorySearchRequestType,
-} from "../../types";
-
-const isBlank = (s: string | null | undefined) => !s || s.trim() === "";
+const VALID_KINDS: CategoryKind[] = ["EXPENSE", "INCOME"];
 
 export function useCategorySearch() {
   const [params, setParams] = useQueryStates({
-    searchTerm: parseAsString,
     kind: parseAsString,
     pageNo: parseAsInteger.withDefault(1),
     listSize: parseAsInteger.withDefault(20),
   });
 
+  const kind: CategoryKind | undefined =
+    params.kind && VALID_KINDS.includes(params.kind as CategoryKind)
+      ? (params.kind as CategoryKind)
+      : undefined;
+
   const { data, isLoading } = useCategoryList({
-    searchTerm: params.searchTerm ?? undefined,
-    kind: (params.kind as CategoryKind | null) ?? undefined,
+    kind,
     pageNo: params.pageNo,
     listSize: params.listSize,
   });
 
   const result = data?.body?.data ?? undefined;
 
-  const searchform = useForm<CategorySearchRequestType & ApiPaginationProps>({
-    mode: "controlled",
-    initialValues: {
-      searchTerm: params.searchTerm ?? "",
-      kind: (params.kind as CategoryKind | null) ?? undefined,
-      pageNo: params.pageNo ?? 1,
-      listSize: params.listSize ?? 20,
-    },
-  });
-
-  const onSearch = (formValues: CategorySearchRequestType) => {
+  const setKind = (next: CategoryKind | undefined) => {
     setParams({
-      searchTerm: isBlank(formValues.searchTerm)
-        ? null
-        : (formValues.searchTerm ?? null),
-      kind: formValues.kind ?? null,
+      kind: next ?? null,
       pageNo: 1,
-      listSize: params.listSize ?? 20,
-    });
-  };
-
-  const onReset = () => {
-    searchform.reset();
-    setParams({
-      searchTerm: null,
-      kind: null,
-      pageNo: 1,
-      listSize: 20,
     });
   };
 
@@ -66,10 +39,8 @@ export function useCategorySearch() {
   return {
     handlePageChange,
     params,
-    setParams,
-    searchform,
-    onSearch,
-    onReset,
+    kind,
+    setKind,
     result,
     isLoading,
   };

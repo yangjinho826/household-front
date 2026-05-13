@@ -1,50 +1,38 @@
-import { useForm } from "@mantine/form";
 import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
 
+import {
+  type ArchiveFilter,
+  toIsArchivedParam,
+} from "_features/common/components/filter-chip";
 import { usePortfolioList } from "_features/portfolio/queries/use-query";
-import type { ApiPaginationProps } from "_libraries/fetch/response";
 
-import type { PortfolioSearchRequestType } from "../../types";
-
-const isBlank = (s: string | null | undefined) => !s || s.trim() === "";
+const VALID_FILTERS: ArchiveFilter[] = ["all", "active", "archived"];
 
 export function usePortfolioSearch() {
   const [params, setParams] = useQueryStates({
-    searchTerm: parseAsString,
+    archived: parseAsString,
     pageNo: parseAsInteger.withDefault(1),
     listSize: parseAsInteger.withDefault(20),
   });
 
+  const filter: ArchiveFilter =
+    params.archived && VALID_FILTERS.includes(params.archived as ArchiveFilter)
+      ? (params.archived as ArchiveFilter)
+      : "all";
+
   const { data, isLoading } = usePortfolioList({
-    searchTerm: params.searchTerm ?? undefined,
+    isArchived: toIsArchivedParam(filter),
     pageNo: params.pageNo,
     listSize: params.listSize,
   });
 
   const result = data?.body?.data ?? undefined;
 
-  const searchform = useForm<PortfolioSearchRequestType & ApiPaginationProps>({
-    mode: "controlled",
-    initialValues: {
-      searchTerm: params.searchTerm ?? "",
-      pageNo: params.pageNo ?? 1,
-      listSize: params.listSize ?? 20,
-    },
-  });
-
-  const onSearch = (formValues: PortfolioSearchRequestType) => {
+  const setFilter = (next: ArchiveFilter) => {
     setParams({
-      searchTerm: isBlank(formValues.searchTerm)
-        ? null
-        : (formValues.searchTerm ?? null),
+      archived: next === "all" ? null : next,
       pageNo: 1,
-      listSize: params.listSize ?? 20,
     });
-  };
-
-  const onReset = () => {
-    searchform.reset();
-    setParams({ searchTerm: null, pageNo: 1, listSize: 20 });
   };
 
   const handlePageChange = (page: number, pageSize: number) => {
@@ -54,10 +42,8 @@ export function usePortfolioSearch() {
   return {
     handlePageChange,
     params,
-    setParams,
-    searchform,
-    onSearch,
-    onReset,
+    filter,
+    setFilter,
     result,
     isLoading,
   };

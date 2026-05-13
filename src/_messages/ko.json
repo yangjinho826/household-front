@@ -61,9 +61,6 @@
     "name_required_message": "통장명을 입력해주세요.",
     "type": "타입",
     "type_placeholder": "타입 선택",
-    "type_living": "생활",
-    "type_savings": "적립",
-    "type_investment": "투자",
     "balance": "시작 잔액",
     "balance_placeholder": "0",
     "color": "색상",
@@ -81,8 +78,6 @@
     "name_required_message": "이름을 입력해주세요.",
     "kind": "분류",
     "kind_placeholder": "분류 선택",
-    "kind_expense": "지출",
-    "kind_income": "수입",
     "color": "색상",
     "icon": "아이콘",
     "sort_order": "정렬"
@@ -134,9 +129,6 @@
     "search_term_placeholder": "메모/카테고리 검색",
     "tx_type": "유형",
     "tx_type_placeholder": "유형 선택",
-    "tx_type_expense": "지출",
-    "tx_type_income": "수입",
-    "tx_type_transfer": "이체",
     "amount": "금액",
     "amount_required_message": "금액을 입력해주세요.",
     "tx_date": "날짜",
@@ -180,21 +172,21 @@
     "started_at": "시작일",
     "member_count": "{count}명"
   },
-  "sample": {
-    "detail_title": "샘플 상세",
-    "email": "이메일",
-    "email_placeholder": "이메일 입력",
-    "email_format_message": "이메일 형식이 올바르지 않습니다.",
-    "email_required_message": "이메일을 입력해주세요.",
-    "search_term": "검색어",
-    "search_term_placeholder": "제목 또는 내용",
-    "title": "제목",
-    "title_required_message": "제목을 입력해주세요.",
-    "content": "내용",
-    "content_required_message": "내용을 입력해주세요.",
-    "number": "숫자",
-    "select": "선택",
-    "date": "날짜"
+  "enum": {
+    "account-type": {
+      "LIVING": "생활",
+      "SAVINGS": "적립",
+      "INVESTMENT": "투자"
+    },
+    "category-kind": {
+      "EXPENSE": "지출",
+      "INCOME": "수입"
+    },
+    "tx-type": {
+      "EXPENSE": "지출",
+      "INCOME": "수입",
+      "TRANSFER": "이체"
+    }
   },
   "error": {
     "default": "요청을 처리하지 못했습니다.",

@@ -31,7 +31,7 @@ export default function CategoryTable({
   onClickRow,
   onPageChange,
 }: CategoryTableProps) {
-  const t = useTranslations("category");
+  const tKind = useTranslations("enum.category-kind");
   const tg = useTranslations("general.common");
 
   if (!items.length) {
@@ -66,9 +66,9 @@ export default function CategoryTable({
                 <Badge
                   size="xs"
                   variant="light"
-                  color={it.kind === "income" ? "tossGreen" : "tossRed"}
+                  color={it.kind === "INCOME" ? "tossGreen" : "tossRed"}
                 >
-                  {t(`kind_${it.kind}`)}
+                  {tKind(it.kind)}
                 </Badge>
               </Group>
               {it.icon && (

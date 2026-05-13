@@ -19,7 +19,6 @@ import { useAuthContext } from "_features/auth/context";
 import { HouseholdSwitcher } from "_features/household/components/household-switcher";
 import { useHouseholdStore } from "_features/household/store";
 import { queryKeys } from "_constants/queries";
-import { fmt } from "_utilities/fmt";
 
 export default function SettingsSection() {
   const router = useRouter();
@@ -53,7 +52,6 @@ export default function SettingsSection() {
   const fixedItems = fData.body.data.content;
   const txns = tData.body.data.content;
   const portfolio = pData.body.data.content;
-  const totalFixed = fixedItems.reduce((sum, f) => sum + f.amount, 0);
   const currentHousehold =
     households.find((h) => h.householdId === currentId) ?? households[0];
 
@@ -205,7 +203,7 @@ export default function SettingsSection() {
             />
             <SettingsRow
               label="고정지출 관리"
-              value={`월 ${fmt(totalFixed)}원`}
+              value={`${fixedItems.length}개`}
               onClick={() => navTo("/fixed")}
             />
             <SettingsRow

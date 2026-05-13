@@ -29,12 +29,6 @@ import { queryKeys } from "_constants/queries";
 import { getErrorMessage } from "_libraries/fetch/error-message";
 import { fmt } from "_utilities/fmt";
 
-const TYPE_LABEL: Record<AccountType, string> = {
-  LIVING: "생활",
-  SAVINGS: "적립",
-  INVESTMENT: "투자",
-};
-
 const TYPE_COLOR: Record<AccountType, string> = {
   LIVING: "tossBlue",
   SAVINGS: "tossGreen",
@@ -45,6 +39,7 @@ export default function WealthSection() {
   const router = useRouter();
   const routeParams = useParams<{ locale: string }>();
   const te = useTranslations("error");
+  const tType = useTranslations("enum.account-type");
 
   const { data: accountData } = useSuspenseQuery(
     queryKeys.account.list({ pageNo: 1, listSize: 100 }),
@@ -216,7 +211,7 @@ export default function WealthSection() {
                       }}
                     />
                     <Text size="sm" fw={600}>
-                      {TYPE_LABEL[t.type]}
+                      {tType(t.type)}
                     </Text>
                     <Text size="xs" c="dimmed">
                       {t.pct.toFixed(0)}%

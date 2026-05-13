@@ -34,7 +34,7 @@ export function useCategoryForm({ categoryId }: UseCategoryFormOptions) {
 
   const form = useForm<CategoryBaseRequestType>({
     initialValues: {
-      kind: "expense" as CategoryKind,
+      kind: "EXPENSE" as CategoryKind,
       name: "",
       color: null,
       icon: null,
@@ -44,7 +44,7 @@ export function useCategoryForm({ categoryId }: UseCategoryFormOptions) {
     validate: zodResolver(
       z.object({
         name: z.string().min(1, t("name_required_message")),
-        kind: z.enum(["income", "expense"]),
+        kind: z.enum(["EXPENSE", "INCOME"]),
       }),
     ),
   });

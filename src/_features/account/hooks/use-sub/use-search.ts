@@ -1,62 +1,34 @@
-import { useForm } from "@mantine/form";
 import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
 
 import { useAccountList } from "_features/account/queries/use-query";
-import type { ApiPaginationProps } from "_libraries/fetch/response";
+import type { AccountType } from "_features/account/types";
 
-import type {
-  AccountSearchRequestType,
-  AccountType,
-} from "../../types";
-
-const isBlank = (s: string | null | undefined) => !s || s.trim() === "";
+const VALID_TYPES: AccountType[] = ["LIVING", "SAVINGS", "INVESTMENT"];
 
 export function useAccountSearch() {
   const [params, setParams] = useQueryStates({
-    searchTerm: parseAsString,
     accountType: parseAsString,
     pageNo: parseAsInteger.withDefault(1),
     listSize: parseAsInteger.withDefault(20),
   });
 
+  const accountType: AccountType | undefined =
+    params.accountType && VALID_TYPES.includes(params.accountType as AccountType)
+      ? (params.accountType as AccountType)
+      : undefined;
+
   const { data, isLoading } = useAccountList({
-    searchTerm: params.searchTerm ?? undefined,
-    accountType: (params.accountType as AccountType | null) ?? undefined,
+    accountType,
     pageNo: params.pageNo,
     listSize: params.listSize,
   });
 
   const result = data?.body?.data ?? undefined;
 
-  const searchform = useForm<AccountSearchRequestType & ApiPaginationProps>({
-    mode: "controlled",
-    initialValues: {
-      searchTerm: params.searchTerm ?? "",
-      accountType:
-        (params.accountType as AccountType | null) ?? undefined,
-      pageNo: params.pageNo ?? 1,
-      listSize: params.listSize ?? 20,
-    },
-  });
-
-  const onSearch = (formValues: AccountSearchRequestType) => {
+  const setAccountType = (next: AccountType | undefined) => {
     setParams({
-      searchTerm: isBlank(formValues.searchTerm)
-        ? null
-        : (formValues.searchTerm ?? null),
-      accountType: formValues.accountType ?? null,
+      accountType: next ?? null,
       pageNo: 1,
-      listSize: params.listSize ?? 20,
-    });
-  };
-
-  const onReset = () => {
-    searchform.reset();
-    setParams({
-      searchTerm: null,
-      accountType: null,
-      pageNo: 1,
-      listSize: 20,
     });
   };
 
@@ -67,10 +39,8 @@ export function useAccountSearch() {
   return {
     handlePageChange,
     params,
-    setParams,
-    searchform,
-    onSearch,
-    onReset,
+    accountType,
+    setAccountType,
     result,
     isLoading,
   };

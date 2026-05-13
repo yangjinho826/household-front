@@ -10,9 +10,11 @@ import {
   TextInput,
 } from "@mantine/core";
 import { useTranslations } from "next-intl";
+import { useMemo } from "react";
 
 import ColorPicker from "_features/common/components/color-picker";
 import IconPicker from "_features/common/components/icon-picker";
+import { useEnumOptions } from "_features/enum/queries/use-query";
 
 import { useCategoryForm } from "../hooks/use-sub/use-form";
 
@@ -22,6 +24,7 @@ interface CategoryFormProps {
 
 export default function CategoryForm({ categoryId }: CategoryFormProps) {
   const t = useTranslations("category");
+  const tKind = useTranslations("enum.category-kind");
   const tg = useTranslations("general.common");
 
   const {
@@ -33,6 +36,13 @@ export default function CategoryForm({ categoryId }: CategoryFormProps) {
     handleCancel,
   } = useCategoryForm({ categoryId });
 
+  const { data: kindData } = useEnumOptions("category-kind");
+  const kindOptions = useMemo(
+    () =>
+      (kindData.body.data ?? []).map((v) => ({ value: v, label: tKind(v) })),
+    [kindData, tKind],
+  );
+
   return (
     <Card>
       <form onSubmit={form.onSubmit(handleSubmit)}>
@@ -40,10 +50,7 @@ export default function CategoryForm({ categoryId }: CategoryFormProps) {
           <Select
             {...form.getInputProps("kind")}
             label={t("kind")}
-            data={[
-              { value: "expense", label: t("kind_expense") },
-              { value: "income", label: t("kind_income") },
-            ]}
+            data={kindOptions}
           />
           <TextInput
             {...form.getInputProps("name")}

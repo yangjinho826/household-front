@@ -1,4 +1,4 @@
-export type CategoryKind = "income" | "expense";
+export type CategoryKind = "EXPENSE" | "INCOME";
 
 export interface CategorySearchRequestType {
   searchTerm?: string;

@@ -17,16 +17,13 @@ import type {
 interface BackendCategoryResponse {
   id: string;
   household_id: string;
-  is_income: boolean;
+  kind: CategoryKind;
   name: string;
   color: string | null;
   icon: string | null;
   sort_order: number;
   is_archived: boolean;
 }
-
-const toKind = (isIncome: boolean): CategoryKind =>
-  isIncome ? "income" : "expense";
 
 function mapToListItem(
   b: BackendCategoryResponse,
@@ -36,7 +33,7 @@ function mapToListItem(
     rowNo,
     categoryId: b.id,
     householdId: b.household_id,
-    kind: toKind(b.is_income),
+    kind: b.kind,
     name: b.name,
     color: b.color,
     icon: b.icon,
@@ -52,7 +49,7 @@ function mapToDetailItem(b: BackendCategoryResponse): CategoryDetailItemType {
   return {
     categoryId: b.id,
     householdId: b.household_id,
-    kind: toKind(b.is_income),
+    kind: b.kind,
     name: b.name,
     color: b.color,
     icon: b.icon,
@@ -65,11 +62,7 @@ function mapToDetailItem(b: BackendCategoryResponse): CategoryDetailItemType {
 }
 
 export async function GetCategorySearchApi(params: CategorySearchRequestType) {
-  // 백엔드 enum 은 대문자 (EXPENSE/INCOME), 프론트 도메인은 소문자 — 송신 시 변환
-  const queryString = objectToParams({
-    ...params,
-    kind: params.kind ? params.kind.toUpperCase() : undefined,
-  }).toString();
+  const queryString = objectToParams({ ...params }).toString();
   const res = await apiFetch<ApiResponse<BackendCategoryResponse[]>>(
     `/api/category/list${queryString ? `?${queryString}` : ""}`,
     { method: "GET" },
@@ -110,7 +103,7 @@ export async function PostCategoryCreateApi(params: CategoryCreateRequest) {
     {
       method: "POST",
       body: {
-        is_income: params.kind === "income",
+        kind: params.kind,
         name: params.name,
         color: params.color ?? null,
         icon: params.icon ?? null,
@@ -131,7 +124,7 @@ export async function PutCategoryUpdateApi(params: CategoryUpdateRequest) {
     {
       method: "PUT",
       body: {
-        is_income: params.kind === "income",
+        kind: params.kind,
         name: params.name,
         color: params.color ?? null,
         icon: params.icon ?? null,

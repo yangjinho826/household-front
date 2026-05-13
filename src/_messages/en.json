@@ -61,9 +61,6 @@
     "name_required_message": "Please enter name.",
     "type": "Type",
     "type_placeholder": "Select type",
-    "type_living": "Living",
-    "type_savings": "Savings",
-    "type_investment": "Investment",
     "balance": "Start Balance",
     "balance_placeholder": "0",
     "color": "Color",
@@ -81,8 +78,6 @@
     "name_required_message": "Please enter name.",
     "kind": "Kind",
     "kind_placeholder": "Select kind",
-    "kind_expense": "Expense",
-    "kind_income": "Income",
     "color": "Color",
     "icon": "Icon",
     "sort_order": "Order"
@@ -134,9 +129,6 @@
     "search_term_placeholder": "Search by memo/category",
     "tx_type": "Type",
     "tx_type_placeholder": "Select type",
-    "tx_type_expense": "Expense",
-    "tx_type_income": "Income",
-    "tx_type_transfer": "Transfer",
     "amount": "Amount",
     "amount_required_message": "Please enter amount.",
     "tx_date": "Date",
@@ -180,21 +172,21 @@
     "started_at": "Started at",
     "member_count": "{count} members"
   },
-  "sample": {
-    "detail_title": "Sample Detail",
-    "email": "Email",
-    "email_placeholder": "Enter email",
-    "email_format_message": "Invalid email format.",
-    "email_required_message": "Please enter email.",
-    "search_term": "Search",
-    "search_term_placeholder": "Title or content",
-    "title": "Title",
-    "title_required_message": "Please enter title.",
-    "content": "Content",
-    "content_required_message": "Please enter content.",
-    "number": "Number",
-    "select": "Select",
-    "date": "Date"
+  "enum": {
+    "account-type": {
+      "LIVING": "Living",
+      "SAVINGS": "Savings",
+      "INVESTMENT": "Investment"
+    },
+    "category-kind": {
+      "EXPENSE": "Expense",
+      "INCOME": "Income"
+    },
+    "tx-type": {
+      "EXPENSE": "Expense",
+      "INCOME": "Income",
+      "TRANSFER": "Transfer"
+    }
   },
   "error": {
     "default": "Failed to process the request.",
