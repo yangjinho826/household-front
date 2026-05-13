@@ -14,13 +14,16 @@ import {
   UnstyledButton,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { IconArrowLeft } from "@tabler/icons-react";
+import { IconArrowLeft, IconPencil } from "@tabler/icons-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { useState } from "react";
 
 import TradeForm from "_features/portfolio/components/trade-form";
-import type { PortfolioTxType } from "_features/portfolio/types";
+import type {
+  PortfolioTransactionItemType,
+  PortfolioTxType,
+} from "_features/portfolio/types";
 import {
   formatProfitAmount,
   formatProfitRate,
@@ -35,6 +38,7 @@ interface Props {
 
 export default function PortfolioTradeSection({ portfolioId }: Props) {
   const router = useRouter();
+  const routeParams = useParams<{ locale: string }>();
 
   const { data: portfolioData } = useSuspenseQuery(
     queryKeys.portfolio.list({}),
@@ -53,6 +57,8 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
 
   const [opened, { open, close }] = useDisclosure(false);
   const [initialType, setInitialType] = useState<PortfolioTxType>("BUY");
+  const [editingTx, setEditingTx] =
+    useState<PortfolioTransactionItemType | null>(null);
 
   if (!portfolio) {
     return (
@@ -63,21 +69,40 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
   }
 
   const openTrade = (type: PortfolioTxType) => {
+    setEditingTx(null);
     setInitialType(type);
     open();
   };
 
+  const handleEditPortfolio = () => {
+    router.push(`/${routeParams.locale}/portfolio/${portfolio.portfolioId}`);
+  };
+
+  const handleCloseModal = () => {
+    setEditingTx(null);
+    close();
+  };
+
   return (
     <Stack gap="md">
-      <Group gap={4} align="center">
+      <Group justify="space-between" align="center">
+        <Group gap={4} align="center">
+          <ActionIcon
+            variant="subtle"
+            onClick={() => router.back()}
+            aria-label="back"
+          >
+            <IconArrowLeft size={18} />
+          </ActionIcon>
+          <Title order={3}>{portfolio.ticker}</Title>
+        </Group>
         <ActionIcon
           variant="subtle"
-          onClick={() => router.back()}
-          aria-label="back"
+          onClick={handleEditPortfolio}
+          aria-label="edit"
         >
-          <IconArrowLeft size={18} />
+          <IconPencil size={18} />
         </ActionIcon>
-        <Title order={3}>{portfolio.ticker}</Title>
       </Group>
 
       {/* 종목 hero */}
@@ -205,46 +230,51 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
         <Card radius="lg" p="xs">
           <Stack gap={0}>
             {trades.map((t) => (
-              <Stack
+              <UnstyledButton
                 key={t.txId}
-                gap={4}
-                style={{ padding: 12, borderRadius: 12 }}
+                onClick={() => {
+                  setEditingTx(t);
+                  open();
+                }}
+                style={{ width: "100%" }}
               >
-                <Group justify="space-between" align="center">
-                  <Group gap={6}>
-                    <Badge
-                      color={t.ptType === "BUY" ? "tossRed" : "tossBlue"}
-                      variant="light"
+                <Stack gap={4} style={{ padding: 12, borderRadius: 12 }}>
+                  <Group justify="space-between" align="center">
+                    <Group gap={6}>
+                      <Badge
+                        color={t.ptType === "BUY" ? "tossRed" : "tossBlue"}
+                        variant="light"
+                        size="sm"
+                      >
+                        {t.ptType === "BUY" ? "매수" : "매도"}
+                      </Badge>
+                      <Text size="xs" fw={600} c="dimmed">
+                        {t.txDate}
+                      </Text>
+                    </Group>
+                    <Text
                       size="sm"
+                      fw={700}
+                      style={{ fontVariantNumeric: "tabular-nums" }}
                     >
-                      {t.ptType === "BUY" ? "매수" : "매도"}
-                    </Badge>
-                    <Text size="xs" fw={600} c="dimmed">
-                      {t.txDate}
+                      {fmt(t.total)}원
                     </Text>
                   </Group>
-                  <Text
-                    size="sm"
-                    fw={700}
-                    style={{ fontVariantNumeric: "tabular-nums" }}
-                  >
-                    {fmt(t.total)}원
-                  </Text>
-                </Group>
-                <Group gap={8}>
-                  <Text size="11px" c="dimmed">
-                    {t.quantity}주
-                  </Text>
-                  <Text size="11px" c="dimmed">
-                    × {fmt(t.price)}원
-                  </Text>
-                </Group>
-                {t.memo && (
-                  <Text size="11px" c="dimmed">
-                    {t.memo}
-                  </Text>
-                )}
-              </Stack>
+                  <Group gap={8}>
+                    <Text size="11px" c="dimmed">
+                      {t.quantity}주
+                    </Text>
+                    <Text size="11px" c="dimmed">
+                      × {fmt(t.price)}원
+                    </Text>
+                  </Group>
+                  {t.memo && (
+                    <Text size="11px" c="dimmed">
+                      {t.memo}
+                    </Text>
+                  )}
+                </Stack>
+              </UnstyledButton>
             ))}
           </Stack>
         </Card>
@@ -252,15 +282,23 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
 
       <Modal
         opened={opened}
-        onClose={close}
-        title={initialType === "BUY" ? "매수 기록" : "매도 기록"}
+        onClose={handleCloseModal}
+        title={
+          editingTx
+            ? "거래 수정"
+            : initialType === "BUY"
+              ? "매수 기록"
+              : "매도 기록"
+        }
         centered
         size="md"
       >
         <TradeForm
+          key={editingTx?.txId ?? "new"}
           portfolioId={portfolio.portfolioId}
-          initialType={initialType}
-          onSuccess={close}
+          initialType={editingTx?.ptType ?? initialType}
+          editingTx={editingTx ?? undefined}
+          onSuccess={handleCloseModal}
         />
       </Modal>
     </Stack>
