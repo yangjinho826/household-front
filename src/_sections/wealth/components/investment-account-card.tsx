@@ -8,7 +8,6 @@ import type { AccountListItemType } from "_features/account/types";
 import {
   formatProfitAmount,
   formatProfitRate,
-  portfolioCalc,
   profitColor,
 } from "_features/portfolio/utils";
 import type { PortfolioListItemType } from "_features/portfolio/types";
@@ -23,7 +22,11 @@ export default function InvestmentAccountCard({ account, portfolios }: Props) {
   const router = useRouter();
   const routeParams = useParams<{ locale: string }>();
 
-  const stat = portfolioCalc(portfolios);
+  // 백엔드가 통장 balance = cash + portfolio_valuation 으로 합산. 디테일 hero 와 동일 데이터 소스
+  const profitLoss = account.portfolioProfitLoss ?? 0;
+  const profitLossRate = account.portfolioProfitLossRate ?? 0;
+  const cash = account.cash ?? 0;
+  const valuation = account.portfolioValuation ?? 0;
 
   return (
     <UnstyledButton
@@ -67,7 +70,7 @@ export default function InvestmentAccountCard({ account, portfolios }: Props) {
               fw={800}
               style={{ fontVariantNumeric: "tabular-nums" }}
             >
-              {fmt(stat.totalValue)}
+              {fmt(account.balance)}
               <Text span size="sm" c="dimmed" ml={4} fw={600}>
                 원
               </Text>
@@ -76,18 +79,18 @@ export default function InvestmentAccountCard({ account, portfolios }: Props) {
               <Text
                 size="xs"
                 fw={700}
-                c={profitColor(stat.profit)}
+                c={profitColor(profitLoss)}
                 style={{ fontVariantNumeric: "tabular-nums" }}
               >
-                {formatProfitAmount(stat.profit, fmt)}원
+                {formatProfitAmount(profitLoss, fmt)}원
               </Text>
               <Text
                 size="xs"
                 fw={700}
-                c={profitColor(stat.profit)}
+                c={profitColor(profitLoss)}
                 style={{ fontVariantNumeric: "tabular-nums" }}
               >
-                ({formatProfitRate(stat.profitRate)})
+                ({formatProfitRate(profitLossRate)})
               </Text>
             </Group>
           </Stack>
@@ -95,16 +98,30 @@ export default function InvestmentAccountCard({ account, portfolios }: Props) {
           <Group gap={12} mt={4}>
             <Group gap={4}>
               <Text size="10px" c="dimmed" fw={600}>
-                매입
+                현금
               </Text>
               <Text
                 size="10px"
                 fw={700}
                 style={{ fontVariantNumeric: "tabular-nums" }}
               >
-                {fmt(stat.totalCost)}원
+                {fmt(cash)}원
               </Text>
             </Group>
+            <Text size="10px" c="dimmed">·</Text>
+            <Group gap={4}>
+              <Text size="10px" c="dimmed" fw={600}>
+                평가
+              </Text>
+              <Text
+                size="10px"
+                fw={700}
+                style={{ fontVariantNumeric: "tabular-nums" }}
+              >
+                {fmt(valuation)}원
+              </Text>
+            </Group>
+            <Text size="10px" c="dimmed">·</Text>
             <Group gap={4}>
               <Text size="10px" c="dimmed" fw={600}>
                 종목
