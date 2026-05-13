@@ -64,7 +64,7 @@ export default function WealthSection() {
   );
 
   const byType = useMemo(() => {
-    const types: AccountType[] = ["LIVING", "SAVINGS", "INVESTMENT"];
+    const types: AccountType[] = ["LIVING", "SAVINGS", "INVESTMENT", "OTHER"];
     return types
       .map((type) => {
         const accs = accounts.filter((a) => a.accountType === type);

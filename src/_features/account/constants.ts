@@ -7,6 +7,7 @@ export const ACCOUNT_TYPE_MANTINE_COLOR: Record<AccountType, string> = {
   LIVING: "tossBlue",
   SAVINGS: "tossGreen",
   INVESTMENT: "tossPurple",
+  OTHER: "gray",
 };
 
 /** AccountType → hex (IconBox 등 직접 색이 필요한 곳) */
@@ -14,11 +15,13 @@ export const ACCOUNT_TYPE_HEX: Record<AccountType, string> = {
   LIVING: TOKEN.blue,
   SAVINGS: TOKEN.green,
   INVESTMENT: TOKEN.purple,
+  OTHER: "#8B95A1",
 };
 
-/** 정렬 순서 (생활 → 적립 → 투자) */
+/** 정렬 순서 (생활 → 적립 → 투자 → 기타) */
 export const ACCOUNT_TYPE_ORDER: AccountType[] = [
   "LIVING",
   "SAVINGS",
   "INVESTMENT",
+  "OTHER",
 ];

@@ -45,7 +45,7 @@ export function useAccountForm({ accountId }: UseAccountFormOptions) {
     validate: zodResolver(
       z.object({
         name: z.string().min(1, t("name_required_message")),
-        accountType: z.enum(["LIVING", "SAVINGS", "INVESTMENT"]),
+        accountType: z.enum(["LIVING", "SAVINGS", "INVESTMENT", "OTHER"]),
         startBalance: z.number(),
       }),
     ),

@@ -1,5 +1,5 @@
-// 백엔드 enum: LIVING / SAVINGS / INVESTMENT
-export type AccountType = "LIVING" | "SAVINGS" | "INVESTMENT";
+// 백엔드 enum: LIVING / SAVINGS / INVESTMENT / OTHER
+export type AccountType = "LIVING" | "SAVINGS" | "INVESTMENT" | "OTHER";
 
 export interface AccountSearchRequestType {
   searchTerm?: string;

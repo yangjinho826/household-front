@@ -182,7 +182,8 @@
     "account-type": {
       "LIVING": "생활",
       "SAVINGS": "적립",
-      "INVESTMENT": "투자"
+      "INVESTMENT": "투자",
+      "OTHER": "기타"
     },
     "category-kind": {
       "EXPENSE": "지출",

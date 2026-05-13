@@ -182,7 +182,8 @@
     "account-type": {
       "LIVING": "Living",
       "SAVINGS": "Savings",
-      "INVESTMENT": "Investment"
+      "INVESTMENT": "Investment",
+      "OTHER": "Other"
     },
     "category-kind": {
       "EXPENSE": "Expense",

@@ -3,7 +3,7 @@ import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
 import { useAccountList } from "_features/account/queries/use-query";
 import type { AccountType } from "_features/account/types";
 
-const VALID_TYPES: AccountType[] = ["LIVING", "SAVINGS", "INVESTMENT"];
+const VALID_TYPES: AccountType[] = ["LIVING", "SAVINGS", "INVESTMENT", "OTHER"];
 
 export function useAccountSearch() {
   const [params, setParams] = useQueryStates({
