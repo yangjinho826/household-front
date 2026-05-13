@@ -1,5 +1,6 @@
 "use client";
 
+import { Center, Loader } from "@mantine/core";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter, useParams, usePathname } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
@@ -49,6 +50,19 @@ export function OnboardingGuard({ children }: { children: ReactNode }) {
       router.replace(`/${params.locale}`);
     }
   }, [count, isOnboarding, router, params.locale]);
+
+  // redirect 가 effect 단계라 children 이 먼저 마운트되면, 가계부 ID 없는 상태로
+  // 자식 페이지의 useSuspenseQuery 들이 호출되어 throw → ErrorBoundary 발동.
+  // render 단계에서 미리 차단.
+  const shouldRedirect =
+    (count === 0 && !isOnboarding) || (count > 0 && isOnboarding);
+  if (shouldRedirect) {
+    return (
+      <Center py="xl">
+        <Loader />
+      </Center>
+    );
+  }
 
   return <>{children}</>;
 }

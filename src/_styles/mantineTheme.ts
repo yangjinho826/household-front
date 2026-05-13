@@ -140,6 +140,7 @@ export const mantineTheme = createTheme({
         variant: "filled",
         size: "md",
         radius: "md",
+        hideControls: true,
       },
     }),
     Select: Select.extend({

@@ -8,6 +8,8 @@ import {
   TextInput,
   Textarea,
 } from "@mantine/core";
+import { DateInput } from "@mantine/dates";
+import dayjs from "dayjs";
 import { useTranslations } from "next-intl";
 
 import { useHouseholdForm } from "../hooks/use-sub/use-form";
@@ -49,10 +51,22 @@ export default function HouseholdForm({ householdId }: HouseholdFormProps) {
             label={t("currency")}
             placeholder="KRW"
           />
-          <TextInput
-            {...form.getInputProps("startedAt")}
+          <DateInput
+            value={
+              form.values.startedAt
+                ? dayjs(form.values.startedAt).toDate()
+                : null
+            }
+            onChange={(d) =>
+              form.setFieldValue(
+                "startedAt",
+                d ? dayjs(d).format("YYYY-MM-DD") : "",
+              )
+            }
+            error={form.errors.startedAt}
             label={t("started_at")}
             placeholder="YYYY-MM-DD"
+            valueFormat="YYYY-MM-DD"
           />
           <Group grow mt="md">
             <Button

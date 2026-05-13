@@ -62,6 +62,7 @@ export function HouseholdSwitcher({ opened, onClose }: HouseholdSwitcherProps) {
           borderTopRightRadius: 24,
           maxWidth: 448,
           margin: "0 auto",
+          maxHeight: "min(80vh, 600px)",
         },
       }}
     >

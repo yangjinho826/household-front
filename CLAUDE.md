@@ -69,10 +69,10 @@ pnpm dlx shadcn@latest add <component>
 
 ```
 src/
-├── _features/    # 9 도메인 (household, account, transaction, portfolio, category, fixed, sample, common, layout)
+├── _features/    # 도메인 (household, account, transaction, portfolio, category, fixed, common, layout 등)
 ├── _libraries/   # auth, fetch, i18n, ui (shadcn)
-├── _providers/   # query-provider, budget-providers, sample-provider
-├── _sections/    # 페이지 단위 (auth, home, transaction, wealth, portfolio, settings, sample)
+├── _providers/   # query-provider, mantine-provider, search-params-provider 등
+├── _sections/    # 페이지 단위 (auth, home, transaction, wealth, portfolio, settings 등)
 ├── _styles/      # design-tokens (토스 색상 C.*)
 ├── _utilities/   # fmt, icons, utils, mock-response
 ├── _constants/   # apiBaseUrl, authLoginUrl
@@ -92,7 +92,7 @@ src/
 
 ### 표준 참조 모듈
 
-**`_features/sample/`** — 신규 도메인 만들 때 sample 복제 + 도메인명 치환
+**`_features/household/`** 또는 `_features/transaction/` — 신규 도메인 만들 때 참조 (api/queries/components/hooks 구조)
 
 ### mock 모드
 

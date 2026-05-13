@@ -6,11 +6,12 @@ import {
   NumberInput,
   SegmentedControl,
   Stack,
-  TextInput,
   Textarea,
 } from "@mantine/core";
+import { DateInput } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
+import dayjs from "dayjs";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
@@ -135,10 +136,20 @@ export default function TradeForm({
             <span style={{ fontSize: 11, color: "#8B95A1" }}>원</span>
           }
         />
-        <TextInput
-          {...form.getInputProps("txDate")}
+        <DateInput
+          value={
+            form.values.txDate ? dayjs(form.values.txDate).toDate() : null
+          }
+          onChange={(d) =>
+            form.setFieldValue(
+              "txDate",
+              d ? dayjs(d).format("YYYY-MM-DD") : "",
+            )
+          }
+          error={form.errors.txDate}
           label="거래일"
           placeholder="YYYY-MM-DD"
+          valueFormat="YYYY-MM-DD"
         />
         <Textarea
           {...form.getInputProps("memo")}
