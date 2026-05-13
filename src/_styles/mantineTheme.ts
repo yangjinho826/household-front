@@ -13,6 +13,7 @@ import {
   TextInput,
   Title,
 } from "@mantine/core";
+import { DateInput } from "@mantine/dates";
 
 const tossBlue: MantineColorsTuple = [
   "#E8F3FF",
@@ -151,6 +152,13 @@ export const mantineTheme = createTheme({
       },
     }),
     Textarea: Textarea.extend({
+      defaultProps: {
+        variant: "filled",
+        size: "md",
+        radius: "md",
+      },
+    }),
+    DateInput: DateInput.extend({
       defaultProps: {
         variant: "filled",
         size: "md",

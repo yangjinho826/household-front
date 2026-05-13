@@ -24,16 +24,14 @@ import {
 } from "recharts";
 
 import { useAccountSnapshotMutations } from "_features/account-snapshot/queries/use-mutations";
+import { ACCOUNT_TYPE_MANTINE_COLOR } from "_features/account/constants";
 import type { AccountListItemType, AccountType } from "_features/account/types";
 import { queryKeys } from "_constants/queries";
 import { getErrorMessage } from "_libraries/fetch/error-message";
 import { fmt } from "_utilities/fmt";
 
-const TYPE_COLOR: Record<AccountType, string> = {
-  LIVING: "tossBlue",
-  SAVINGS: "tossGreen",
-  INVESTMENT: "tossPurple",
-};
+// 시각 색상 매핑은 _features/account/constants.ts 에서 중앙 관리
+const TYPE_COLOR = ACCOUNT_TYPE_MANTINE_COLOR;
 
 export default function WealthSection() {
   const router = useRouter();

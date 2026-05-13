@@ -11,6 +11,7 @@ import {
 } from "@mantine/core";
 import { useTranslations } from "next-intl";
 
+import IconBox from "_features/common/components/icon-box";
 import { fmt } from "_utilities/fmt";
 
 import type { FixedListItemType } from "../types";
@@ -48,45 +49,48 @@ export default function FixedTable({
 
   return (
     <Stack gap="sm">
-      {items.map((it) => {
-        const used = usagesByFixed?.[it.fixedId] ?? 0;
-        return (
-          <UnstyledButton
-            key={it.fixedId}
-            onClick={() => onClickRow(it.fixedId)}
-          >
-            <Card>
-              <Group justify="space-between">
-                <Stack gap={2}>
-                  <Group gap="xs">
-                    {it.color && (
-                      <div
-                        style={{
-                          width: 10,
-                          height: 10,
-                          borderRadius: 5,
-                          background: it.color,
-                        }}
-                      />
-                    )}
-                    <Text fw={600}>{it.name}</Text>
+      <Card radius="lg" p="xs">
+        <Stack gap={0}>
+          {items.map((it) => {
+            const used = usagesByFixed?.[it.fixedId] ?? 0;
+            const accent = it.color ?? it.categoryColor;
+            const iconName = it.icon ?? it.categoryIcon;
+            return (
+              <UnstyledButton
+                key={it.fixedId}
+                onClick={() => onClickRow(it.fixedId)}
+                style={{ padding: 12, borderRadius: 12, display: "block" }}
+              >
+                <Group justify="space-between" gap="md" wrap="nowrap" align="center">
+                  <Group gap={12} wrap="nowrap" style={{ minWidth: 0, flex: 1 }}>
+                    <IconBox icon={iconName} color={accent} />
+                    <Stack gap={2} style={{ minWidth: 0, flex: 1 }}>
+                      <Text size="sm" fw={600} truncate>
+                        {it.name}
+                      </Text>
+                      <Text size="xs" c="dimmed" truncate>
+                        {t("day_format", { day: it.dayOfMonth })}
+                        {it.categoryName ? ` · ${it.categoryName}` : ""}
+                      </Text>
+                    </Stack>
                   </Group>
-                  <Text size="xs" c="dimmed">
-                    {t("day_format", { day: it.dayOfMonth })}
+                  <Text
+                    fw={800}
+                    c={used > 0 ? undefined : "dimmed"}
+                    style={{
+                      fontVariantNumeric: "tabular-nums",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {fmt(used)}원
                   </Text>
-                </Stack>
-                <Text
-                  fw={700}
-                  style={{ fontVariantNumeric: "tabular-nums" }}
-                  c={used > 0 ? undefined : "dimmed"}
-                >
-                  {t("used_this_month", { amount: fmt(used) })}
-                </Text>
-              </Group>
-            </Card>
-          </UnstyledButton>
-        );
-      })}
+                </Group>
+              </UnstyledButton>
+            );
+          })}
+        </Stack>
+      </Card>
+
       {totalPages > 1 && (
         <Group justify="center">
           <Pagination

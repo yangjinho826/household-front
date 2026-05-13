@@ -1,8 +1,8 @@
 "use client";
 
-import { Button, Card, Center, Stack, Text } from "@mantine/core";
+import { Card, Center, Loader, Stack, Text } from "@mantine/core";
 import { useTranslations } from "next-intl";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 import { useTransactionInfiniteList } from "../queries/use-query";
 import type {
@@ -16,10 +16,11 @@ interface ListViewProps {
 }
 
 /**
- * 월별 그룹화 + 무한 스크롤 (더보기 버튼) 거래 리스트.
+ * 월별 그룹화 + 무한 스크롤 거래 리스트.
+ *
+ * sentinel 이 뷰포트에 들어오면 다음 페이지 자동 fetch.
  */
 export default function TransactionListView({ searchParams }: ListViewProps) {
-  const t = useTranslations("transaction");
   const tg = useTranslations("general.common");
 
   const { data, hasNextPage, fetchNextPage, isFetchingNextPage } =
@@ -41,6 +42,22 @@ export default function TransactionListView({ searchParams }: ListViewProps) {
     }
     return Array.from(map.entries()).sort((a, b) => b[0].localeCompare(a[0]));
   }, [items]);
+
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const target = loadMoreRef.current;
+    if (!target || !hasNextPage) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: "120px" },
+    );
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   if (items.length === 0) {
     return (
@@ -68,13 +85,9 @@ export default function TransactionListView({ searchParams }: ListViewProps) {
       ))}
 
       {hasNextPage && (
-        <Button
-          variant="light"
-          onClick={() => fetchNextPage()}
-          loading={isFetchingNextPage}
-        >
-          {t("load_more")}
-        </Button>
+        <Center ref={loadMoreRef} py="md">
+          {isFetchingNextPage && <Loader size="sm" />}
+        </Center>
       )}
     </Stack>
   );
