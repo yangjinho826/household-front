@@ -10,6 +10,7 @@ import {
 } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
 import { useForm } from "@mantine/form";
+import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import dayjs from "dayjs";
 import { useTranslations } from "next-intl";
@@ -19,6 +20,7 @@ import { getErrorMessage } from "_libraries/fetch/error-message";
 import { todayIsoKst } from "_utilities/datetime";
 
 import { usePortfolioMutations } from "../queries/use-mutations";
+import type { PortfolioTransactionItemType } from "../types";
 
 type TradeType = "BUY" | "SELL";
 
@@ -26,6 +28,8 @@ interface TradeFormProps {
   /** 종목 ID (필수 — 매수/매도 모두 기존 종목에 대해 수행) */
   portfolioId: string;
   initialType?: TradeType;
+  /** 있으면 수정 모드 — initialValues 채움 + tradeType 잠금 + 삭제 버튼 노출 */
+  editingTx?: PortfolioTransactionItemType;
   onSuccess?: () => void;
 }
 
@@ -40,19 +44,27 @@ interface FormValues {
 export default function TradeForm({
   portfolioId,
   initialType = "BUY",
+  editingTx,
   onSuccess,
 }: TradeFormProps) {
   const te = useTranslations("error");
-  const { buyMutation, sellMutation } = usePortfolioMutations();
+  const {
+    buyMutation,
+    sellMutation,
+    updateTxMutation,
+    removeTxMutation,
+  } = usePortfolioMutations();
   const [submitting, setSubmitting] = useState(false);
+
+  const isEdit = !!editingTx;
 
   const form = useForm<FormValues>({
     initialValues: {
-      tradeType: initialType,
-      quantity: 0,
-      price: 0,
-      txDate: todayIsoKst(),
-      memo: "",
+      tradeType: editingTx?.ptType ?? initialType,
+      quantity: editingTx?.quantity ?? 0,
+      price: editingTx?.price ?? 0,
+      txDate: editingTx?.txDate ?? todayIsoKst(),
+      memo: editingTx?.memo ?? "",
     },
     validate: {
       quantity: (v) => (v > 0 ? null : "수량을 입력해주세요"),
@@ -64,7 +76,20 @@ export default function TradeForm({
   const handleSubmit = async (values: FormValues) => {
     setSubmitting(true);
     try {
-      if (values.tradeType === "BUY") {
+      if (editingTx) {
+        await updateTxMutation.mutateAsync({
+          txId: editingTx.txId,
+          quantity: values.quantity,
+          price: values.price,
+          txDate: values.txDate,
+          memo: values.memo.trim() || null,
+        });
+        notifications.show({
+          title: "거래 수정 완료",
+          message: "거래가 수정되었습니다.",
+          color: editingTx.ptType === "BUY" ? "red" : "blue",
+        });
+      } else if (values.tradeType === "BUY") {
         await buyMutation.mutateAsync({
           portfolioId,
           quantity: values.quantity,
@@ -94,7 +119,7 @@ export default function TradeForm({
       onSuccess?.();
     } catch (error) {
       notifications.show({
-        title: "거래 기록 실패",
+        title: isEdit ? "거래 수정 실패" : "거래 기록 실패",
         message: getErrorMessage(error, te),
         color: "red",
       });
@@ -103,8 +128,51 @@ export default function TradeForm({
     }
   };
 
+  const handleRemove = () => {
+    if (!editingTx) return;
+    modals.openConfirmModal({
+      centered: true,
+      title: "거래 삭제",
+      labels: { confirm: "삭제", cancel: "취소" },
+      confirmProps: { color: "red" },
+      children: (
+        <span>
+          이 거래를 삭제할까요?
+          <br />
+          종목의 보유 수량과 평균가가 재계산됩니다.
+        </span>
+      ),
+      onConfirm: async () => {
+        setSubmitting(true);
+        try {
+          await removeTxMutation.mutateAsync(editingTx.txId);
+          notifications.show({
+            title: "거래 삭제 완료",
+            message: "거래가 삭제되었습니다.",
+            color: "green",
+          });
+          onSuccess?.();
+        } catch (error) {
+          notifications.show({
+            title: "거래 삭제 실패",
+            message: getErrorMessage(error, te),
+            color: "red",
+          });
+        } finally {
+          setSubmitting(false);
+        }
+      },
+    });
+  };
+
   const total = (form.values.quantity || 0) * (form.values.price || 0);
   const isBuy = form.values.tradeType === "BUY";
+  const isPending =
+    submitting ||
+    buyMutation.isPending ||
+    sellMutation.isPending ||
+    updateTxMutation.isPending ||
+    removeTxMutation.isPending;
 
   return (
     <form onSubmit={form.onSubmit(handleSubmit)}>
@@ -117,6 +185,7 @@ export default function TradeForm({
             { value: "SELL", label: "매도" },
           ]}
           color={isBuy ? "tossRed" : "tossBlue"}
+          disabled={isEdit}
         />
         <NumberInput
           {...form.getInputProps("quantity")}
@@ -170,12 +239,25 @@ export default function TradeForm({
 
         <Button
           type="submit"
-          loading={submitting || buyMutation.isPending || sellMutation.isPending}
+          loading={isPending}
           color={isBuy ? "tossRed" : "tossBlue"}
           size="md"
         >
-          {isBuy ? "매수 기록" : "매도 기록"}
+          {isEdit ? "거래 수정" : isBuy ? "매수 기록" : "매도 기록"}
         </Button>
+
+        {isEdit && (
+          <Button
+            type="button"
+            variant="light"
+            color="red"
+            onClick={handleRemove}
+            disabled={isPending}
+            fullWidth
+          >
+            삭제
+          </Button>
+        )}
       </Stack>
     </form>
   );
