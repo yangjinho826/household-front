@@ -14,6 +14,7 @@ import { useHouseholdStore } from "_features/household/store";
  * - 가계부 1개+ → 첫 가계부 ID 를 zustand store 에 저장 (X-Household-Id 헤더 인터셉터가 사용)
  *
  * Suspense boundary 가 부모에 있어야 함 (useSuspenseQuery).
+ * client-only 마운트는 상위 `ClientOnlyShell` 이 보장.
  */
 export function OnboardingGuard({ children }: { children: ReactNode }) {
   const router = useRouter();

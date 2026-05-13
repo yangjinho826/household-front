@@ -11,16 +11,19 @@ const baseApiFetch = returnFetchExtended({
 /**
  * 최종 사용 fetch — 4 체인 (cookie → refresh → api → json) 통과.
  *
- * SSR 단계에선 호출 차단: apiBaseUrl 이 빈 문자열(rewrites 의존)이라 Node fetch 가
- * 상대 URL parse 실패. useSuspenseQuery 가 영원 pending 으로 인식 → React 18 Suspense
- * 가 fallback HTML 송출 → client hydrate 후 진짜 fetch.
+ * SSR 단계에선 호출 금지. 호출 시 즉시 reject — useSuspenseQuery 가 throw 하는
+ * Promise 가 영원 pending 이면 React 18 streaming SSR 이 stream 을 안 닫아서
+ * nginx 60초 후 504. 보호 라우트는 `ClientOnlyShell` 이 client-only 마운트로
+ * 차단하므로 정상 흐름에선 이 reject 가 트리거되지 않음. 트리거되면 즉시 노출돼야 함.
  */
 export const apiFetch = <T>(
   url: Parameters<typeof baseApiFetch>[0],
   init?: Parameters<typeof baseApiFetch>[1],
 ): Promise<Fetch.Json<T>> => {
   if (typeof window === "undefined") {
-    return new Promise<Fetch.Json<T>>(() => {});
+    return Promise.reject(
+      new Error("apiFetch called during SSR — wrap caller in ClientOnlyShell"),
+    );
   }
   return baseApiFetch<T>(url, init);
 };
