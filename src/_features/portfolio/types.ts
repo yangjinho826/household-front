@@ -82,6 +82,15 @@ export interface PortfolioTransactionItemType {
   memo: string | null;
 }
 
+/** 매수/매도 거래 수정 — pt_type 변경 불가 (백엔드 제약) */
+export interface PortfolioTxUpdateRequest {
+  txId: string;
+  quantity?: number | null;
+  price?: number | null;
+  txDate?: string | null;
+  memo?: string | null;
+}
+
 /** 월별 평가액 추이 1 point */
 export interface PortfolioValueHistoryPoint {
   snapshotDate: string; // YYYY-MM-DD (월말)

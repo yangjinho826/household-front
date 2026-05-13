@@ -13,6 +13,7 @@ import type {
   PortfolioSellRequest,
   PortfolioTransactionItemType,
   PortfolioTxType,
+  PortfolioTxUpdateRequest,
   PortfolioUpdateRequest,
   PortfolioValueHistoryByAccountRequest,
   PortfolioValueHistoryByItem,
@@ -280,6 +281,32 @@ export async function GetPortfolioValueHistoryByItemApi(
     ...res,
     body: { ...res.body, data: mapHistoryByItem(res.body.data) },
   };
+}
+
+/** 매수/매도 거래 수정 (pt_type 불변) */
+export async function PutPortfolioTxUpdateApi(params: PortfolioTxUpdateRequest) {
+  const res = await apiFetch<ApiResponse<BackendPortfolioTxResponse>>(
+    `/api/portfolio/transactions/${params.txId}`,
+    {
+      method: "PUT",
+      body: {
+        quantity: params.quantity ?? null,
+        price: params.price ?? null,
+        tx_date: params.txDate ?? null,
+        memo: params.memo ?? null,
+      },
+      errorHandleMethod: "reject",
+    },
+  );
+  return { ...res, body: { ...res.body, data: mapToTx(res.body.data, 1) } };
+}
+
+/** 매수/매도 거래 soft delete — 해당 종목 quantity/avg_price 자동 재계산 */
+export async function DeletePortfolioTxApi(txId: string) {
+  return apiFetch<ApiResponse<null>>(
+    `/api/portfolio/transactions/${txId}`,
+    { method: "DELETE", errorHandleMethod: "reject" },
+  );
 }
 
 /** 매수/매도 거래 이력 */

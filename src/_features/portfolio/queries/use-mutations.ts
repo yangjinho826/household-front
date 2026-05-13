@@ -3,15 +3,18 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "_constants/queries";
 
 import {
+  DeletePortfolioTxApi,
   PostPortfolioBuyApi,
   PostPortfolioCreateApi,
   PostPortfolioSellApi,
+  PutPortfolioTxUpdateApi,
   PutPortfolioUpdateApi,
 } from "../api";
 import type {
   PortfolioBuyRequest,
   PortfolioCreateRequest,
   PortfolioSellRequest,
+  PortfolioTxUpdateRequest,
   PortfolioUpdateRequest,
 } from "../types";
 
@@ -55,5 +58,22 @@ export function usePortfolioMutations() {
     onSuccess: invalidateAll,
   });
 
-  return { createMutation, buyMutation, sellMutation, updateMutation };
+  const updateTxMutation = useMutation({
+    mutationFn: (props: PortfolioTxUpdateRequest) => PutPortfolioTxUpdateApi(props),
+    onSuccess: invalidateAll,
+  });
+
+  const removeTxMutation = useMutation({
+    mutationFn: (txId: string) => DeletePortfolioTxApi(txId),
+    onSuccess: invalidateAll,
+  });
+
+  return {
+    createMutation,
+    buyMutation,
+    sellMutation,
+    updateMutation,
+    updateTxMutation,
+    removeTxMutation,
+  };
 }
