@@ -3,8 +3,10 @@
 import {
   Anchor,
   Button,
+  Group,
   PasswordInput,
   Stack,
+  Text,
   TextInput,
   Title,
 } from "@mantine/core";
@@ -14,6 +16,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
+import BrandLogo from "_features/auth/components/brand-logo";
 import { useAuthMutations } from "_features/auth/queries/use-mutations";
 
 export default function LoginSection() {
@@ -56,24 +59,57 @@ export default function LoginSection() {
 
   return (
     <form onSubmit={onSubmit}>
-      <Stack gap="md">
-        <Title order={2}>{t("login_title")}</Title>
-        <TextInput
-          {...form.getInputProps("email")}
-          label={t("email")}
-          placeholder={t("email_placeholder")}
-        />
-        <PasswordInput
-          {...form.getInputProps("password")}
-          label={t("password")}
-          placeholder={t("password_placeholder")}
-        />
-        <Button type="submit" fullWidth loading={loginMutation.isPending}>
-          {t("login_submit")}
-        </Button>
-        <Anchor component={Link} href="/register" size="sm" ta="center">
-          {t("register_link")}
-        </Anchor>
+      <Stack gap="xl">
+        <Stack gap="md">
+          <BrandLogo />
+          <Stack gap={4}>
+            <Title order={1} fw={800} style={{ whiteSpace: "pre-line", lineHeight: 1.3 }}>
+              {t("welcome_title")}
+            </Title>
+            <Text size="sm" c="dimmed">
+              {t("welcome_subtitle")}
+            </Text>
+          </Stack>
+        </Stack>
+
+        <Stack gap="sm">
+          <TextInput
+            {...form.getInputProps("email")}
+            label={t("email")}
+            placeholder={t("email_placeholder")}
+          />
+          <PasswordInput
+            {...form.getInputProps("password")}
+            label={t("password")}
+            placeholder={t("password_placeholder")}
+          />
+        </Stack>
+
+        <Stack gap="sm">
+          <Button
+            type="submit"
+            fullWidth
+            size="lg"
+            radius="md"
+            fw={700}
+            loading={loginMutation.isPending}
+          >
+            {t("login_submit")}
+          </Button>
+          <Group justify="center" gap={6}>
+            <Text size="xs" c="dimmed">
+              {t("register_prompt")}
+            </Text>
+            <Anchor
+              component={Link}
+              href={`/${params.locale}/register`}
+              size="xs"
+              fw={700}
+            >
+              {t("register_link")}
+            </Anchor>
+          </Group>
+        </Stack>
       </Stack>
     </form>
   );

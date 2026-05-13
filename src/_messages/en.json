@@ -25,7 +25,13 @@
     "register_submit": "Create account",
     "register_success": "Account created.",
     "register_failed": "Sign-up failed.",
-    "register_link": "Sign up"
+    "register_link": "Sign up",
+    "welcome_title": "Hello!\nWelcome to your budget",
+    "welcome_subtitle": "Start with your email",
+    "welcome_register_title": "Let's get started",
+    "welcome_register_subtitle": "All you need is an email and password",
+    "login_prompt": "Already have an account?",
+    "register_prompt": "New here?"
   },
   "general": {
     "common": {

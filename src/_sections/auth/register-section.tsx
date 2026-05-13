@@ -3,8 +3,10 @@
 import {
   Anchor,
   Button,
+  Group,
   PasswordInput,
   Stack,
+  Text,
   TextInput,
   Title,
 } from "@mantine/core";
@@ -14,6 +16,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
+import BrandLogo from "_features/auth/components/brand-logo";
 import { useAuthMutations } from "_features/auth/queries/use-mutations";
 
 const ERROR_FIELD_MAP: Record<string, "email" | "password" | "name"> = {
@@ -73,34 +76,71 @@ export default function RegisterSection() {
 
   return (
     <form onSubmit={onSubmit}>
-      <Stack gap="md">
-        <Title order={2}>{t("register_title")}</Title>
-        <TextInput
-          {...form.getInputProps("name")}
-          label={t("name")}
-          placeholder={t("name_placeholder")}
-        />
-        <TextInput
-          {...form.getInputProps("email")}
-          label={t("email")}
-          placeholder={t("email_placeholder")}
-        />
-        <PasswordInput
-          {...form.getInputProps("password")}
-          label={t("password")}
-          placeholder={t("password_placeholder")}
-        />
-        <PasswordInput
-          {...form.getInputProps("confirmPassword")}
-          label={t("confirm_password")}
-          placeholder={t("confirm_password_placeholder")}
-        />
-        <Button type="submit" fullWidth loading={registerMutation.isPending}>
-          {t("register_submit")}
-        </Button>
-        <Anchor component={Link} href="/login" size="sm" ta="center">
-          {t("login_link")}
-        </Anchor>
+      <Stack gap="xl">
+        <Stack gap="md">
+          <BrandLogo />
+          <Stack gap={4}>
+            <Title
+              order={1}
+              fw={800}
+              style={{ whiteSpace: "pre-line", lineHeight: 1.3 }}
+            >
+              {t("welcome_register_title")}
+            </Title>
+            <Text size="sm" c="dimmed">
+              {t("welcome_register_subtitle")}
+            </Text>
+          </Stack>
+        </Stack>
+
+        <Stack gap="sm">
+          <TextInput
+            {...form.getInputProps("name")}
+            label={t("name")}
+            placeholder={t("name_placeholder")}
+          />
+          <TextInput
+            {...form.getInputProps("email")}
+            label={t("email")}
+            placeholder={t("email_placeholder")}
+          />
+          <PasswordInput
+            {...form.getInputProps("password")}
+            label={t("password")}
+            placeholder={t("password_placeholder")}
+          />
+          <PasswordInput
+            {...form.getInputProps("confirmPassword")}
+            label={t("confirm_password")}
+            placeholder={t("confirm_password_placeholder")}
+          />
+        </Stack>
+
+        <Stack gap="sm">
+          <Button
+            type="submit"
+            fullWidth
+            size="lg"
+            radius="md"
+            fw={700}
+            loading={registerMutation.isPending}
+          >
+            {t("register_submit")}
+          </Button>
+          <Group justify="center" gap={6}>
+            <Text size="xs" c="dimmed">
+              {t("login_prompt")}
+            </Text>
+            <Anchor
+              component={Link}
+              href={`/${params.locale}/login`}
+              size="xs"
+              fw={700}
+            >
+              {t("login_link")}
+            </Anchor>
+          </Group>
+        </Stack>
       </Stack>
     </form>
   );
