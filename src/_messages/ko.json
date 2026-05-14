@@ -146,8 +146,9 @@
     "to_account": "도착 통장",
     "category": "카테고리",
     "category_placeholder": "카테고리 선택",
-    "fixed_expense_mapping": "고정 지출 매핑",
-    "fixed_expense_mapping_placeholder": "어느 고정 지출인지 선택 (선택)",
+    "fixed_expense_item": "고정 지출 항목",
+    "fixed_expense_item_placeholder": "어느 고정 지출 항목인지 선택",
+    "fixed_expense_item_required_message": "고정 지출 항목을 선택해주세요.",
     "view_list": "목록",
     "view_calendar": "달력",
     "filter_all": "전체",
@@ -192,7 +193,8 @@
     "tx-type": {
       "EXPENSE": "지출",
       "INCOME": "수입",
-      "TRANSFER": "이체"
+      "TRANSFER": "이체",
+      "FIXED_EXPENSE": "고정 지출"
     },
     "portfolio-tx-type": {
       "BUY": "매수",

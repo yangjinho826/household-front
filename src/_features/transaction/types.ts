@@ -1,4 +1,4 @@
-export type TxType = "EXPENSE" | "INCOME" | "TRANSFER";
+export type TxType = "EXPENSE" | "INCOME" | "TRANSFER" | "FIXED_EXPENSE";
 
 export interface TransactionSearchRequestType {
   searchTerm?: string;

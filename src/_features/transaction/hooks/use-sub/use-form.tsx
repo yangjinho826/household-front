@@ -50,11 +50,22 @@ export function useTransactionForm({
       memo: null,
     },
     validate: zodResolver(
-      z.object({
-        txType: z.enum(["EXPENSE", "INCOME", "TRANSFER"]),
-        amount: z.number().positive(t("amount_required_message")),
-        txDate: z.string().min(1),
-      }),
+      z
+        .object({
+          txType: z.enum(["EXPENSE", "INCOME", "TRANSFER", "FIXED_EXPENSE"]),
+          amount: z.number().positive(t("amount_required_message")),
+          txDate: z.string().min(1),
+          fixedExpenseId: z.string().nullable().optional(),
+        })
+        .superRefine((data, ctx) => {
+          if (data.txType === "FIXED_EXPENSE" && !data.fixedExpenseId) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              path: ["fixedExpenseId"],
+              message: t("fixed_expense_item_required_message"),
+            });
+          }
+        }),
     ),
   });
 

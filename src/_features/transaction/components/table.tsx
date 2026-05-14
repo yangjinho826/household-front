@@ -17,6 +17,7 @@ import type { TransactionListItemType, TxType } from "../types";
 
 const TYPE_COLOR: Record<TxType, string> = {
   EXPENSE: "tossRed.5",
+  FIXED_EXPENSE: "tossRed.5",
   INCOME: "tossGreen.5",
   TRANSFER: "tossPurple.5",
 };
@@ -50,6 +51,7 @@ export default function TransactionTable({
 
   const sign: Record<TxType, string> = {
     EXPENSE: "-",
+    FIXED_EXPENSE: "-",
     INCOME: "+",
     TRANSFER: "→",
   };

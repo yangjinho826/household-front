@@ -11,12 +11,14 @@ import type { TransactionListItemType, TxType } from "../types";
 
 const SIGN: Record<TxType, string> = {
   EXPENSE: "-",
+  FIXED_EXPENSE: "-",
   INCOME: "+",
   TRANSFER: "→",
 };
 
 const TYPE_COLOR: Record<TxType, string> = {
   EXPENSE: "tossRed.5",
+  FIXED_EXPENSE: "tossRed.5",
   INCOME: "tossGreen.5",
   TRANSFER: "tossPurple.5",
 };
@@ -24,6 +26,7 @@ const TYPE_COLOR: Record<TxType, string> = {
 // 카테고리 색상 없을 때 tx_type 기준 fallback
 const TYPE_FALLBACK_HEX: Record<TxType, string> = {
   EXPENSE: TOKEN.red,
+  FIXED_EXPENSE: TOKEN.red,
   INCOME: TOKEN.green,
   TRANSFER: TOKEN.purple,
 };

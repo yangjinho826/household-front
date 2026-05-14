@@ -70,7 +70,7 @@ export default function TransactionForm({
 
   const txType = form.values.txType;
   const isTransfer = txType === "TRANSFER";
-  const isExpense = txType === "EXPENSE";
+  const isFixedExpense = txType === "FIXED_EXPENSE";
 
   const fixedOptions = useMemo(
     () =>
@@ -166,14 +166,14 @@ export default function TransactionForm({
                 searchable
                 clearable
               />
-              {isExpense && (
+              {isFixedExpense && (
                 <Select
                   {...form.getInputProps("fixedExpenseId")}
-                  label={t("fixed_expense_mapping")}
-                  placeholder={t("fixed_expense_mapping_placeholder")}
+                  label={t("fixed_expense_item")}
+                  placeholder={t("fixed_expense_item_placeholder")}
                   data={fixedOptions}
                   searchable
-                  clearable
+                  required
                 />
               )}
             </>

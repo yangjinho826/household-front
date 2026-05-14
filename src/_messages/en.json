@@ -146,8 +146,9 @@
     "to_account": "To",
     "category": "Category",
     "category_placeholder": "Select category",
-    "fixed_expense_mapping": "Fixed expense mapping",
-    "fixed_expense_mapping_placeholder": "Map to a fixed expense (optional)",
+    "fixed_expense_item": "Fixed expense item",
+    "fixed_expense_item_placeholder": "Select fixed expense item",
+    "fixed_expense_item_required_message": "Please select a fixed expense item.",
     "view_list": "List",
     "view_calendar": "Calendar",
     "filter_all": "All",
@@ -192,7 +193,8 @@
     "tx-type": {
       "EXPENSE": "Expense",
       "INCOME": "Income",
-      "TRANSFER": "Transfer"
+      "TRANSFER": "Transfer",
+      "FIXED_EXPENSE": "Fixed Expense"
     },
     "portfolio-tx-type": {
       "BUY": "Buy",
