@@ -1,9 +1,9 @@
 "use client";
 
 import {
-  Anchor,
+  // Anchor,  // 회원가입 링크 차단 시 미사용 — 재오픈 시 주석 풀기
   Button,
-  Group,
+  // Group,   // 회원가입 링크 차단 시 미사용
   PasswordInput,
   Stack,
   Text,
@@ -12,7 +12,7 @@ import {
 } from "@mantine/core";
 import { isEmail, isNotEmpty, useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
-import Link from "next/link";
+// import Link from "next/link";  // 회원가입 링크 차단 시 미사용
 import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
@@ -96,19 +96,22 @@ export default function LoginSection() {
           >
             {t("login_submit")}
           </Button>
-          <Group justify="center" gap={6}>
-            <Text size="xs" c="dimmed">
-              {t("register_prompt")}
-            </Text>
-            <Anchor
-              component={Link}
-              href={`/${params.locale}/register`}
-              size="xs"
-              fw={700}
-            >
-              {t("register_link")}
-            </Anchor>
-          </Group>
+          {/*
+            회원가입 진입점 — 베타 단계에서 차단. 재오픈 시 주석만 풀면 됨.
+            <Group justify="center" gap={6}>
+              <Text size="xs" c="dimmed">
+                {t("register_prompt")}
+              </Text>
+              <Anchor
+                component={Link}
+                href={`/${params.locale}/register`}
+                size="xs"
+                fw={700}
+              >
+                {t("register_link")}
+              </Anchor>
+            </Group>
+          */}
         </Stack>
       </Stack>
     </form>
