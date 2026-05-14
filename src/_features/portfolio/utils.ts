@@ -1,7 +1,30 @@
+import { TOKEN } from "_styles/design-tokens";
+
 import type {
   PortfolioDetailItemType,
   PortfolioListItemType,
 } from "./types";
+
+const PORTFOLIO_PALETTE = [
+  TOKEN.blue,
+  TOKEN.purple,
+  TOKEN.green,
+  TOKEN.gold,
+  TOKEN.red,
+] as const;
+
+/**
+ * 종목 ticker 에 토스 5색 중 하나를 안정적으로 매핑.
+ * 같은 ticker 는 항상 같은 색 (hash mod).
+ */
+export function pickPortfolioColor(ticker: string): string {
+  let hash = 0;
+  for (let i = 0; i < ticker.length; i += 1) {
+    hash = (hash * 31 + ticker.charCodeAt(i)) | 0;
+  }
+  const idx = Math.abs(hash) % PORTFOLIO_PALETTE.length;
+  return PORTFOLIO_PALETTE[idx]!;
+}
 
 export interface PortfolioStat {
   totalValue: number;

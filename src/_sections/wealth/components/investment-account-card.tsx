@@ -1,10 +1,11 @@
 "use client";
 
-import { Card, Group, Stack, Text, UnstyledButton } from "@mantine/core";
+import { Card, Divider, Group, Stack, Text, UnstyledButton } from "@mantine/core";
 import { IconChevronRight } from "@tabler/icons-react";
 import { useRouter, useParams } from "next/navigation";
 
 import type { AccountListItemType } from "_features/account/types";
+import PortfolioDonut from "_features/portfolio/components/portfolio-donut";
 import {
   formatProfitAmount,
   formatProfitRate,
@@ -121,20 +122,14 @@ export default function InvestmentAccountCard({ account, portfolios }: Props) {
                 {fmt(valuation)}원
               </Text>
             </Group>
-            <Text size="10px" c="dimmed">·</Text>
-            <Group gap={4}>
-              <Text size="10px" c="dimmed" fw={600}>
-                종목
-              </Text>
-              <Text
-                size="10px"
-                fw={700}
-                style={{ fontVariantNumeric: "tabular-nums" }}
-              >
-                {portfolios.length}개
-              </Text>
-            </Group>
           </Group>
+
+          {portfolios.length > 0 && (
+            <>
+              <Divider my={4} color="gray.1" />
+              <PortfolioDonut portfolios={portfolios} />
+            </>
+          )}
         </Stack>
       </Card>
     </UnstyledButton>
