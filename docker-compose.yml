@@ -39,6 +39,13 @@ services:
     depends_on:
       - frontend
     restart: unless-stopped
+    # JSON access log 를 stdout 으로 받아서 docker 가 호스트에 자동 영속화 + 회전
+    # 보관 총량: max-size × max-file = 약 1GB (트래픽 보면서 조정)
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "10"
 
 networks:
   web:
