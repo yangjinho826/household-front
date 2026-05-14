@@ -62,7 +62,11 @@ export function HouseholdSwitcher({ opened, onClose }: HouseholdSwitcherProps) {
           borderTopRightRadius: 24,
           maxWidth: 448,
           margin: "0 auto",
-          maxHeight: "min(80vh, 600px)",
+          // BottomTab(64) 위까지만 차지하도록 maxHeight 제한 + 하단 padding 으로 콘텐츠가 BottomTab 에 가려지지 않게
+          maxHeight: "min(80vh, calc(100vh - 64px))",
+        },
+        body: {
+          paddingBottom: 64 + 8,
         },
       }}
     >

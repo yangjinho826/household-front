@@ -74,7 +74,8 @@ export function BottomTab() {
         maxWidth: 448,
         background: "white",
         borderTop: `1px solid ${theme.colors.gray?.[1] ?? "#E5E8EB"}`,
-        zIndex: 30,
+        // Mantine Drawer/Modal 기본 z-index(200대) 위. 바텀시트가 떠도 메뉴바는 항상 사용 가능.
+        zIndex: 500,
       }}
     >
       <Box
