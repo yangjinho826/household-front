@@ -193,6 +193,10 @@
       "EXPENSE": "지출",
       "INCOME": "수입",
       "TRANSFER": "이체"
+    },
+    "portfolio-tx-type": {
+      "BUY": "매수",
+      "SELL": "매도"
     }
   },
   "error": {

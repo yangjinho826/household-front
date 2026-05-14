@@ -1,1 +1,5 @@
-export type EnumName = "account-type" | "category-kind" | "tx-type";
+export type EnumName =
+  | "account-type"
+  | "category-kind"
+  | "tx-type"
+  | "portfolio-tx-type";

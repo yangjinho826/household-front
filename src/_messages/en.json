@@ -193,6 +193,10 @@
       "EXPENSE": "Expense",
       "INCOME": "Income",
       "TRANSFER": "Transfer"
+    },
+    "portfolio-tx-type": {
+      "BUY": "Buy",
+      "SELL": "Sell"
     }
   },
   "error": {

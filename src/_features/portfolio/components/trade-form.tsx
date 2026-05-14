@@ -16,25 +16,27 @@ import dayjs from "dayjs";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
+import { useEnumOptions } from "_features/enum/queries/use-query";
 import { getErrorMessage } from "_libraries/fetch/error-message";
 import { todayIsoKst } from "_utilities/datetime";
 
 import { usePortfolioMutations } from "../queries/use-mutations";
-import type { PortfolioTransactionItemType } from "../types";
-
-type TradeType = "BUY" | "SELL";
+import type {
+  PortfolioTransactionItemType,
+  PortfolioTxType,
+} from "../types";
 
 interface TradeFormProps {
   /** 종목 ID (필수 — 매수/매도 모두 기존 종목에 대해 수행) */
   portfolioId: string;
-  initialType?: TradeType;
+  initialType?: PortfolioTxType;
   /** 있으면 수정 모드 — initialValues 채움 + tradeType 잠금 + 삭제 버튼 노출 */
   editingTx?: PortfolioTransactionItemType;
   onSuccess?: () => void;
 }
 
 interface FormValues {
-  tradeType: TradeType;
+  tradeType: PortfolioTxType;
   quantity: number;
   price: number;
   txDate: string;
@@ -48,6 +50,8 @@ export default function TradeForm({
   onSuccess,
 }: TradeFormProps) {
   const te = useTranslations("error");
+  const tPt = useTranslations("enum.portfolio-tx-type");
+  const { data: ptTypeData } = useEnumOptions("portfolio-tx-type");
   const {
     buyMutation,
     sellMutation,
@@ -180,10 +184,10 @@ export default function TradeForm({
         <SegmentedControl
           {...form.getInputProps("tradeType")}
           fullWidth
-          data={[
-            { value: "BUY", label: "매수" },
-            { value: "SELL", label: "매도" },
-          ]}
+          data={ptTypeData.body.data.map((v) => ({
+            value: v,
+            label: tPt(v),
+          }))}
           color={isBuy ? "tossRed" : "tossBlue"}
           disabled={isEdit}
         />
