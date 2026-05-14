@@ -14,9 +14,11 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter, useParams } from "next/navigation";
 import { useMemo } from "react";
 
+import PortfolioDonut from "_features/portfolio/components/portfolio-donut";
 import {
   formatProfitAmount,
   formatProfitRate,
+  pickPortfolioColor,
   profitColor,
 } from "_features/portfolio/utils";
 import { queryKeys } from "_constants/queries";
@@ -46,6 +48,17 @@ export default function AccountPortfolioSection({ accountId }: Props) {
         (p) => p.accountId === accountId && !p.isArchived,
       ),
     [portfolioData, accountId],
+  );
+
+  const tickerBreakdown = useMemo(
+    () =>
+      portfolios.map((p) => ({
+        key: p.portfolioId,
+        label: p.ticker,
+        value: p.currentValue,
+        color: pickPortfolioColor(p.ticker),
+      })),
+    [portfolios],
   );
 
   if (!account) {
@@ -151,6 +164,18 @@ export default function AccountPortfolioSection({ accountId }: Props) {
           </Group>
         </Stack>
       </Card>
+
+      {/* 종목별 비중 — 보유 종목이 1개 이상일 때만 */}
+      {tickerBreakdown.length > 0 && (
+        <Card radius="xl" p="md">
+          <Stack gap={6}>
+            <Text size="xs" fw={500} c="dimmed" px={4}>
+              종목별 비중
+            </Text>
+            <PortfolioDonut items={tickerBreakdown} />
+          </Stack>
+        </Card>
+      )}
 
       {/* 보유 종목 */}
       <Group justify="space-between" align="center" px={4}>

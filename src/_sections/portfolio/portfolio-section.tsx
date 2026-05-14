@@ -9,18 +9,14 @@ import {
   Text,
   Title,
 } from "@mantine/core";
-import { useSuspenseQueries, useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-import {
-  Area,
-  AreaChart,
-  ResponsiveContainer,
-  XAxis,
-} from "recharts";
 
+import PortfolioDonut from "_features/portfolio/components/portfolio-donut";
 import {
   formatProfitAmount,
   formatProfitRate,
+  pickPortfolioColor,
   profitColor,
 } from "_features/portfolio/utils";
 import InvestmentAccountCard from "_sections/wealth/components/investment-account-card";
@@ -68,30 +64,19 @@ export default function PortfolioSection() {
     };
   }, [investmentAccounts]);
 
-  // 모든 투자 계좌의 종목별 월별 평가액 → 월별 합산
-  const historyResults = useSuspenseQueries({
-    queries: investmentAccounts.map((a) =>
-      queryKeys.portfolio.valueHistoryByAccount({ accountId: a.accountId }),
-    ),
-  });
-
-  const trendData = useMemo(() => {
-    const monthMap = new Map<string, number>(); // "YYYY-MM" → 평가액 합
-    for (const res of historyResults) {
-      for (const item of res.data?.body.data ?? []) {
-        for (const p of item.history) {
-          const key = p.snapshotDate.slice(0, 7); // YYYY-MM
-          monthMap.set(key, (monthMap.get(key) ?? 0) + p.valuation);
-        }
-      }
-    }
-    return Array.from(monthMap.entries())
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([month, value]) => ({
-        month: `${Number(month.slice(5))}월`,
-        value,
-      }));
-  }, [historyResults]);
+  // 계좌별 도넛 — 전체 자산 안에서 각 투자 계좌의 비중
+  const accountBreakdown = useMemo(
+    () =>
+      investmentAccounts
+        .filter((a) => a.balance > 0)
+        .map((a) => ({
+          key: a.accountId,
+          label: a.name,
+          value: a.balance,
+          color: a.color ?? pickPortfolioColor(a.accountId),
+        })),
+    [investmentAccounts],
+  );
 
   return (
     <Stack gap="md">
@@ -163,45 +148,14 @@ export default function PortfolioSection() {
             </Stack>
           </Card>
 
-          {/* 월별 추이 — hero 와 별도 카드 */}
-          {trendData.length > 0 && (
+          {/* 계좌별 비중 — 전체 자산 안에서 각 투자 계좌가 차지하는 % */}
+          {accountBreakdown.length > 0 && (
             <Card radius="xl" p="md">
-              <Stack gap={4}>
+              <Stack gap={6}>
                 <Text size="xs" fw={500} c="dimmed" px={4}>
-                  월별 추이
+                  계좌별 비중
                 </Text>
-                <ResponsiveContainer width="100%" height={96} minWidth={0}>
-                  <AreaChart
-                    data={trendData}
-                    margin={{ top: 8, right: 0, bottom: 0, left: 0 }}
-                  >
-                    <defs>
-                      <linearGradient
-                        id="portfolioTrend"
-                        x1="0"
-                        y1="0"
-                        x2="0"
-                        y2="1"
-                      >
-                        <stop offset="0%" stopColor="#8B5CF6" stopOpacity={0.3} />
-                        <stop offset="100%" stopColor="#8B5CF6" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <Area
-                      type="monotone"
-                      dataKey="value"
-                      stroke="#8B5CF6"
-                      strokeWidth={2.5}
-                      fill="url(#portfolioTrend)"
-                    />
-                    <XAxis
-                      dataKey="month"
-                      tick={{ fontSize: 10, fill: "#8B95A1" }}
-                      axisLine={false}
-                      tickLine={false}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
+                <PortfolioDonut items={accountBreakdown} />
               </Stack>
             </Card>
           )}
