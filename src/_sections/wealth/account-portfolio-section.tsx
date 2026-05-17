@@ -50,13 +50,13 @@ export default function AccountPortfolioSection({ accountId }: Props) {
     [portfolioData, accountId],
   );
 
-  const tickerBreakdown = useMemo(
+  const stockBreakdown = useMemo(
     () =>
       portfolios.map((p) => ({
         key: p.portfolioId,
-        label: p.ticker,
+        label: p.name,
         value: p.currentValue,
-        color: pickPortfolioColor(p.ticker),
+        color: pickPortfolioColor(p.name),
       })),
     [portfolios],
   );
@@ -166,13 +166,13 @@ export default function AccountPortfolioSection({ accountId }: Props) {
       </Card>
 
       {/* 종목별 비중 — 보유 종목이 1개 이상일 때만 */}
-      {tickerBreakdown.length > 0 && (
+      {stockBreakdown.length > 0 && (
         <Card radius="xl" p="md">
           <Stack gap={6}>
             <Text size="xs" fw={500} c="dimmed" px={4}>
               종목별 비중
             </Text>
-            <PortfolioDonut items={tickerBreakdown} />
+            <PortfolioDonut items={stockBreakdown} />
           </Stack>
         </Card>
       )}
@@ -216,10 +216,10 @@ export default function AccountPortfolioSection({ accountId }: Props) {
                   <Group justify="space-between" align="flex-start">
                     <Stack gap={2} style={{ flex: 1, minWidth: 0 }}>
                       <Text size="sm" fw={700} truncate>
-                        {p.ticker}
+                        {p.name}
                       </Text>
                       <Text size="xs" c="dimmed">
-                        {p.symbol ?? "—"} · {p.quantity}주
+                        {p.code} · {p.country} · {p.quantity}주
                       </Text>
                       <Group gap={4} mt={4}>
                         <Text size="10px" c="dimmed" fw={600}>

@@ -4,6 +4,7 @@ import { queryKeys } from "_constants/queries";
 
 import {
   DeletePortfolioTxApi,
+  GetPortfolioLookupApi,
   PostPortfolioBuyApi,
   PostPortfolioCreateApi,
   PostPortfolioSellApi,
@@ -11,6 +12,7 @@ import {
   PutPortfolioUpdateApi,
 } from "../api";
 import type {
+  Country,
   PortfolioBuyRequest,
   PortfolioCreateRequest,
   PortfolioSellRequest,
@@ -68,6 +70,12 @@ export function usePortfolioMutations() {
     onSuccess: invalidateAll,
   });
 
+  // 야후 파이낸스 조회 — 저장 X, 결과를 form 에 채우는 용도. 캐시 안 함.
+  const lookupMutation = useMutation({
+    mutationFn: (props: { country: Country; code: string }) =>
+      GetPortfolioLookupApi(props.country, props.code),
+  });
+
   return {
     createMutation,
     buyMutation,
@@ -75,5 +83,6 @@ export function usePortfolioMutations() {
     updateMutation,
     updateTxMutation,
     removeTxMutation,
+    lookupMutation,
   };
 }

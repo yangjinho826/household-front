@@ -6,7 +6,7 @@ import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
 export interface DonutBreakdownItem {
   /** React key + 안정 식별자 */
   key: string;
-  /** 표시명 (ticker / 계좌명 등) */
+  /** 표시명 (종목명 / 계좌명 등) */
   label: string;
   /** 슬라이스 크기 (양수만 유효, 0 이하는 자동 제외) */
   value: number;

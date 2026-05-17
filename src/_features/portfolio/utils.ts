@@ -14,13 +14,13 @@ const PORTFOLIO_PALETTE = [
 ] as const;
 
 /**
- * 종목 ticker 에 토스 5색 중 하나를 안정적으로 매핑.
- * 같은 ticker 는 항상 같은 색 (hash mod).
+ * 종목명에 토스 5색 중 하나를 안정적으로 매핑.
+ * 같은 종목명은 항상 같은 색 (hash mod).
  */
-export function pickPortfolioColor(ticker: string): string {
+export function pickPortfolioColor(name: string): string {
   let hash = 0;
-  for (let i = 0; i < ticker.length; i += 1) {
-    hash = (hash * 31 + ticker.charCodeAt(i)) | 0;
+  for (let i = 0; i < name.length; i += 1) {
+    hash = (hash * 31 + name.charCodeAt(i)) | 0;
   }
   const idx = Math.abs(hash) % PORTFOLIO_PALETTE.length;
   return PORTFOLIO_PALETTE[idx]!;

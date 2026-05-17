@@ -1,3 +1,5 @@
+export type Country = "KR" | "US";
+
 export interface PortfolioSearchRequestType {
   searchTerm?: string;
   accountId?: string;
@@ -6,8 +8,9 @@ export interface PortfolioSearchRequestType {
 
 /** 종목 등록 — 메타만 (qty=0). 매수는 buy 별도 호출 */
 export interface PortfolioCreateRequest {
-  ticker: string;
-  symbol?: string | null;
+  name: string;
+  code: string;
+  country: Country;
   currentPrice: number;
   accountId: string;
 }
@@ -34,9 +37,19 @@ export interface PortfolioSellRequest {
 export interface PortfolioUpdateRequest {
   portfolioId: string;
   currentPrice?: number | null;
-  ticker?: string | null;
-  symbol?: string | null;
+  name?: string | null;
+  code?: string | null;
+  country?: Country | null;
   isArchived?: boolean | null;
+}
+
+/** 야후 파이낸스 조회 결과 (저장 전 미리보기용) */
+export interface PortfolioLookupResponse {
+  country: Country;
+  code: string;
+  name: string;
+  currentPrice: number;
+  yahooSymbol: string;
 }
 
 export interface PortfolioListItemType {
@@ -44,8 +57,9 @@ export interface PortfolioListItemType {
   portfolioId: string;
   accountId: string;
   accountName: string;
-  ticker: string;
-  symbol: string | null;
+  name: string;
+  code: string;
+  country: Country;
   quantity: number;
   avgPrice: number;
   currentPrice: number;
@@ -72,8 +86,9 @@ export interface PortfolioTransactionItemType {
   txId: string;
   accountId: string;
   accountName: string;
-  ticker: string;
-  symbol: string | null;
+  name: string;
+  code: string;
+  country: Country;
   ptType: PortfolioTxType;
   quantity: number;
   price: number;
@@ -105,8 +120,9 @@ export interface PortfolioValueHistoryPoint {
 export interface PortfolioValueHistoryByItem {
   portfolioItemId: string;
   accountId: string;
-  ticker: string;
-  symbol: string | null;
+  name: string;
+  code: string;
+  country: Country;
   history: PortfolioValueHistoryPoint[];
 }
 

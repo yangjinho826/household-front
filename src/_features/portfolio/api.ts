@@ -6,9 +6,11 @@ import type {
 } from "_libraries/fetch/response";
 
 import type {
+  Country,
   PortfolioBuyRequest,
   PortfolioCreateRequest,
   PortfolioListItemType,
+  PortfolioLookupResponse,
   PortfolioSearchRequestType,
   PortfolioSellRequest,
   PortfolioTransactionItemType,
@@ -27,8 +29,9 @@ interface BackendPortfolioResponse {
   id: string;
   account_id: string;
   account_name: string;
-  ticker: string;
-  symbol: string | null;
+  name: string;
+  code: string;
+  country: Country;
   quantity: number | string;
   avg_price: number | string;
   current_price: number | string;
@@ -43,8 +46,9 @@ interface BackendPortfolioTxResponse {
   id: string;
   account_id: string;
   account_name: string;
-  ticker: string;
-  symbol: string | null;
+  name: string;
+  code: string;
+  country: Country;
   pt_type: PortfolioTxType;
   quantity: number | string;
   price: number | string;
@@ -53,14 +57,23 @@ interface BackendPortfolioTxResponse {
   memo: string | null;
 }
 
+interface BackendPortfolioLookupResponse {
+  country: Country;
+  code: string;
+  name: string;
+  current_price: number | string;
+  yahoo_symbol: string;
+}
+
 function mapToItem(b: BackendPortfolioResponse, rowNo: number): PortfolioListItemType {
   return {
     rowNo,
     portfolioId: b.id,
     accountId: b.account_id,
     accountName: b.account_name,
-    ticker: b.ticker,
-    symbol: b.symbol,
+    name: b.name,
+    code: b.code,
+    country: b.country,
     quantity: num(b.quantity),
     avgPrice: num(b.avg_price),
     currentPrice: num(b.current_price),
@@ -81,14 +94,25 @@ function mapToTx(b: BackendPortfolioTxResponse, rowNo: number): PortfolioTransac
     txId: b.id,
     accountId: b.account_id,
     accountName: b.account_name,
-    ticker: b.ticker,
-    symbol: b.symbol,
+    name: b.name,
+    code: b.code,
+    country: b.country,
     ptType: b.pt_type,
     quantity: num(b.quantity),
     price: num(b.price),
     total: num(b.total),
     txDate: b.tx_date,
     memo: b.memo,
+  };
+}
+
+function mapToLookup(b: BackendPortfolioLookupResponse): PortfolioLookupResponse {
+  return {
+    country: b.country,
+    code: b.code,
+    name: b.name,
+    currentPrice: num(b.current_price),
+    yahooSymbol: b.yahoo_symbol,
   };
 }
 
@@ -136,8 +160,9 @@ export async function PostPortfolioCreateApi(params: PortfolioCreateRequest) {
     {
       method: "POST",
       body: {
-        ticker: params.ticker,
-        symbol: params.symbol ?? null,
+        name: params.name,
+        code: params.code,
+        country: params.country,
         current_price: params.currentPrice,
         account_id: params.accountId,
       },
@@ -145,6 +170,16 @@ export async function PostPortfolioCreateApi(params: PortfolioCreateRequest) {
     },
   );
   return { ...res, body: { ...res.body, data: mapToItem(res.body.data, 1) } };
+}
+
+/** 야후 파이낸스 종목 조회 — 폼 자동 채움용 (저장 X) */
+export async function GetPortfolioLookupApi(country: Country, code: string) {
+  const params = new URLSearchParams({ country, code });
+  const res = await apiFetch<ApiResponse<BackendPortfolioLookupResponse>>(
+    `/api/portfolio/lookup?${params.toString()}`,
+    { method: "GET", errorHandleMethod: "reject" },
+  );
+  return { ...res, body: { ...res.body, data: mapToLookup(res.body.data) } };
 }
 
 /** 매수 액션 — 기존 종목에 qty 누적 + avg_price 재계산 + 이력 기록 */
@@ -192,8 +227,9 @@ export async function PutPortfolioUpdateApi(params: PortfolioUpdateRequest) {
       method: "PUT",
       body: {
         current_price: params.currentPrice ?? null,
-        ticker: params.ticker ?? null,
-        symbol: params.symbol ?? null,
+        name: params.name ?? null,
+        code: params.code ?? null,
+        country: params.country ?? null,
         is_archived: params.isArchived ?? null,
       },
       errorHandleMethod: "reject",
@@ -218,8 +254,9 @@ interface BackendValueHistoryPoint {
 interface BackendValueHistoryByItem {
   portfolio_item_id: string;
   account_id: string;
-  ticker: string;
-  symbol: string | null;
+  name: string;
+  code: string;
+  country: Country;
   history: BackendValueHistoryPoint[];
 }
 
@@ -238,8 +275,9 @@ function mapHistoryByItem(b: BackendValueHistoryByItem): PortfolioValueHistoryBy
   return {
     portfolioItemId: b.portfolio_item_id,
     accountId: b.account_id,
-    ticker: b.ticker,
-    symbol: b.symbol,
+    name: b.name,
+    code: b.code,
+    country: b.country,
     history: b.history.map(mapHistoryPoint),
   };
 }

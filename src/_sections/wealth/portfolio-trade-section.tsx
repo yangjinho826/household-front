@@ -50,9 +50,9 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
   const { data: txData } = useSuspenseQuery(
     queryKeys.portfolio.transactions({ accountId: portfolio?.accountId }),
   );
-  // 종목 단위 필터 (백엔드는 accountId 만 지원)
+  // 종목 단위 필터 (백엔드는 accountId 만 지원) — (country, code) 로 식별
   const trades = txData.body.data.content.filter(
-    (t) => t.ticker === portfolio?.ticker,
+    (t) => t.country === portfolio?.country && t.code === portfolio?.code,
   );
 
   const [opened, { open, close }] = useDisclosure(false);
@@ -94,7 +94,7 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
           >
             <IconArrowLeft size={18} />
           </ActionIcon>
-          <Title order={3}>{portfolio.ticker}</Title>
+          <Title order={3}>{portfolio.name}</Title>
         </Group>
         <ActionIcon
           variant="subtle"

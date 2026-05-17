@@ -55,9 +55,9 @@ export default function PortfolioTable({
             <Card>
               <Group justify="space-between">
                 <Stack gap={2}>
-                  <Text fw={600}>{it.ticker}</Text>
+                  <Text fw={600}>{it.name}</Text>
                   <Text size="xs" c="dimmed">
-                    {it.symbol ?? ""} · {it.quantity}주 @ {fmt(it.avgPrice)}원
+                    {it.code} · {it.country} · {it.quantity}주 @ {fmt(it.avgPrice)}원
                   </Text>
                 </Stack>
                 <Stack gap={2} align="end">

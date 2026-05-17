@@ -30,10 +30,22 @@ export default function PortfolioForm({ portfolioId }: PortfolioFormProps) {
     form,
     isUpdate,
     isPending,
+    isLookupPending,
+    handleLookup,
     handleSubmit,
     handleRemove,
     handleCancel,
   } = usePortfolioForm({ portfolioId });
+
+  const countryOptions = useMemo(
+    () => [
+      { value: "KR", label: t("country_KR") },
+      { value: "US", label: t("country_US") },
+    ],
+    [t],
+  );
+
+  const codePlaceholder = form.values.country === "US" ? "AAPL" : "005930";
 
   // INVESTMENT 통장만 노출
   const { data: accountsData } = useSuspenseQuery(
@@ -70,15 +82,34 @@ export default function PortfolioForm({ portfolioId }: PortfolioFormProps) {
             disabled={isUpdate}
             searchable
           />
-          <TextInput
-            {...form.getInputProps("ticker")}
-            label={t("ticker")}
-            placeholder={t("ticker_placeholder")}
+          <Select
+            {...form.getInputProps("country")}
+            label={t("country")}
+            data={countryOptions}
+            allowDeselect={false}
           />
+          <Group align="end" gap="xs" wrap="nowrap">
+            <TextInput
+              {...form.getInputProps("code")}
+              label={t("code")}
+              placeholder={codePlaceholder}
+              style={{ flex: 1 }}
+            />
+            <Button
+              type="button"
+              variant="light"
+              onClick={handleLookup}
+              loading={isLookupPending}
+              disabled={!form.values.code.trim()}
+            >
+              {t("lookup")}
+            </Button>
+          </Group>
           <TextInput
-            {...form.getInputProps("symbol")}
-            label={t("symbol")}
-            placeholder="005930"
+            {...form.getInputProps("name")}
+            label={t("name")}
+            placeholder={t("name_placeholder")}
+            description={isUpdate ? undefined : t("name_help")}
           />
           <NumberInput
             {...form.getInputProps("currentPrice")}

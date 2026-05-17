@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { z } from "zod";
 
 import { usePortfolioMutations } from "_features/portfolio/queries/use-mutations";
+import type { Country } from "_features/portfolio/types";
 import { getErrorMessage } from "_libraries/fetch/error-message";
 
 import { usePortfolioDetail as usePortfolioDetailQuery } from "../../queries/use-query";
@@ -17,8 +18,9 @@ interface UsePortfolioFormOptions {
 
 interface FormValues {
   accountId: string;
-  ticker: string;
-  symbol: string | null;
+  country: Country;
+  code: string;
+  name: string;
   currentPrice: number;
   isArchived: boolean;
 }
@@ -31,15 +33,16 @@ export function usePortfolioForm({ portfolioId }: UsePortfolioFormOptions) {
   const routeParams = useParams<{ locale: string }>();
 
   const fetchDetail = usePortfolioDetailQuery();
-  const { createMutation, updateMutation } = usePortfolioMutations();
+  const { createMutation, updateMutation, lookupMutation } = usePortfolioMutations();
 
   const isUpdate = Boolean(portfolioId);
 
   const form = useForm<FormValues>({
     initialValues: {
       accountId: "",
-      ticker: "",
-      symbol: null,
+      country: "KR",
+      code: "",
+      name: "",
       currentPrice: 0,
       isArchived: false,
     },
@@ -47,8 +50,10 @@ export function usePortfolioForm({ portfolioId }: UsePortfolioFormOptions) {
     validate: zodResolver(
       z.object({
         accountId: z.string().min(1, t("account_required_message")),
-        ticker: z.string().min(1, t("ticker_required_message")),
-        currentPrice: z.number(),
+        country: z.enum(["KR", "US"]),
+        code: z.string().min(1, t("code_required_message")),
+        name: z.string().min(1, t("name_required_message")),
+        currentPrice: z.number().positive(t("current_price_required_message")),
       }),
     ),
   });
@@ -62,8 +67,9 @@ export function usePortfolioForm({ portfolioId }: UsePortfolioFormOptions) {
       const d = res.body.data;
       form.setValues({
         accountId: d.accountId,
-        ticker: d.ticker,
-        symbol: d.symbol,
+        country: d.country,
+        code: d.code,
+        name: d.name,
         currentPrice: d.currentPrice,
         isArchived: d.isArchived,
       });
@@ -74,6 +80,29 @@ export function usePortfolioForm({ portfolioId }: UsePortfolioFormOptions) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [portfolioId]);
 
+  const handleLookup = async () => {
+    const country = form.values.country;
+    const code = form.values.code.trim();
+    if (!code) return;
+    try {
+      const res = await lookupMutation.mutateAsync({ country, code });
+      const d = res.body.data;
+      form.setFieldValue("name", d.name);
+      form.setFieldValue("currentPrice", d.currentPrice);
+      notifications.show({
+        title: tg("notificationstitle"),
+        message: `${d.name} · ${d.yahooSymbol}`,
+        color: "green",
+      });
+    } catch (error) {
+      notifications.show({
+        title: tg("notificationstitle"),
+        message: getErrorMessage(error, te),
+        color: "red",
+      });
+    }
+  };
+
   const handleSubmit = async () => {
     try {
       if (isUpdate) {
@@ -81,8 +110,9 @@ export function usePortfolioForm({ portfolioId }: UsePortfolioFormOptions) {
         await updateMutation.mutateAsync({
           portfolioId,
           currentPrice: form.values.currentPrice,
-          ticker: form.values.ticker,
-          symbol: form.values.symbol,
+          name: form.values.name,
+          code: form.values.code,
+          country: form.values.country,
           isArchived: form.values.isArchived,
         });
         notifications.show({
@@ -93,8 +123,9 @@ export function usePortfolioForm({ portfolioId }: UsePortfolioFormOptions) {
       } else {
         // 종목 메타 등록 (qty=0 시작) — 매수는 디테일에서 별도
         await createMutation.mutateAsync({
-          ticker: form.values.ticker,
-          symbol: form.values.symbol,
+          name: form.values.name,
+          code: form.values.code,
+          country: form.values.country,
           currentPrice: form.values.currentPrice,
           accountId: form.values.accountId,
         });
@@ -141,6 +172,8 @@ export function usePortfolioForm({ portfolioId }: UsePortfolioFormOptions) {
     form,
     isUpdate,
     isPending: createMutation.isPending || updateMutation.isPending,
+    isLookupPending: lookupMutation.isPending,
+    handleLookup,
     handleSubmit,
     handleRemove,
     handleCancel,
