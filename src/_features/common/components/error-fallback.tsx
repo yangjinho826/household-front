@@ -1,9 +1,11 @@
 "use client";
 
 import {
+  Box,
   Button,
   Card,
   Center,
+  Container,
   Stack,
   Text,
 } from "@mantine/core";
@@ -20,6 +22,10 @@ interface ErrorFallbackProps {
 /**
  * App Router error.tsx 공용 폴백.
  * 백엔드 down (502/500) / 네트워크 오류 시 친화적 표시.
+ *
+ * position: fixed 로 viewport 전체 덮음 — 어느 error boundary 가 잡든
+ * (UserShell 안에 들어가도) AppHeader / BottomTab 까지 가리고 로그인 화면처럼
+ * 단독 모바일 화면으로 표시.
  */
 export function ErrorFallback({ error, reset }: ErrorFallbackProps) {
   useEffect(() => {
@@ -42,23 +48,35 @@ export function ErrorFallback({ error, reset }: ErrorFallbackProps) {
       : "예기치 못한 오류가 발생했습니다.";
 
   return (
-    <Center mih="60dvh" px="md">
-      <Card radius="xl" p="xl" w="100%">
-        <Stack gap="md" align="center">
-          <IconAlertCircle size={40} color="#F04452" stroke={2} />
-          <Stack gap={4} align="center">
-            <Text size="md" fw={700}>
-              {title}
-            </Text>
-            <Text size="sm" c="dimmed" ta="center">
-              {description}
-            </Text>
-          </Stack>
-          <Button onClick={reset} fullWidth>
-            다시 시도
-          </Button>
-        </Stack>
-      </Card>
-    </Center>
+    <Box
+      pos="fixed"
+      top={0}
+      left={0}
+      right={0}
+      bottom={0}
+      bg="#f2f4f6"
+      style={{ zIndex: 1000, overflow: "auto" }}
+    >
+      <Container size={448} bg="white" mih="100dvh" px="md">
+        <Center mih="100dvh">
+          <Card radius="xl" p="xl" w="100%" bg="white">
+            <Stack gap="md" align="center">
+              <IconAlertCircle size={40} color="#F04452" stroke={2} />
+              <Stack gap={4} align="center">
+                <Text size="md" fw={700}>
+                  {title}
+                </Text>
+                <Text size="sm" c="dimmed" ta="center">
+                  {description}
+                </Text>
+              </Stack>
+              <Button onClick={reset} fullWidth>
+                다시 시도
+              </Button>
+            </Stack>
+          </Card>
+        </Center>
+      </Container>
+    </Box>
   );
 }
