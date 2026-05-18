@@ -7,7 +7,7 @@ import { useEffect } from "react";
 import { z } from "zod";
 
 import { usePortfolioMutations } from "_features/portfolio/queries/use-mutations";
-import type { Country } from "_features/portfolio/types";
+import type { Market } from "_features/portfolio/types";
 import { getErrorMessage } from "_libraries/fetch/error-message";
 
 import { usePortfolioDetail as usePortfolioDetailQuery } from "../../queries/use-query";
@@ -18,7 +18,7 @@ interface UsePortfolioFormOptions {
 
 interface FormValues {
   accountId: string;
-  country: Country;
+  market: Market;
   code: string;
   name: string;
   currentPrice: number;
@@ -40,7 +40,7 @@ export function usePortfolioForm({ portfolioId }: UsePortfolioFormOptions) {
   const form = useForm<FormValues>({
     initialValues: {
       accountId: "",
-      country: "KR",
+      market: "KRX_KOSPI",
       code: "",
       name: "",
       currentPrice: 0,
@@ -50,7 +50,7 @@ export function usePortfolioForm({ portfolioId }: UsePortfolioFormOptions) {
     validate: zodResolver(
       z.object({
         accountId: z.string().min(1, t("account_required_message")),
-        country: z.enum(["KR", "US"]),
+        market: z.enum(["KRX_KOSPI", "KRX_KOSDAQ", "NASDAQ", "NYSE"]),
         code: z.string().min(1, t("code_required_message")),
         name: z.string().min(1, t("name_required_message")),
         currentPrice: z.number().positive(t("current_price_required_message")),
@@ -67,7 +67,7 @@ export function usePortfolioForm({ portfolioId }: UsePortfolioFormOptions) {
       const d = res.body.data;
       form.setValues({
         accountId: d.accountId,
-        country: d.country,
+        market: d.market,
         code: d.code,
         name: d.name,
         currentPrice: d.currentPrice,
@@ -81,11 +81,11 @@ export function usePortfolioForm({ portfolioId }: UsePortfolioFormOptions) {
   }, [portfolioId]);
 
   const handleLookup = async () => {
-    const country = form.values.country;
+    const market = form.values.market;
     const code = form.values.code.trim();
     if (!code) return;
     try {
-      const res = await lookupMutation.mutateAsync({ country, code });
+      const res = await lookupMutation.mutateAsync({ market, code });
       const d = res.body.data;
       if (!isUpdate) form.setFieldValue("name", d.name);
       form.setFieldValue("currentPrice", d.currentPrice);
@@ -112,7 +112,7 @@ export function usePortfolioForm({ portfolioId }: UsePortfolioFormOptions) {
           currentPrice: form.values.currentPrice,
           name: form.values.name,
           code: form.values.code,
-          country: form.values.country,
+          market: form.values.market,
           isArchived: form.values.isArchived,
         });
         notifications.show({
@@ -125,7 +125,7 @@ export function usePortfolioForm({ portfolioId }: UsePortfolioFormOptions) {
         await createMutation.mutateAsync({
           name: form.values.name,
           code: form.values.code,
-          country: form.values.country,
+          market: form.values.market,
           currentPrice: form.values.currentPrice,
           accountId: form.values.accountId,
         });

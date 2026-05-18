@@ -15,6 +15,7 @@ import { useEffect, useMemo } from "react";
 import { useTranslations } from "next-intl";
 
 import { queryKeys } from "_constants/queries";
+import { useEnumOptions } from "_features/enum/queries/use-query";
 
 import { usePortfolioForm } from "../hooks/use-sub/use-form";
 
@@ -37,15 +38,21 @@ export default function PortfolioForm({ portfolioId }: PortfolioFormProps) {
     handleCancel,
   } = usePortfolioForm({ portfolioId });
 
-  const countryOptions = useMemo(
-    () => [
-      { value: "KR", label: t("country_KR") },
-      { value: "US", label: t("country_US") },
-    ],
-    [t],
+  const tMarket = useTranslations("enum.market");
+  const { data: marketData } = useEnumOptions("market");
+  const marketOptions = useMemo(
+    () =>
+      (marketData.body.data ?? []).map((v) => ({
+        value: v,
+        label: tMarket(v),
+      })),
+    [marketData, tMarket],
   );
 
-  const codePlaceholder = form.values.country === "US" ? "AAPL" : "005930";
+  const codePlaceholder =
+    form.values.market === "NASDAQ" || form.values.market === "NYSE"
+      ? "AAPL"
+      : "005930";
 
   // INVESTMENT 통장만 노출
   const { data: accountsData } = useSuspenseQuery(
@@ -83,9 +90,9 @@ export default function PortfolioForm({ portfolioId }: PortfolioFormProps) {
             searchable
           />
           <Select
-            {...form.getInputProps("country")}
-            label={t("country")}
-            data={countryOptions}
+            {...form.getInputProps("market")}
+            label={t("market")}
+            data={marketOptions}
             allowDeselect={false}
           />
           <Group align="end" gap="xs" wrap="nowrap">

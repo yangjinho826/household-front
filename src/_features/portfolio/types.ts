@@ -1,4 +1,4 @@
-export type Country = "KR" | "US";
+export type Market = "KRX_KOSPI" | "KRX_KOSDAQ" | "NASDAQ" | "NYSE";
 
 export interface PortfolioSearchRequestType {
   searchTerm?: string;
@@ -10,7 +10,7 @@ export interface PortfolioSearchRequestType {
 export interface PortfolioCreateRequest {
   name: string;
   code: string;
-  country: Country;
+  market: Market;
   currentPrice: number;
   accountId: string;
 }
@@ -39,13 +39,13 @@ export interface PortfolioUpdateRequest {
   currentPrice?: number | null;
   name?: string | null;
   code?: string | null;
-  country?: Country | null;
+  market?: Market | null;
   isArchived?: boolean | null;
 }
 
 /** 야후 파이낸스 조회 결과 (저장 전 미리보기용) */
 export interface PortfolioLookupResponse {
-  country: Country;
+  market: Market;
   code: string;
   name: string;
   currentPrice: number;
@@ -59,7 +59,7 @@ export interface PortfolioListItemType {
   accountName: string;
   name: string;
   code: string;
-  country: Country;
+  market: Market;
   quantity: number;
   avgPrice: number;
   currentPrice: number;
@@ -88,7 +88,7 @@ export interface PortfolioTransactionItemType {
   accountName: string;
   name: string;
   code: string;
-  country: Country;
+  market: Market;
   ptType: PortfolioTxType;
   quantity: number;
   price: number;
@@ -122,7 +122,7 @@ export interface PortfolioValueHistoryByItem {
   accountId: string;
   name: string;
   code: string;
-  country: Country;
+  market: Market;
   history: PortfolioValueHistoryPoint[];
 }
 

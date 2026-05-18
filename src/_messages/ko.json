@@ -115,9 +115,7 @@
     "account": "투자 계좌",
     "account_placeholder": "계좌 선택",
     "account_required_message": "계좌를 선택해주세요.",
-    "country": "국가",
-    "country_KR": "한국",
-    "country_US": "미국",
+    "market": "시장",
     "code": "종목코드",
     "code_placeholder": "예) 005930",
     "code_required_message": "종목코드를 입력해주세요.",
@@ -208,6 +206,12 @@
     "portfolio-tx-type": {
       "BUY": "매수",
       "SELL": "매도"
+    },
+    "market": {
+      "KRX_KOSPI": "코스피",
+      "KRX_KOSDAQ": "코스닥",
+      "NASDAQ": "나스닥",
+      "NYSE": "뉴욕증시"
     }
   },
   "error": {

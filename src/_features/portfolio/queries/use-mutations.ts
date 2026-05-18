@@ -12,7 +12,7 @@ import {
   PutPortfolioUpdateApi,
 } from "../api";
 import type {
-  Country,
+  Market,
   PortfolioBuyRequest,
   PortfolioCreateRequest,
   PortfolioSellRequest,
@@ -72,8 +72,8 @@ export function usePortfolioMutations() {
 
   // 야후 파이낸스 조회 — 저장 X, 결과를 form 에 채우는 용도. 캐시 안 함.
   const lookupMutation = useMutation({
-    mutationFn: (props: { country: Country; code: string }) =>
-      GetPortfolioLookupApi(props.country, props.code),
+    mutationFn: (props: { market: Market; code: string }) =>
+      GetPortfolioLookupApi(props.market, props.code),
   });
 
   return {

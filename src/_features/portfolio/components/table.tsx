@@ -33,6 +33,7 @@ export default function PortfolioTable({
   onPageChange,
 }: PortfolioTableProps) {
   const tg = useTranslations("general.common");
+  const tMarket = useTranslations("enum.market");
 
   if (!items.length) {
     return (
@@ -57,7 +58,7 @@ export default function PortfolioTable({
                 <Stack gap={2}>
                   <Text fw={600}>{it.name}</Text>
                   <Text size="xs" c="dimmed">
-                    {it.code} · {it.country} · {it.quantity}주 @ {fmt(it.avgPrice)}원
+                    {it.code} · {tMarket(it.market)} · {it.quantity}주 @ {fmt(it.avgPrice)}원
                   </Text>
                 </Stack>
                 <Stack gap={2} align="end">

@@ -12,6 +12,7 @@ import {
 import { IconArrowLeft, IconChevronRight } from "@tabler/icons-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter, useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 
 import PortfolioDonut from "_features/portfolio/components/portfolio-donut";
@@ -31,6 +32,7 @@ interface Props {
 export default function AccountPortfolioSection({ accountId }: Props) {
   const router = useRouter();
   const routeParams = useParams<{ locale: string }>();
+  const tMarket = useTranslations("enum.market");
 
   const { data: accountData } = useSuspenseQuery(
     queryKeys.account.list({ pageNo: 1, listSize: 100 }),
@@ -219,7 +221,7 @@ export default function AccountPortfolioSection({ accountId }: Props) {
                         {p.name}
                       </Text>
                       <Text size="xs" c="dimmed">
-                        {p.code} · {p.country} · {p.quantity}주
+                        {p.code} · {tMarket(p.market)} · {p.quantity}주
                       </Text>
                       <Group gap={4} mt={4}>
                         <Text size="10px" c="dimmed" fw={600}>

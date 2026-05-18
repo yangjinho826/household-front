@@ -6,7 +6,7 @@ import type {
 } from "_libraries/fetch/response";
 
 import type {
-  Country,
+  Market,
   PortfolioBuyRequest,
   PortfolioCreateRequest,
   PortfolioListItemType,
@@ -31,7 +31,7 @@ interface BackendPortfolioResponse {
   account_name: string;
   name: string;
   code: string;
-  country: Country;
+  market: Market;
   quantity: number | string;
   avg_price: number | string;
   current_price: number | string;
@@ -48,7 +48,7 @@ interface BackendPortfolioTxResponse {
   account_name: string;
   name: string;
   code: string;
-  country: Country;
+  market: Market;
   pt_type: PortfolioTxType;
   quantity: number | string;
   price: number | string;
@@ -58,7 +58,7 @@ interface BackendPortfolioTxResponse {
 }
 
 interface BackendPortfolioLookupResponse {
-  country: Country;
+  market: Market;
   code: string;
   name: string;
   current_price: number | string;
@@ -73,7 +73,7 @@ function mapToItem(b: BackendPortfolioResponse, rowNo: number): PortfolioListIte
     accountName: b.account_name,
     name: b.name,
     code: b.code,
-    country: b.country,
+    market: b.market,
     quantity: num(b.quantity),
     avgPrice: num(b.avg_price),
     currentPrice: num(b.current_price),
@@ -96,7 +96,7 @@ function mapToTx(b: BackendPortfolioTxResponse, rowNo: number): PortfolioTransac
     accountName: b.account_name,
     name: b.name,
     code: b.code,
-    country: b.country,
+    market: b.market,
     ptType: b.pt_type,
     quantity: num(b.quantity),
     price: num(b.price),
@@ -108,7 +108,7 @@ function mapToTx(b: BackendPortfolioTxResponse, rowNo: number): PortfolioTransac
 
 function mapToLookup(b: BackendPortfolioLookupResponse): PortfolioLookupResponse {
   return {
-    country: b.country,
+    market: b.market,
     code: b.code,
     name: b.name,
     currentPrice: num(b.current_price),
@@ -162,7 +162,7 @@ export async function PostPortfolioCreateApi(params: PortfolioCreateRequest) {
       body: {
         name: params.name,
         code: params.code,
-        country: params.country,
+        market: params.market,
         current_price: params.currentPrice,
         account_id: params.accountId,
       },
@@ -173,8 +173,8 @@ export async function PostPortfolioCreateApi(params: PortfolioCreateRequest) {
 }
 
 /** 야후 파이낸스 종목 조회 — 폼 자동 채움용 (저장 X) */
-export async function GetPortfolioLookupApi(country: Country, code: string) {
-  const params = new URLSearchParams({ country, code });
+export async function GetPortfolioLookupApi(market: Market, code: string) {
+  const params = new URLSearchParams({ market, code });
   const res = await apiFetch<ApiResponse<BackendPortfolioLookupResponse>>(
     `/api/portfolio/lookup?${params.toString()}`,
     { method: "GET", errorHandleMethod: "reject" },
@@ -229,7 +229,7 @@ export async function PutPortfolioUpdateApi(params: PortfolioUpdateRequest) {
         current_price: params.currentPrice ?? null,
         name: params.name ?? null,
         code: params.code ?? null,
-        country: params.country ?? null,
+        market: params.market ?? null,
         is_archived: params.isArchived ?? null,
       },
       errorHandleMethod: "reject",
@@ -256,7 +256,7 @@ interface BackendValueHistoryByItem {
   account_id: string;
   name: string;
   code: string;
-  country: Country;
+  market: Market;
   history: BackendValueHistoryPoint[];
 }
 
@@ -277,7 +277,7 @@ function mapHistoryByItem(b: BackendValueHistoryByItem): PortfolioValueHistoryBy
     accountId: b.account_id,
     name: b.name,
     code: b.code,
-    country: b.country,
+    market: b.market,
     history: b.history.map(mapHistoryPoint),
   };
 }
