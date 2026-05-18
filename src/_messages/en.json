@@ -116,6 +116,7 @@
     "account_placeholder": "Select account",
     "account_required_message": "Please select an account.",
     "market": "Market",
+    "market_help": "Markets auto-refreshed via Yahoo. Pick 'Other' for unsupported assets like commodities.",
     "code": "Stock Code",
     "code_placeholder": "e.g. 005930",
     "code_required_message": "Please enter stock code.",
@@ -211,7 +212,8 @@
       "KRX_KOSPI": "KOSPI",
       "KRX_KOSDAQ": "KOSDAQ",
       "NASDAQ": "NASDAQ",
-      "NYSE": "NYSE"
+      "NYSE": "NYSE",
+      "OTHER": "Other"
     }
   },
   "error": {

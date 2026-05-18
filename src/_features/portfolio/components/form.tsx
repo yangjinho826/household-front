@@ -49,6 +49,7 @@ export default function PortfolioForm({ portfolioId }: PortfolioFormProps) {
     [marketData, tMarket],
   );
 
+  const isOther = form.values.market === "OTHER";
   const codePlaceholder =
     form.values.market === "NASDAQ" || form.values.market === "NYSE"
       ? "AAPL"
@@ -92,26 +93,29 @@ export default function PortfolioForm({ portfolioId }: PortfolioFormProps) {
           <Select
             {...form.getInputProps("market")}
             label={t("market")}
+            description={t("market_help")}
             data={marketOptions}
             allowDeselect={false}
           />
-          <Group align="end" gap="xs" wrap="nowrap">
-            <TextInput
-              {...form.getInputProps("code")}
-              label={t("code")}
-              placeholder={codePlaceholder}
-              style={{ flex: 1 }}
-            />
-            <Button
-              type="button"
-              variant="light"
-              onClick={handleLookup}
-              loading={isLookupPending}
-              disabled={!form.values.code.trim()}
-            >
-              {t("lookup")}
-            </Button>
-          </Group>
+          {!isOther && (
+            <Group align="end" gap="xs" wrap="nowrap">
+              <TextInput
+                {...form.getInputProps("code")}
+                label={t("code")}
+                placeholder={codePlaceholder}
+                style={{ flex: 1 }}
+              />
+              <Button
+                type="button"
+                variant="light"
+                onClick={handleLookup}
+                loading={isLookupPending}
+                disabled={!form.values.code.trim()}
+              >
+                {t("lookup")}
+              </Button>
+            </Group>
+          )}
           <TextInput
             {...form.getInputProps("name")}
             label={t("name")}

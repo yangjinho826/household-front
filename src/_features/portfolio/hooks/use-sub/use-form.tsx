@@ -48,13 +48,24 @@ export function usePortfolioForm({ portfolioId }: UsePortfolioFormOptions) {
     },
     validateInputOnBlur: true,
     validate: zodResolver(
-      z.object({
-        accountId: z.string().min(1, t("account_required_message")),
-        market: z.enum(["KRX_KOSPI", "KRX_KOSDAQ", "NASDAQ", "NYSE"]),
-        code: z.string().min(1, t("code_required_message")),
-        name: z.string().min(1, t("name_required_message")),
-        currentPrice: z.number().positive(t("current_price_required_message")),
-      }),
+      z
+        .object({
+          accountId: z.string().min(1, t("account_required_message")),
+          market: z.enum(["KRX_KOSPI", "KRX_KOSDAQ", "NASDAQ", "NYSE", "OTHER"]),
+          code: z.string(),
+          name: z.string().min(1, t("name_required_message")),
+          currentPrice: z.number().positive(t("current_price_required_message")),
+        })
+        .superRefine((val, ctx) => {
+          // OTHER (야후 미지원) 면 code 빈문자열 OK, 그 외엔 필수
+          if (val.market !== "OTHER" && val.code.trim().length < 1) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: t("code_required_message"),
+              path: ["code"],
+            });
+          }
+        }),
     ),
   });
 

@@ -116,6 +116,7 @@
     "account_placeholder": "계좌 선택",
     "account_required_message": "계좌를 선택해주세요.",
     "market": "시장",
+    "market_help": "야후 파이낸스에서 자동 시세 갱신되는 시장이에요. 금/원자재 등 미지원 종목은 '기타' 선택",
     "code": "종목코드",
     "code_placeholder": "예) 005930",
     "code_required_message": "종목코드를 입력해주세요.",
@@ -211,7 +212,8 @@
       "KRX_KOSPI": "코스피",
       "KRX_KOSDAQ": "코스닥",
       "NASDAQ": "나스닥",
-      "NYSE": "뉴욕증시"
+      "NYSE": "뉴욕증시",
+      "OTHER": "기타"
     }
   },
   "error": {

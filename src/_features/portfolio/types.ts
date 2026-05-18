@@ -1,4 +1,9 @@
-export type Market = "KRX_KOSPI" | "KRX_KOSDAQ" | "NASDAQ" | "NYSE";
+export type Market =
+  | "KRX_KOSPI"
+  | "KRX_KOSDAQ"
+  | "NASDAQ"
+  | "NYSE"
+  | "OTHER";
 
 export interface PortfolioSearchRequestType {
   searchTerm?: string;
