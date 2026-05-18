@@ -110,6 +110,7 @@ export default function PortfolioForm({ portfolioId }: PortfolioFormProps) {
             label={t("name")}
             placeholder={t("name_placeholder")}
             description={isUpdate ? undefined : t("name_help")}
+            disabled={isUpdate}
           />
           <NumberInput
             {...form.getInputProps("currentPrice")}

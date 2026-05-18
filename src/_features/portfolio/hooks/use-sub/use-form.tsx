@@ -87,7 +87,7 @@ export function usePortfolioForm({ portfolioId }: UsePortfolioFormOptions) {
     try {
       const res = await lookupMutation.mutateAsync({ country, code });
       const d = res.body.data;
-      form.setFieldValue("name", d.name);
+      if (!isUpdate) form.setFieldValue("name", d.name);
       form.setFieldValue("currentPrice", d.currentPrice);
       notifications.show({
         title: tg("notificationstitle"),
