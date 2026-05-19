@@ -23,7 +23,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter, useParams } from "next/navigation";
 import { useState } from "react";
 
-import { GetUserSearchByEmailApi } from "_features/auth/api";
+import { GetAuthUserSearchByEmailApi } from "_features/auth/api";
 import { useHouseholdMutations } from "_features/household/queries/use-mutations";
 import { queryKeys } from "_constants/queries";
 import { ApiResponseError } from "_libraries/fetch/api-response-error";
@@ -37,6 +37,7 @@ interface MembersSectionProps {
 export default function MembersSection({ householdId }: MembersSectionProps) {
   const router = useRouter();
   const routeParams = useParams<{ locale: string }>();
+  const t = useTranslations("household.member");
   const te = useTranslations("error");
 
   const { data: hData } = useSuspenseQuery(
@@ -62,7 +63,7 @@ export default function MembersSection({ householdId }: MembersSectionProps) {
     setSearching(true);
     try {
       // 이메일로 user 검색
-      const userRes = await GetUserSearchByEmailApi(target);
+      const userRes = await GetAuthUserSearchByEmailApi(target);
       const user = userRes.body.data;
 
       // 멤버 추가
@@ -73,8 +74,11 @@ export default function MembersSection({ householdId }: MembersSectionProps) {
       });
 
       notifications.show({
-        title: "초대 완료",
-        message: `${user.name} (${user.email}) 님을 추가했습니다`,
+        title: t("invite_success_title"),
+        message: t("invite_success_message", {
+          name: user.name,
+          email: user.email,
+        }),
         color: "green",
       });
       setEmail("");
@@ -82,10 +86,10 @@ export default function MembersSection({ householdId }: MembersSectionProps) {
       // 미가입 이메일 → 백엔드 NOT_FOUND (CM004)
       let message = getErrorMessage(error, te);
       if (error instanceof ApiResponseError && error.errorCode === "CM004") {
-        message = "해당 이메일로 가입된 사용자가 없습니다";
+        message = t("user_not_found");
       }
       notifications.show({
-        title: "초대 실패",
+        title: t("invite_failed_title"),
         message,
         color: "red",
       });
@@ -95,17 +99,17 @@ export default function MembersSection({ householdId }: MembersSectionProps) {
   };
 
   const handleRemove = async (memberId: string, memberName: string) => {
-    if (!confirm(`${memberName} 님을 가계부에서 제거할까요?`)) return;
+    if (!confirm(t("remove_confirm", { name: memberName }))) return;
     try {
       await removeMemberMutation.mutateAsync({ householdId, memberId });
       notifications.show({
-        title: "제거 완료",
-        message: `${memberName} 님을 제거했습니다`,
+        title: t("remove_success_title"),
+        message: t("remove_success_message", { name: memberName }),
         color: "green",
       });
     } catch (error) {
       notifications.show({
-        title: "제거 실패",
+        title: t("remove_failed_title"),
         message: getErrorMessage(error, te),
         color: "red",
       });
@@ -125,11 +129,11 @@ export default function MembersSection({ householdId }: MembersSectionProps) {
         >
           <IconArrowLeft size={20} />
         </ActionIcon>
-        <Title order={3}>멤버 관리</Title>
+        <Title order={3}>{t("title")}</Title>
       </Group>
 
       <Text size="xs" c="dimmed" px={4}>
-        {household.name} · 멤버 {members.length}명
+        {t("subtitle", { name: household.name, count: members.length })}
       </Text>
 
       {/* 멤버 초대 — owner 만 */}
@@ -137,10 +141,10 @@ export default function MembersSection({ householdId }: MembersSectionProps) {
         <Card radius="lg">
           <Stack gap="sm">
             <Text size="sm" fw={700}>
-              멤버 초대
+              {t("invite_section_title")}
             </Text>
             <Text size="xs" c="dimmed">
-              가입한 사용자의 이메일을 입력해주세요
+              {t("invite_section_hint")}
             </Text>
             <Group gap={8} wrap="nowrap">
               <TextInput
@@ -160,7 +164,7 @@ export default function MembersSection({ householdId }: MembersSectionProps) {
                 loading={searching || addMemberMutation.isPending}
                 disabled={!email.trim()}
               >
-                초대
+                {t("invite_button")}
               </Button>
             </Group>
           </Stack>
@@ -205,7 +209,7 @@ export default function MembersSection({ householdId }: MembersSectionProps) {
                 <Stack gap={2} style={{ flex: 1, minWidth: 0 }}>
                   <Group gap={6} wrap="nowrap">
                     <Text size="sm" fw={700} truncate>
-                      {m.userName ?? "(이름 없음)"}
+                      {m.userName ?? t("unknown_name")}
                     </Text>
                     {isMemberOwner && (
                       <IconCrown
@@ -223,7 +227,7 @@ export default function MembersSection({ householdId }: MembersSectionProps) {
                 {canRemove ? (
                   <UnstyledButton
                     onClick={() =>
-                      handleRemove(m.memberId, m.userName ?? "이 멤버")
+                      handleRemove(m.memberId, m.userName ?? t("this_member"))
                     }
                     style={{ padding: 6, borderRadius: 8 }}
                   >
@@ -231,7 +235,7 @@ export default function MembersSection({ householdId }: MembersSectionProps) {
                   </UnstyledButton>
                 ) : (
                   <Text size="10px" fw={700} c="dimmed">
-                    {isMemberOwner ? "소유자" : "멤버"}
+                    {isMemberOwner ? t("role_owner") : t("role_member")}
                   </Text>
                 )}
               </Group>

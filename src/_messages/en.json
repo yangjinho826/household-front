@@ -185,7 +185,26 @@
     "description": "Description",
     "currency": "Currency",
     "started_at": "Started at",
-    "member_count": "{count} members"
+    "member_count": "{count} members",
+    "member": {
+      "title": "Members",
+      "subtitle": "{name} · {count} members",
+      "invite_section_title": "Invite member",
+      "invite_section_hint": "Enter the email of a registered user",
+      "invite_button": "Invite",
+      "invite_success_title": "Invite complete",
+      "invite_success_message": "Added {name} ({email})",
+      "invite_failed_title": "Invite failed",
+      "user_not_found": "No user found with that email",
+      "remove_confirm": "Remove {name} from this household?",
+      "remove_success_title": "Removed",
+      "remove_success_message": "{name} was removed",
+      "remove_failed_title": "Remove failed",
+      "unknown_name": "(no name)",
+      "this_member": "this member",
+      "role_owner": "Owner",
+      "role_member": "Member"
+    }
   },
   "enum": {
     "account-type": {
@@ -242,6 +261,7 @@
     "HH004": "Already a household member.",
     "HH005": "Member not found.",
     "HH006": "Owner cannot leave the household.",
-    "SN001": "This month's snapshot has already been saved."
+    "SN001": "This month's snapshot has already been saved.",
+    "PT001": "Stock lookup failed."
   }
 }
