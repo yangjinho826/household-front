@@ -48,9 +48,6 @@ export interface TransactionListItemType {
   categoryName?: string | null;
   categoryColor?: string | null;
   categoryIcon?: string | null;
-  frstRegDt: string;
-  lastMdfcnDt: string;
-  dataStatCd: string;
 }
 
 /** 달력 일별 합계 (백엔드 /transaction/calendar) */
@@ -88,7 +85,4 @@ export interface TransactionDetailItemType {
   categoryName?: string | null;
   categoryColor?: string | null;
   categoryIcon?: string | null;
-  frstRegDt: string;
-  lastMdfcnDt: string;
-  dataStatCd: string;
 }

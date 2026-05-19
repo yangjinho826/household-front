@@ -31,9 +31,6 @@ export interface CategoryListItemType {
   icon: string | null;
   sortOrder: number;
   isArchived: boolean;
-  frstRegDt: string;
-  lastMdfcnDt: string;
-  dataStatCd: string;
 }
 
 export interface CategoryDetailItemType {
@@ -45,7 +42,4 @@ export interface CategoryDetailItemType {
   icon: string | null;
   sortOrder: number;
   isArchived: boolean;
-  frstRegDt: string;
-  lastMdfcnDt: string;
-  dataStatCd: string;
 }

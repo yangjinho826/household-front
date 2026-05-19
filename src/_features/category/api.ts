@@ -8,58 +8,14 @@ import type {
 import type {
   CategoryCreateRequest,
   CategoryDetailItemType,
-  CategoryKind,
   CategoryListItemType,
   CategorySearchRequestType,
   CategoryUpdateRequest,
 } from "./types";
 
-interface BackendCategoryResponse {
+type BackendCategoryResponse = Omit<CategoryDetailItemType, "categoryId"> & {
   id: string;
-  household_id: string;
-  kind: CategoryKind;
-  name: string;
-  color: string | null;
-  icon: string | null;
-  sort_order: number;
-  is_archived: boolean;
-}
-
-function mapToListItem(
-  b: BackendCategoryResponse,
-  rowNo: number,
-): CategoryListItemType {
-  return {
-    rowNo,
-    categoryId: b.id,
-    householdId: b.household_id,
-    kind: b.kind,
-    name: b.name,
-    color: b.color,
-    icon: b.icon,
-    sortOrder: b.sort_order,
-    isArchived: b.is_archived,
-    frstRegDt: "",
-    lastMdfcnDt: "",
-    dataStatCd: "ACTIVE",
-  };
-}
-
-function mapToDetailItem(b: BackendCategoryResponse): CategoryDetailItemType {
-  return {
-    categoryId: b.id,
-    householdId: b.household_id,
-    kind: b.kind,
-    name: b.name,
-    color: b.color,
-    icon: b.icon,
-    sortOrder: b.sort_order,
-    isArchived: b.is_archived,
-    frstRegDt: "",
-    lastMdfcnDt: "",
-    dataStatCd: "ACTIVE",
-  };
-}
+};
 
 export async function GetCategorySearchApi(params: CategorySearchRequestType) {
   const queryString = objectToParams({ ...params }).toString();
@@ -67,8 +23,12 @@ export async function GetCategorySearchApi(params: CategorySearchRequestType) {
     `/api/category/list${queryString ? `?${queryString}` : ""}`,
     { method: "GET" },
   );
-  const items = (res.body.data ?? []).map((b, idx) =>
-    mapToListItem(b, idx + 1),
+  const items = (res.body.data ?? []).map(
+    ({ id, ...rest }, idx): CategoryListItemType => ({
+      ...rest,
+      categoryId: id,
+      rowNo: idx + 1,
+    }),
   );
   const wrapped: ApiListResponse<CategoryListItemType> = {
     code: res.body.code,
@@ -91,53 +51,27 @@ export async function GetCategoryDetailApi(categoryId: string) {
     `/api/category/detail/${categoryId}`,
     { method: "GET" },
   );
-  return {
-    ...res,
-    body: { ...res.body, data: mapToDetailItem(res.body.data) },
-  };
+  const { id, ...rest } = res.body.data;
+  const mapped: CategoryDetailItemType = { ...rest, categoryId: id };
+  return { ...res, body: { ...res.body, data: mapped } };
 }
 
 export async function PostCategoryCreateApi(params: CategoryCreateRequest) {
   const res = await apiFetch<ApiResponse<BackendCategoryResponse>>(
     `/api/category/create`,
-    {
-      method: "POST",
-      body: {
-        kind: params.kind,
-        name: params.name,
-        color: params.color ?? null,
-        icon: params.icon ?? null,
-        sort_order: params.sortOrder,
-      },
-      errorHandleMethod: "reject",
-    },
+    { method: "POST", body: params, errorHandleMethod: "reject" },
   );
-  return {
-    ...res,
-    body: { ...res.body, data: mapToDetailItem(res.body.data) },
-  };
+  const { id, ...rest } = res.body.data;
+  const mapped: CategoryDetailItemType = { ...rest, categoryId: id };
+  return { ...res, body: { ...res.body, data: mapped } };
 }
 
 export async function PutCategoryUpdateApi(params: CategoryUpdateRequest) {
-  const res = await apiFetch<ApiResponse<BackendCategoryResponse>>(
-    `/api/category/update/${params.categoryId}`,
-    {
-      method: "PUT",
-      body: {
-        kind: params.kind,
-        name: params.name,
-        color: params.color ?? null,
-        icon: params.icon ?? null,
-        sort_order: params.sortOrder,
-        is_archived: params.isArchived,
-      },
-      errorHandleMethod: "reject",
-    },
+  const { categoryId, ...rest } = params;
+  return apiFetch<ApiResponse<void>>(
+    `/api/category/update/${categoryId}`,
+    { method: "PUT", body: rest, errorHandleMethod: "reject" },
   );
-  return {
-    ...res,
-    body: { ...res.body, data: undefined as unknown as void },
-  };
 }
 
 export function DeleteCategoryDeleteApi(categoryId: string) {

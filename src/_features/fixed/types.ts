@@ -35,9 +35,6 @@ export interface FixedListItemType {
   icon: string | null;
   sortOrder: number;
   isArchived: boolean;
-  frstRegDt: string;
-  lastMdfcnDt: string;
-  dataStatCd: string;
 }
 
 export interface FixedDetailItemType {
@@ -54,7 +51,4 @@ export interface FixedDetailItemType {
   icon: string | null;
   sortOrder: number;
   isArchived: boolean;
-  frstRegDt: string;
-  lastMdfcnDt: string;
-  dataStatCd: string;
 }

@@ -28,9 +28,6 @@ export interface HouseholdListItemType {
   startedAt: string;
   role?: HouseholdRole;
   memberCount?: number;
-  frstRegDt: string;
-  lastMdfcnDt: string;
-  dataStatCd: string;
 }
 
 export interface HouseholdDetailItemType {
@@ -42,9 +39,6 @@ export interface HouseholdDetailItemType {
   startedAt: string;
   role?: HouseholdRole;
   memberCount?: number;
-  frstRegDt: string;
-  lastMdfcnDt: string;
-  dataStatCd: string;
 }
 
 // Members

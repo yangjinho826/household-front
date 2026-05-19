@@ -41,9 +41,6 @@ export interface AccountListItemType {
   portfolioValuation: number | null;
   portfolioProfitLoss: number | null;
   portfolioProfitLossRate: number | null;
-  frstRegDt: string;
-  lastMdfcnDt: string;
-  dataStatCd: string;
 }
 
 export interface AccountDetailItemType {
@@ -63,7 +60,4 @@ export interface AccountDetailItemType {
   portfolioValuation: number | null;
   portfolioProfitLoss: number | null;
   portfolioProfitLossRate: number | null;
-  frstRegDt: string;
-  lastMdfcnDt: string;
-  dataStatCd: string;
 }
