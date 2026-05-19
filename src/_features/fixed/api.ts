@@ -13,69 +13,9 @@ import type {
   FixedUpdateRequest,
 } from "./types";
 
-const num = (v: number | string) => (typeof v === "number" ? v : Number(v));
-
-interface BackendFixedResponse {
+type BackendFixedResponse = Omit<FixedDetailItemType, "fixedId"> & {
   id: string;
-  household_id: string;
-  name: string;
-  amount: number | string;
-  day_of_month: number;
-  category_id: string | null;
-  category_name: string | null;
-  category_color: string | null;
-  category_icon: string | null;
-  color: string | null;
-  icon: string | null;
-  sort_order: number;
-  is_archived: boolean;
-}
-
-function mapToListItem(
-  b: BackendFixedResponse,
-  rowNo: number,
-): FixedListItemType {
-  return {
-    rowNo,
-    fixedId: b.id,
-    householdId: b.household_id,
-    name: b.name,
-    amount: num(b.amount),
-    dayOfMonth: b.day_of_month,
-    categoryId: b.category_id,
-    categoryName: b.category_name,
-    categoryColor: b.category_color,
-    categoryIcon: b.category_icon,
-    color: b.color,
-    icon: b.icon,
-    sortOrder: b.sort_order,
-    isArchived: b.is_archived,
-    frstRegDt: "",
-    lastMdfcnDt: "",
-    dataStatCd: "ACTIVE",
-  };
-}
-
-function mapToDetailItem(b: BackendFixedResponse): FixedDetailItemType {
-  return {
-    fixedId: b.id,
-    householdId: b.household_id,
-    name: b.name,
-    amount: num(b.amount),
-    dayOfMonth: b.day_of_month,
-    categoryId: b.category_id,
-    categoryName: b.category_name,
-    categoryColor: b.category_color,
-    categoryIcon: b.category_icon,
-    color: b.color,
-    icon: b.icon,
-    sortOrder: b.sort_order,
-    isArchived: b.is_archived,
-    frstRegDt: "",
-    lastMdfcnDt: "",
-    dataStatCd: "ACTIVE",
-  };
-}
+};
 
 export async function GetFixedSearchApi(params: FixedSearchRequestType) {
   const queryString = objectToParams({ ...params }).toString();
@@ -83,8 +23,12 @@ export async function GetFixedSearchApi(params: FixedSearchRequestType) {
     `/api/fixed/list${queryString ? `?${queryString}` : ""}`,
     { method: "GET" },
   );
-  const items = (res.body.data ?? []).map((b, idx) =>
-    mapToListItem(b, idx + 1),
+  const items = (res.body.data ?? []).map(
+    ({ id, ...rest }, idx): FixedListItemType => ({
+      ...rest,
+      fixedId: id,
+      rowNo: idx + 1,
+    }),
   );
   const wrapped: ApiListResponse<FixedListItemType> = {
     code: res.body.code,
@@ -107,57 +51,27 @@ export async function GetFixedDetailApi(fixedId: string) {
     `/api/fixed/detail/${fixedId}`,
     { method: "GET" },
   );
-  return {
-    ...res,
-    body: { ...res.body, data: mapToDetailItem(res.body.data) },
-  };
+  const { id, ...rest } = res.body.data;
+  const mapped: FixedDetailItemType = { ...rest, fixedId: id };
+  return { ...res, body: { ...res.body, data: mapped } };
 }
 
 export async function PostFixedCreateApi(params: FixedCreateRequest) {
   const res = await apiFetch<ApiResponse<BackendFixedResponse>>(
     `/api/fixed/create`,
-    {
-      method: "POST",
-      body: {
-        name: params.name,
-        amount: params.amount,
-        day_of_month: params.dayOfMonth,
-        category_id: params.categoryId ?? null,
-        color: params.color ?? null,
-        icon: params.icon ?? null,
-        sort_order: params.sortOrder,
-      },
-      errorHandleMethod: "reject",
-    },
+    { method: "POST", body: params, errorHandleMethod: "reject" },
   );
-  return {
-    ...res,
-    body: { ...res.body, data: mapToDetailItem(res.body.data) },
-  };
+  const { id, ...rest } = res.body.data;
+  const mapped: FixedDetailItemType = { ...rest, fixedId: id };
+  return { ...res, body: { ...res.body, data: mapped } };
 }
 
 export async function PutFixedUpdateApi(params: FixedUpdateRequest) {
-  const res = await apiFetch<ApiResponse<BackendFixedResponse>>(
-    `/api/fixed/update/${params.fixedId}`,
-    {
-      method: "PUT",
-      body: {
-        name: params.name,
-        amount: params.amount,
-        day_of_month: params.dayOfMonth,
-        category_id: params.categoryId ?? null,
-        color: params.color ?? null,
-        icon: params.icon ?? null,
-        sort_order: params.sortOrder,
-        is_archived: params.isArchived,
-      },
-      errorHandleMethod: "reject",
-    },
+  const { fixedId, ...rest } = params;
+  return apiFetch<ApiResponse<void>>(
+    `/api/fixed/update/${fixedId}`,
+    { method: "PUT", body: rest, errorHandleMethod: "reject" },
   );
-  return {
-    ...res,
-    body: { ...res.body, data: undefined as unknown as void },
-  };
 }
 
 export function DeleteFixedDeleteApi(fixedId: string) {
@@ -168,7 +82,7 @@ export function DeleteFixedDeleteApi(fixedId: string) {
 }
 
 interface BackendFixedMonthlyUsage {
-  fixed_expense_id: string;
+  fixedExpenseId: string;
   used: number | string;
 }
 
@@ -194,7 +108,8 @@ export async function GetFixedMonthlySummaryApi(month?: string) {
   const b = res.body.data;
   const usages: Record<string, number> = {};
   for (const item of b.items) {
-    usages[item.fixed_expense_id] = num(item.used);
+    usages[item.fixedExpenseId] =
+      typeof item.used === "number" ? item.used : Number(item.used);
   }
   const data: FixedMonthlySummaryType = { month: b.month, usages };
   return { ...res, body: { ...res.body, data } };

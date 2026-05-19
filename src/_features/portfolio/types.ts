@@ -76,9 +76,6 @@ export interface PortfolioListItemType {
   isArchived: boolean;
   // 호환 필드 (mock — 향후 제거 가능)
   householdId?: string;
-  frstRegDt: string;
-  lastMdfcnDt: string;
-  dataStatCd: string;
 }
 
 export type PortfolioDetailItemType = PortfolioListItemType;
