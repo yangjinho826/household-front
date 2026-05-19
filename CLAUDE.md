@@ -74,7 +74,7 @@ src/
 ├── _providers/   # query-provider, mantine-provider, search-params-provider 등
 ├── _sections/    # 페이지 단위 (auth, home, transaction, wealth, portfolio, settings 등)
 ├── _styles/      # design-tokens (토스 색상 C.*)
-├── _utilities/   # fmt, icons, utils, mock-response
+├── _utilities/   # fmt, icons, utils
 ├── _constants/   # apiBaseUrl, authLoginUrl
 ├── _messages/    # ko.json, en.json
 └── _types/       # env.d.ts
@@ -93,7 +93,3 @@ src/
 ### 표준 참조 모듈
 
 **`_features/household/`** 또는 `_features/transaction/` — 신규 도메인 만들 때 참조 (api/queries/components/hooks 구조)
-
-### mock 모드
-
-`NEXT_PUBLIC_USE_MOCK !== "false"` 시 in-memory 데이터. 백엔드 (FastAPI) 붙으면 env 변경만.
