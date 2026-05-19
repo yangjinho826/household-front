@@ -42,7 +42,9 @@ export function useAuth() {
       isAuthenticated: Boolean(user),
       accessToken,
       actions: {
-        logout: () => logoutMutation.mutate(),
+        // mutateAsync 반환 — 호출 측이 await 해서 PostLogoutApi 응답
+        // (= 백엔드 Set-Cookie: refresh_token 만료) 도착 후 라우팅 가능
+        logout: () => logoutMutation.mutateAsync(),
         clearSession,
       },
       state: {
