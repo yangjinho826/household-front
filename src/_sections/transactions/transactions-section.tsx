@@ -11,19 +11,14 @@ import {
 import { IconCalendar, IconList, IconPlus } from "@tabler/icons-react";
 import { useRouter, useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
 
 import FilterChip from "_features/common/components/filter-chip";
-import MonthPicker, {
-  defaultYearMonth,
-} from "_features/common/components/month-picker";
+import MonthPicker from "_features/common/components/month-picker";
 import { useEnumOptions } from "_features/enum/queries/use-query";
 import TransactionCalendarView from "_features/transaction/components/calendar-view";
 import TransactionListView from "_features/transaction/components/list-view";
+import { useTransactionSearch } from "_features/transaction/hooks/use-sub/use-search";
 import type { TxType } from "_features/transaction/types";
-
-type ViewMode = "list" | "calendar";
-type FilterMode = "all" | TxType;
 
 export default function TransactionsSection() {
   const t = useTranslations("transaction");
@@ -31,16 +26,19 @@ export default function TransactionsSection() {
   const router = useRouter();
   const routeParams = useParams<{ locale: string }>();
 
-  const [view, setView] = useState<ViewMode>("list");
-  const [filter, setFilter] = useState<FilterMode>("all");
-  const [month, setMonth] = useState<string>(() => defaultYearMonth());
+  const {
+    view,
+    filter,
+    month,
+    year,
+    monthNum,
+    setView,
+    setFilter,
+    setMonth,
+  } = useTransactionSearch();
 
   const { data: txTypeData } = useEnumOptions("tx-type");
   const txTypes = txTypeData.body.data as TxType[];
-
-  const [yearStr, monthStr] = month.split("-");
-  const yearNum = Number(yearStr);
-  const monthNum = Number(monthStr);
 
   return (
     <Stack gap="md">
@@ -64,7 +62,7 @@ export default function TransactionsSection() {
 
       <SegmentedControl
         value={view}
-        onChange={(v) => setView(v as ViewMode)}
+        onChange={(v) => setView(v as "list" | "calendar")}
         data={[
           {
             value: "list",
@@ -109,7 +107,7 @@ export default function TransactionsSection() {
       {view === "list" ? (
         <TransactionListView
           searchParams={{
-            year: yearNum,
+            year,
             month: monthNum,
             ...(filter !== "all" && { txType: filter }),
           }}
@@ -117,7 +115,7 @@ export default function TransactionsSection() {
       ) : (
         <TransactionCalendarView
           key={month}
-          year={yearNum}
+          year={year}
           month={monthNum}
         />
       )}
