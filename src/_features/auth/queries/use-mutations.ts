@@ -3,9 +3,9 @@ import { useMutation } from "@tanstack/react-query";
 import { ApiResponseError } from "_libraries/fetch/api-response-error";
 
 import {
-  PostLoginApi,
-  PostLogoutApi,
-  PostRegisterApi,
+  PostAuthLoginApi,
+  PostAuthLogoutApi,
+  PostAuthRegisterApi,
 } from "../api";
 import { useAuthStore } from "../store";
 import type {
@@ -25,10 +25,10 @@ export function useAuthMutations(options?: AuthMutationsOptions) {
   const clearSession = useAuthStore((s) => s.clearSession);
 
   const loginMutation = useMutation({
-    mutationFn: (params: LoginRequest) => PostLoginApi(params),
+    mutationFn: (params: LoginRequest) => PostAuthLoginApi(params),
     onSuccess: (res) => {
       const data = res.body.data as LoginResponseRaw;
-      setSession({ accessToken: data.access_token, user: data.user });
+      setSession({ accessToken: data.accessToken, user: data.user });
     },
     onError: (error) => {
       if (error instanceof ApiResponseError) options?.onLoginError?.(error);
@@ -36,7 +36,7 @@ export function useAuthMutations(options?: AuthMutationsOptions) {
   });
 
   const registerMutation = useMutation({
-    mutationFn: (params: RegisterRequest) => PostRegisterApi(params),
+    mutationFn: (params: RegisterRequest) => PostAuthRegisterApi(params),
     onError: (error) => {
       if (error instanceof ApiResponseError) options?.onRegisterError?.(error);
     },
@@ -45,7 +45,7 @@ export function useAuthMutations(options?: AuthMutationsOptions) {
   const logoutMutation = useMutation({
     mutationFn: async () => {
       try {
-        await PostLogoutApi();
+        await PostAuthLogoutApi();
       } finally {
         // 백엔드 호출 실패/성공 무관하게 클라 상태는 즉시 비움 (unmount 전 보장)
         clearSession();

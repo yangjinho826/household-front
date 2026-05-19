@@ -18,10 +18,10 @@ export interface AuthUser {
   language: "ko" | "en";
 }
 
-// 백엔드 /api/auth/login 응답의 data 부분 (snake_case)
+// 백엔드 /api/auth/login 응답의 data 부분
 export interface LoginResponseRaw {
-  access_token: string;
-  expires_in: number;
-  token_type: string;
+  accessToken: string;
+  expiresIn: number;
+  tokenType: string;
   user: AuthUser;
 }

@@ -1,10 +1,10 @@
 import { createQueryKeys } from "@lukemorales/query-key-factory";
 
-import { GetMeApi } from "../api";
+import { GetAuthMeApi } from "../api";
 
 export const auth = createQueryKeys("auth", {
   me: {
     queryKey: null,
-    queryFn: () => GetMeApi(),
+    queryFn: () => GetAuthMeApi(),
   },
 });
