@@ -10,6 +10,8 @@ export const TOKEN = {
   green: "#22C55E",
   purple: "#8B5CF6",
   gold: "#F59E0B",
+  yellow: "#FFD600",
+  orange: "#FF6B35",
 } as const;
 
 /** 색이 지정되지 않은 항목의 fallback */

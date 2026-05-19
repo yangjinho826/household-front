@@ -2,13 +2,15 @@
 
 import { Group, Stack, Text, UnstyledButton } from "@mantine/core";
 
+import { TOKEN } from "_styles/design-tokens";
+
 const COLORS = [
-  "#3182F6", // 토스 블루
-  "#22C55E", // 토스 그린
-  "#F04452", // 토스 레드
-  "#8B5CF6", // 토스 퍼플
-  "#FFD600", // 옐로우
-  "#FF6B35", // 오렌지
+  TOKEN.blue, // 토스 블루
+  TOKEN.green, // 토스 그린
+  TOKEN.red, // 토스 레드
+  TOKEN.purple, // 토스 퍼플
+  TOKEN.yellow, // 옐로우
+  TOKEN.orange, // 오렌지
   "#FF6B6B", // 레드 라이트
   "#4ECDC4", // 민트
   "#FFE66D", // 옐로우 라이트
