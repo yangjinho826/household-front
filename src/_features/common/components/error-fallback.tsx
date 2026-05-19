@@ -10,6 +10,7 @@ import {
   Text,
 } from "@mantine/core";
 import { IconAlertCircle } from "@tabler/icons-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 
 import { ApiResponseError } from "_libraries/fetch/api-response-error";
@@ -28,6 +29,8 @@ interface ErrorFallbackProps {
  * 단독 모바일 화면으로 표시.
  */
 export function ErrorFallback({ error, reset }: ErrorFallbackProps) {
+  const queryClient = useQueryClient();
+
   useEffect(() => {
     console.error("[ErrorBoundary]", error);
   }, [error]);
@@ -70,7 +73,15 @@ export function ErrorFallback({ error, reset }: ErrorFallbackProps) {
                   {description}
                 </Text>
               </Stack>
-              <Button onClick={reset} fullWidth>
+              <Button
+                onClick={() => {
+                  // 캐시된 에러 query state 를 비워야 재마운트 시 fresh fetch.
+                  // reset() 만으로는 TanStack Query 캐시가 그대로라 같은 에러 재현됨.
+                  queryClient.resetQueries();
+                  reset();
+                }}
+                fullWidth
+              >
                 다시 시도
               </Button>
             </Stack>

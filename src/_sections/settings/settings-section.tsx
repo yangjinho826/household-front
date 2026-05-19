@@ -23,7 +23,7 @@ import { queryKeys } from "_constants/queries";
 export default function SettingsSection() {
   const router = useRouter();
   const routeParams = useParams<{ locale: string }>();
-  const { user, actions } = useAuthContext();
+  const { user, actions, state } = useAuthContext();
   const [switcherOpened, switcher] = useDisclosure(false);
   const currentId = useHouseholdStore((s) => s.currentHouseholdId);
 
@@ -55,10 +55,14 @@ export default function SettingsSection() {
   const currentHousehold =
     households.find((h) => h.householdId === currentId) ?? households[0];
 
-  const onLogout = () => {
-    actions.logout();
-    // logoutMutation 의 mutationFn 이 finally 에서 clearSession 호출 — 즉시 redirect 안전
-    router.replace(`/${routeParams.locale}/login`);
+  const onLogout = async () => {
+    try {
+      await actions.logout();
+    } catch {
+      // 백엔드 호출 실패해도 mutationFn finally 에서 clearSession 실행됨 — 무시
+    }
+    // 풀 리로드 — (guest) layout 의 SSR 가드가 새 쿠키 상태로 평가되도록
+    window.location.replace(`/${routeParams.locale}/login`);
   };
 
   const navTo = (path: string) =>
@@ -221,6 +225,8 @@ export default function SettingsSection() {
         color="gray"
         size="md"
         leftSection={<IconLogout size={16} />}
+        loading={state.isLoggingOut}
+        disabled={state.isLoggingOut}
         onClick={onLogout}
       >
         로그아웃
