@@ -61,7 +61,7 @@ export const returnFetchRefresh = (args?: ReturnFetchDefaultOptions) =>
         let newAccessToken: string | undefined;
         try {
           const json = await refreshResponse.clone().json();
-          newAccessToken = json?.data?.access_token;
+          newAccessToken = json?.data?.accessToken;
         } catch {
           // 파싱 실패 → 아래 가드에서 redirect
         }

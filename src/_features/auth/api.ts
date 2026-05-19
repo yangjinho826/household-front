@@ -8,14 +8,14 @@ import type {
   RegisterRequest,
 } from "./types";
 
-export function GetMeApi() {
+export function GetAuthMeApi() {
   return apiFetch<ApiResponse<AuthUser>>(`/api/user/me`, {
     method: "GET",
     errorHandleMethod: "reject",
   });
 }
 
-export function GetUserSearchByEmailApi(email: string) {
+export function GetAuthUserSearchByEmailApi(email: string) {
   const qs = new URLSearchParams({ email }).toString();
   return apiFetch<ApiResponse<AuthUser>>(`/api/user/search?${qs}`, {
     method: "GET",
@@ -23,7 +23,7 @@ export function GetUserSearchByEmailApi(email: string) {
   });
 }
 
-export function PostLoginApi(params: LoginRequest) {
+export function PostAuthLoginApi(params: LoginRequest) {
   return apiFetch<ApiResponse<LoginResponseRaw>>(`/api/auth/login`, {
     method: "POST",
     body: params,
@@ -31,7 +31,7 @@ export function PostLoginApi(params: LoginRequest) {
   });
 }
 
-export function PostRegisterApi(params: RegisterRequest) {
+export function PostAuthRegisterApi(params: RegisterRequest) {
   return apiFetch<ApiResponse<AuthUser>>(`/api/user`, {
     method: "POST",
     body: params,
@@ -39,7 +39,7 @@ export function PostRegisterApi(params: RegisterRequest) {
   });
 }
 
-export function PostLogoutApi() {
+export function PostAuthLogoutApi() {
   return apiFetch<ApiResponse<void>>(`/api/auth/logout`, {
     method: "POST",
     errorHandleMethod: "reject",
