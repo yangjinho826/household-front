@@ -28,7 +28,8 @@ yarn-error.log*
 nginx/ssl/
 .idea/
 .vscode/
-.claude/
+.claude/*
+!.claude/settings.json
 .serena/
 
 # test
