@@ -2,8 +2,8 @@ name: Deploy to Lightsail
 
 on:
   push:
-    branches: [main]
-  workflow_dispatch:
+    tags: ['v*']        # v 로 시작하는 git tag push 시만 트리거 (의식적 배포)
+  workflow_dispatch:    # 비상용 수동 트리거는 유지
 
 env:
   IMAGE_NAME: household-front

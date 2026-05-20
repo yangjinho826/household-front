@@ -22,6 +22,14 @@ services:
           cpus: '0.25'
           memory: 200M
     restart: unless-stopped
+    # 호스트 부팅 시점 nginx 가 frontend 보다 먼저 떠서 502 내는 사고 방지용.
+    # 재배포 다운타임에는 효과 없음 (nginx 는 이미 떠 있고 frontend 만 stop→start).
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 30s
 
   # ── nginx 리버스 프록시 (외부 진입점) ──
   nginx:
@@ -37,7 +45,8 @@ services:
       - web
       - household-net
     depends_on:
-      - frontend
+      frontend:
+        condition: service_healthy
     restart: unless-stopped
     # JSON access log 를 stdout 으로 받아서 docker 가 호스트에 자동 영속화 + 회전
     # 보관 총량: max-size × max-file = 약 1GB (트래픽 보면서 조정)

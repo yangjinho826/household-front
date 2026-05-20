@@ -1,0 +1,59 @@
+name: Rollback (직전 배포로)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+
+env:
+  IMAGE_NAME: household-front
+  GHCR_REPOSITORY: ghcr.io/yangjinho826/household-front
+
+jobs:
+  rollback:
+    name: Rollback to previous deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Find previous timestamp tag from GHCR
+        id: tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # GHCR 의 패키지 version 목록 → 모든 tag 추출 →
+          # timestamp-sha 형식만 필터 (YYYYMMDDHHmmss-{8자SHA}) → 내림차순 정렬 → 2번째 (현재 :latest 의 직전)
+          PREV=$(gh api -X GET /users/yangjinho826/packages/container/household-front/versions --paginate \
+            --jq '.[].metadata.container.tags[]' \
+            | grep -E '^[0-9]{14}-[a-f0-9]{8}$' \
+            | sort -ru \
+            | sed -n '2p')
+
+          if [ -z "$PREV" ]; then
+            echo "::error::직전 timestamp 태그를 찾지 못함. 수동 SSH 롤백 필요."
+            exit 1
+          fi
+
+          echo "PREV_TAG=$PREV" >> "$GITHUB_OUTPUT"
+          echo "▶ 직전 태그: $PREV"
+
+      - name: Rollback via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          PREV_TAG: ${{ steps.tag.outputs.PREV_TAG }}
+        with:
+          host: ${{ secrets.LIGHTSAIL_HOST }}
+          username: ${{ secrets.LIGHTSAIL_USER }}
+          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+          envs: PREV_TAG
+          script: |
+            set -e
+            cd ~/household/household-front
+            docker pull ${{ env.GHCR_REPOSITORY }}:${PREV_TAG}
+            docker tag  ${{ env.GHCR_REPOSITORY }}:${PREV_TAG} ${{ env.IMAGE_NAME }}:latest
+            docker compose up -d --no-deps frontend
+            docker compose ps
+
+      - name: Verify
+        run: echo "✅ Rolled back frontend to ${{ steps.tag.outputs.PREV_TAG }}"
