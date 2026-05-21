@@ -12,8 +12,8 @@ export async function GetAccountSnapshotYearlyApi(
   params: AccountSnapshotYearlyRequest = {},
 ) {
   const queryParams: Record<string, unknown> = {};
-  if (params.from) queryParams.from = params.from;
-  if (params.to) queryParams.to = params.to;
+  if (params.fromDate) queryParams.fromDate = params.fromDate;
+  if (params.toDate) queryParams.toDate = params.toDate;
 
   const queryString = objectToParams(queryParams).toString();
   return apiFetch<ApiResponse<AccountSnapshotYearly>>(
