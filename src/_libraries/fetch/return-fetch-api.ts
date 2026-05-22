@@ -37,6 +37,12 @@ export const returnFetchApi = (args?: ReturnFetchDefaultOptions) =>
               "X-Error-Handle-Method": custom.errorHandleMethod,
             };
           }
+          if (custom.method === "POST" && custom.idempotencyKey) {
+            headers = {
+              ...headers,
+              "Idempotency-Key": custom.idempotencyKey,
+            };
+          }
         }
 
         if (!isFormDataRequest(configs)) {

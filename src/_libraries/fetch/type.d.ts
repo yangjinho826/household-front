@@ -19,6 +19,7 @@ type JsonRequestInit = Omit<NonNullable<RequestInit>, "method" | "body" | "next"
   };
   method: MethodType;
   errorHandleMethod?: ErrorHandleMethod;
+  idempotencyKey?: string;
   retryCount?: number;
 };
 
