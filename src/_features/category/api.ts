@@ -78,10 +78,18 @@ export async function GetCategoryDetailApi(categoryId: string) {
   return { ...res, body: { ...res.body, data: mapped } };
 }
 
-export async function PostCategoryCreateApi(params: CategoryCreateRequest) {
+export async function PostCategoryCreateApi(
+  params: CategoryCreateRequest,
+  idempotencyKey?: string,
+) {
   const res = await apiFetch<ApiResponse<BackendCategoryResponse>>(
     `/api/category/create`,
-    { method: "POST", body: params, errorHandleMethod: "reject" },
+    {
+      method: "POST",
+      body: params,
+      idempotencyKey,
+      errorHandleMethod: "reject",
+    },
   );
   const { id, ...rest } = res.body.data;
   const mapped: CategoryDetailItemType = { ...rest, categoryId: id };

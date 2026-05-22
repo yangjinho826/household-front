@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { queryKeys } from "_constants/queries";
+import { useIdempotentMutation } from "_libraries/hooks/use-idempotent-mutation";
 
 import {
   DeleteHouseholdDeleteApi,
@@ -18,9 +19,9 @@ import type {
 export function useHouseholdMutations() {
   const queryClient = useQueryClient();
 
-  const createMutation = useMutation({
-    mutationFn: (props: HouseholdCreateRequest) =>
-      PostHouseholdCreateApi(props),
+  const createMutation = useIdempotentMutation({
+    mutationFn: (props: HouseholdCreateRequest, idempotencyKey) =>
+      PostHouseholdCreateApi(props, idempotencyKey),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.household.list._def,
@@ -55,9 +56,9 @@ export function useHouseholdMutations() {
     },
   });
 
-  const addMemberMutation = useMutation({
-    mutationFn: (props: MemberCreateRequest) =>
-      PostHouseholdMemberCreateApi(props),
+  const addMemberMutation = useIdempotentMutation({
+    mutationFn: (props: MemberCreateRequest, idempotencyKey) =>
+      PostHouseholdMemberCreateApi(props, idempotencyKey),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.household.members._def,

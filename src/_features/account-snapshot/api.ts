@@ -27,11 +27,12 @@ export async function GetAccountSnapshotYearlyApi(
  * 예: 6/1~6/말 사이에 호출하면 5월 박제.
  * 같은 달 이미 있으면 백엔드 SNAPSHOT_ALREADY_EXISTS 에러.
  */
-export async function PostAccountSnapshotCreateApi() {
+export async function PostAccountSnapshotCreateApi(idempotencyKey?: string) {
   return apiFetch<ApiResponse<AccountSnapshotMonthItem>>(
     `/api/account-snapshot/create`,
     {
       method: "POST",
+      idempotencyKey,
       errorHandleMethod: "reject",
     },
   );

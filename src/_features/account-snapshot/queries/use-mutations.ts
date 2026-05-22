@@ -1,14 +1,16 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { queryKeys } from "_constants/queries";
+import { useIdempotentMutation } from "_libraries/hooks/use-idempotent-mutation";
 
 import { PostAccountSnapshotCreateApi } from "../api";
 
 export function useAccountSnapshotMutations() {
   const queryClient = useQueryClient();
 
-  const createMutation = useMutation({
-    mutationFn: () => PostAccountSnapshotCreateApi(),
+  const createMutation = useIdempotentMutation({
+    mutationFn: (_: void, idempotencyKey) =>
+      PostAccountSnapshotCreateApi(idempotencyKey),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.accountSnapshot.yearly._def,

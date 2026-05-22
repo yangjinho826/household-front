@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 
 import { ApiResponseError } from "_libraries/fetch/api-response-error";
+import { useIdempotentMutation } from "_libraries/hooks/use-idempotent-mutation";
 
 import {
   PostAuthLoginApi,
@@ -35,8 +36,9 @@ export function useAuthMutations(options?: AuthMutationsOptions) {
     },
   });
 
-  const registerMutation = useMutation({
-    mutationFn: (params: RegisterRequest) => PostAuthRegisterApi(params),
+  const registerMutation = useIdempotentMutation({
+    mutationFn: (params: RegisterRequest, idempotencyKey) =>
+      PostAuthRegisterApi(params, idempotencyKey),
     onError: (error) => {
       if (error instanceof ApiResponseError) options?.onRegisterError?.(error);
     },

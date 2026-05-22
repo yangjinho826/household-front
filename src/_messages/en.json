@@ -262,6 +262,9 @@
     "HH005": "Member not found.",
     "HH006": "Owner cannot leave the household.",
     "SN001": "This month's snapshot has already been saved.",
-    "PT001": "Stock lookup failed."
+    "PT001": "Stock lookup failed.",
+    "ID001": "This key has already been used for a different request.",
+    "ID002": "A different request body was sent with the same key.",
+    "ID003": "The same request is being processed. Please retry shortly."
   }
 }

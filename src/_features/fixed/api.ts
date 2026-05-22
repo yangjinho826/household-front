@@ -74,10 +74,18 @@ export async function GetFixedDetailApi(fixedId: string) {
   return { ...res, body: { ...res.body, data: mapped } };
 }
 
-export async function PostFixedCreateApi(params: FixedCreateRequest) {
+export async function PostFixedCreateApi(
+  params: FixedCreateRequest,
+  idempotencyKey?: string,
+) {
   const res = await apiFetch<ApiResponse<BackendFixedResponse>>(
     `/api/fixed/create`,
-    { method: "POST", body: params, errorHandleMethod: "reject" },
+    {
+      method: "POST",
+      body: params,
+      idempotencyKey,
+      errorHandleMethod: "reject",
+    },
   );
   const { id, ...rest } = res.body.data;
   const mapped: FixedDetailItemType = { ...rest, fixedId: id };
