@@ -3,9 +3,10 @@
 가계부 앱 프론트엔드 (모바일 토스 스타일).
 스택: `personal-frontend` 룰 적용 (bims 컨벤션 + shadcn/ui).
 
+<!-- BEGIN claude-init managed: rules -->
 ## 적용 룰
 
-<!-- ~/.claude/rules/ 의 룰 파일들을 @import. claude-init 이 자동 생성 -->
+<!-- ~/.claude/rules/ 의 룰 파일들을 @import. claude-init 이 자동 생성/갱신 (마커 안만 갱신) -->
 
 <!-- common -->
 @~/.claude/rules/common/coding.md
@@ -34,6 +35,7 @@
 @~/.claude/rules/personal-frontend/design.md
 @~/.claude/rules/personal-frontend/general.md
 
+<!-- END claude-init managed: rules -->
 ## 빌드/실행
 
 ```bash
