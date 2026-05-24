@@ -30,7 +30,11 @@ nginx/ssl/
 .vscode/
 .claude/*
 !.claude/settings.json
+!.claude/memory-bank/
+!.claude/memory-bank/**
 .serena/
 
 # test
 coverage/
+.env.claude
+.claude/memory-bank/_progress.log
