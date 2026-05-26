@@ -160,33 +160,35 @@ export default function WealthSection() {
               원
             </Text>
           </Text>
-          <ResponsiveContainer width="100%" height={96} minWidth={0}>
-            <AreaChart
-              data={trendData}
-              margin={{ top: 12, right: 0, bottom: 0, left: 0 }}
-            >
-              <defs>
-                <linearGradient id="wealthTrend" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#3B82F6" stopOpacity={0.3} />
-                  <stop offset="100%" stopColor="#3B82F6" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <Area
-                type="monotone"
-                dataKey="value"
-                stroke="#3B82F6"
-                strokeWidth={2.5}
-                fill="url(#wealthTrend)"
-              />
-              <XAxis
-                dataKey="month"
-                tick={{ fontSize: 9, fill: "#8B95A1" }}
-                axisLine={false}
-                tickLine={false}
-                interval={1}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+          <div className="chart-trend-wrap">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+              <AreaChart
+                data={trendData}
+                margin={{ top: 12, right: 0, bottom: 0, left: 0 }}
+              >
+                <defs>
+                  <linearGradient id="wealthTrend" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#3B82F6" stopOpacity={0.3} />
+                    <stop offset="100%" stopColor="#3B82F6" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <Area
+                  type="monotone"
+                  dataKey="value"
+                  stroke="#3B82F6"
+                  strokeWidth={2.5}
+                  fill="url(#wealthTrend)"
+                />
+                <XAxis
+                  dataKey="month"
+                  tick={{ fontSize: 9, fill: "#8B95A1" }}
+                  axisLine={false}
+                  tickLine={false}
+                  interval={1}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </Stack>
       </Card>
 
