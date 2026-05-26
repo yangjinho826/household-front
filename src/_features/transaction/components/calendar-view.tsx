@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, SimpleGrid, Stack, Text, UnstyledButton } from "@mantine/core";
+import { Card, Grid, SimpleGrid, Stack, Text, UnstyledButton } from "@mantine/core";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 
@@ -76,8 +76,9 @@ export default function TransactionCalendarView({ year, month }: CalendarViewPro
   );
 
   return (
-    <Stack gap="md">
-      {/* 월간 합계 */}
+    <Grid gutter="md" align="flex-start">
+      {/* 캘린더 — 모바일/패드 풀폭, 데스크탑(>=lg) 절반 */}
+      <Grid.Col span={{ base: 12, lg: 6 }}>
       <Card radius="lg" p="md">
         <Stack gap="sm">
           <SimpleGrid cols={3} spacing="xs">
@@ -187,25 +188,29 @@ export default function TransactionCalendarView({ year, month }: CalendarViewPro
           </SimpleGrid>
         </Stack>
       </Card>
+      </Grid.Col>
 
-      <Stack gap="xs">
-        <Text size="sm" fw={700} px={4}>
-          {selectedDate.slice(5).replace("-", "월 ")}일 거래
-        </Text>
-        <Card radius="lg" p="xs">
-          {selectedTx.length === 0 ? (
-            <Text size="sm" c="dimmed" ta="center" py="lg">
-              거래가 없습니다
-            </Text>
-          ) : (
-            <Stack gap={0}>
-              {selectedTx.map((tx) => (
-                <TxRow key={tx.transactionId} t={tx} />
-              ))}
-            </Stack>
-          )}
-        </Card>
-      </Stack>
-    </Stack>
+      {/* 선택일 거래 — 모바일/패드 캘린더 아래, 데스크탑 캘린더 오른쪽 */}
+      <Grid.Col span={{ base: 12, lg: 6 }}>
+        <Stack gap="xs">
+          <Text size="sm" fw={700} px={4}>
+            {selectedDate.slice(5).replace("-", "월 ")}일 거래
+          </Text>
+          <Card radius="lg" p="xs">
+            {selectedTx.length === 0 ? (
+              <Text size="sm" c="dimmed" ta="center" py="lg">
+                거래가 없습니다
+              </Text>
+            ) : (
+              <Stack gap={0}>
+                {selectedTx.map((tx) => (
+                  <TxRow key={tx.transactionId} t={tx} />
+                ))}
+              </Stack>
+            )}
+          </Card>
+        </Stack>
+      </Grid.Col>
+    </Grid>
   );
 }

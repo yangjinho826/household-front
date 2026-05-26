@@ -20,7 +20,7 @@ export default function FilterChip({ label, active, onClick }: FilterChipProps) 
         borderRadius: 999,
         background: active
           ? "var(--mantine-color-info-0)"
-          : "var(--mantine-color-gray-0)",
+          : "var(--mantine-color-gray-1)",
         color: active
           ? "var(--mantine-color-info-5)"
           : "var(--mantine-color-gray-7)",
