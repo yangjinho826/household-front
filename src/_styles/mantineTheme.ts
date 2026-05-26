@@ -183,9 +183,9 @@ export const mantineTheme = createTheme({
     fontFamily: "Pretendard, sans-serif",
     fontWeight: "700",
     sizes: {
-      h1: { fontSize: rem(48), lineHeight: "1.2", fontWeight: "700" },
-      h2: { fontSize: rem(36), lineHeight: "1.3", fontWeight: "700" },
-      h3: { fontSize: rem(28), lineHeight: "1.35", fontWeight: "600" },
+      h1: { fontSize: rem(40), lineHeight: "1.2", fontWeight: "700" },
+      h2: { fontSize: rem(32), lineHeight: "1.3", fontWeight: "700" },
+      h3: { fontSize: rem(24), lineHeight: "1.35", fontWeight: "600" },
       h4: { fontSize: rem(20), lineHeight: "1.4", fontWeight: "600" },
     },
   },

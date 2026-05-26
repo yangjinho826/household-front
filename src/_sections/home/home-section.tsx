@@ -147,7 +147,7 @@ export default function HomeSection() {
               이번 달 저축
             </Text>
             <Text
-              size="xl"
+              size="lg"
               fw={700}
               style={{ fontVariantNumeric: "tabular-nums" }}
             >
