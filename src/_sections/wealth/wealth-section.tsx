@@ -114,7 +114,7 @@ export default function WealthSection() {
     <Stack gap="md">
       <Title order={3}>자산</Title>
 
-      <Card radius="xl" p="lg">
+      <Card radius="xl" p="xl" shadow="md">
         <Stack gap={4}>
           <Group justify="space-between" align="center">
             <Text size="xs" fw={500} c="dimmed">

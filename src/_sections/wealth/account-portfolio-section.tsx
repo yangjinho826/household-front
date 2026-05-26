@@ -81,7 +81,7 @@ export default function AccountPortfolioSection({ accountId }: Props) {
       <SubHeader title={account.name} />
 
       {/* hero — 통장 전체 자산 + 손익 + 현금/평가/종목 메타 */}
-      <Card radius="xl" p="lg">
+      <Card radius="xl" p="xl" shadow="md">
         <Stack gap={4}>
           <Text size="xs" fw={500} c="dimmed">
             통장 전체 자산

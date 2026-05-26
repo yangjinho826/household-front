@@ -64,7 +64,7 @@ export default function HomeSection() {
   return (
     <Stack gap="md">
       {/* 총자산 hero */}
-      <Card radius="xl" p="lg">
+      <Card radius="xl" p="xl" shadow="md">
         <Stack gap={4}>
           <Text size="xs" fw={500} c="dimmed">
             총 자산

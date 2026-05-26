@@ -224,10 +224,12 @@ export const mantineTheme = createTheme({
       },
     }),
     Card: Card.extend({
+      // sub 카드 기본값 — 정보 밀도 ↑, 미니멀.
+      // hero 카드 (페이지 주인공) 는 사용처에서 p="xl" shadow="md" 명시로 위계 분리.
       defaultProps: {
         radius: "xl",
-        padding: "xl",
-        shadow: "md",
+        padding: "lg",
+        shadow: "xs",
         withBorder: false,
       },
       styles: {

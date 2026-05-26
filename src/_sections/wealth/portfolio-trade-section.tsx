@@ -99,7 +99,7 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
       />
 
       {/* 종목 hero */}
-      <Card radius="xl" p="lg">
+      <Card radius="xl" p="xl" shadow="md">
         <Stack gap={4}>
           <Text size="xs" fw={500} c="dimmed">
             평가금액

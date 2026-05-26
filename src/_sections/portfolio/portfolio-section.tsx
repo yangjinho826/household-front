@@ -85,7 +85,7 @@ export default function PortfolioSection() {
       {/* 전체 계좌 hero — 계좌 0개면 숨김 (아래 "투자 계좌 없습니다" 카드가 대신 안내) */}
       {investmentAccounts.length > 0 && (
         <>
-          <Card radius="xl" p="lg">
+          <Card radius="xl" p="xl" shadow="md">
             <Stack gap={8}>
               <Stack gap={2}>
                 <Text size="xs" fw={500} c="dimmed">
