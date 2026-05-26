@@ -34,3 +34,4 @@ nginx/ssl/
 
 # test
 coverage/
+.claude/memory-bank/_progress.log

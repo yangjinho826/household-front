@@ -1,39 +1,47 @@
 # household-front
 
 가계부 앱 프론트엔드 (모바일 토스 스타일).
-스택: `personal-frontend` 룰 적용 (bims 컨벤션 + shadcn/ui).
+**bims-control 구조 + cnnet 응답 래퍼/에러 메시지 형식 채택.** 단 cnnet 의 `/api/front/v1` 경로, `dataStatCd` 논리 삭제, 감사 필드 는 안 따름.
 
+<!-- BEGIN claude-init managed: rules -->
 ## 적용 룰
 
-<!-- ~/.claude/rules/ 의 룰 파일들을 @import. claude-init 이 자동 생성 -->
+<!-- ~/.claude/rules/ 의 룰 파일들을 @import. claude-init 이 자동 생성/갱신 (마커 안만 갱신) -->
 
 <!-- common -->
+@~/.claude/rules/common/README.md
 @~/.claude/rules/common/coding.md
 @~/.claude/rules/common/git.md
 @~/.claude/rules/common/style.md
 
 <!-- javascript -->
+@~/.claude/rules/javascript/README.md
 @~/.claude/rules/javascript/style.md
 
 <!-- typescript -->
+@~/.claude/rules/typescript/README.md
 @~/.claude/rules/typescript/strict.md
 @~/.claude/rules/typescript/style.md
 
 <!-- typescript-react -->
+@~/.claude/rules/typescript-react/README.md
 @~/.claude/rules/typescript-react/general.md
 @~/.claude/rules/typescript-react/state.md
 @~/.claude/rules/typescript-react/testing.md
 
 <!-- typescript-nextjs -->
+@~/.claude/rules/typescript-nextjs/README.md
 @~/.claude/rules/typescript-nextjs/app-router.md
 @~/.claude/rules/typescript-nextjs/data-fetching.md
 @~/.claude/rules/typescript-nextjs/server-actions.md
 @~/.claude/rules/typescript-nextjs/server-components.md
 
-<!-- personal-frontend -->
-@~/.claude/rules/personal-frontend/design.md
-@~/.claude/rules/personal-frontend/general.md
+<!-- personal-frontend / bims-control 룰은 import 안 함 -->
+<!-- - personal-frontend: shadcn/ui 강제 + Mantine 금지 → 실제와 정반대 -->
+<!-- - bims-control: /api/front/v1 경로, javaFetch, dataStatCd, 감사 필드 같은 cnnet 항목이 본문에 박혀 있어 부분 채택 표현 어려움 -->
+<!-- 프로젝트 특수 패턴은 아래 "프로젝트 메모" 섹션에 직접 정리 -->
 
+<!-- END claude-init managed: rules -->
 ## 빌드/실행
 
 ```bash
@@ -55,15 +63,19 @@ pnpm dlx shadcn@latest add <component>
 
 가계부 앱 (모바일 토스 스타일).
 
-### 스택 (bims 표준)
+### 스택 (실제 적용)
 - Next.js 14.2.23 + React 18.3.1 + TypeScript strict
-- Tailwind 4 (`@theme inline` CSS 변수) + shadcn/ui (`_libraries/ui/`)
-- TanStack Query 5 + Zustand 5
+- Tailwind 4 (`@theme inline` CSS 변수) + **Mantine 8.x** (`_providers/mantine-provider.tsx`, `_styles/mantineTheme.ts`)
+- 아이콘: `@tabler/icons-react` (lucide-react 안 씀)
+- TanStack Query 5 + Zustand 5 + `@lukemorales/query-key-factory`
 - next-intl v4 (`app/[locale]/...`)
+- URL 상태: `nuqs`. 폼: `@mantine/form` + `zod`. 차트: `recharts`. 날짜: `dayjs`. JWT: `jose`
 - pnpm (npm/yarn 금지)
 - **fetch**: `apiFetch` (return-fetch 4 체인 — cookie → refresh → api → json)
-- **응답 타입**: `ApiResponse<T>` / `ApiListResponse<T>` (모든 필드 required)
-- **에러**: `ApiResponseError` (status / errorCode / errorMessage / errorHandleMethod)
+- **응답 타입**: `ApiResponse<T>` / `ApiListResponse<T>` (모든 필드 required) — cnnet `ResultVO` 와 동일 컨셉
+- **에러**: `ApiResponseError` (status / errorCode / errorMessage / errorHandleMethod), 메시지 형식은 cnnet 표준 (`~에 실패했습니다`)
+- **API 경로**: `/api/{도메인}/{동작}` — cnnet 의 `/api/front/v1` prefix 는 **안 씀**
+- **논리 삭제 / 감사 필드**: 안 씀 (cnnet 컨벤션 미적용)
 
 ### 디렉토리 (bims 100% 매칭)
 
