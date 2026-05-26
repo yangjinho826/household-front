@@ -16,18 +16,20 @@ export interface DonutBreakdownItem {
 
 interface Props {
   items: DonutBreakdownItem[];
-  /** 도넛 가로/세로 px (정사각형) */
-  size?: number;
   /** 좌측 리스트에 표시할 상위 항목 수 */
   topN?: number;
 }
 
 /**
  * 일반화된 도넛 분포 차트 — 슬라이스 + 상위 N개 리스트.
+ *
+ * 크기는 CSS class `.chart-donut-wrap` (globals.css) 가 viewport 별로 분기:
+ * 모바일/패드 88px, 데스크탑(>=lg) 144px. inner/outer radius 는 % 라 자동 비례.
+ *
  * 종목/계좌 등 어떤 그룹에도 사용. 색은 호출 측에서 결정.
  * 활성 항목 (value > 0) 만 포함. 없으면 null 반환.
  */
-export default function PortfolioDonut({ items, size = 88, topN = 3 }: Props) {
+export default function PortfolioDonut({ items, topN = 3 }: Props) {
   const active = items.filter((i) => i.value > 0);
   if (active.length === 0) return null;
 
@@ -41,7 +43,7 @@ export default function PortfolioDonut({ items, size = 88, topN = 3 }: Props) {
 
   return (
     <Group gap="md" wrap="nowrap" align="center">
-      <div style={{ width: size, height: size, flexShrink: 0 }}>
+      <div className="chart-donut-wrap">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -50,8 +52,8 @@ export default function PortfolioDonut({ items, size = 88, topN = 3 }: Props) {
               nameKey="label"
               cx="50%"
               cy="50%"
-              innerRadius={size * 0.32}
-              outerRadius={size * 0.48}
+              innerRadius="64%"
+              outerRadius="96%"
               paddingAngle={1}
               stroke="none"
               isAnimationActive={false}

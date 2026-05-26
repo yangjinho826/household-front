@@ -62,11 +62,13 @@ export function HouseholdSwitcher({ opened, onClose }: HouseholdSwitcherProps) {
           borderTopRightRadius: 24,
           maxWidth: 448,
           margin: "0 auto",
-          // BottomTab(64) 위까지만 차지하도록 maxHeight 제한 + 하단 padding 으로 콘텐츠가 BottomTab 에 가려지지 않게
-          maxHeight: "min(80vh, calc(100vh - 64px))",
+          // BottomTab + 홈 인디케이터 영역까지 합산해서 가림 방지
+          maxHeight:
+            "min(80dvh, calc(100dvh - var(--bottom-tab-h) - var(--safe-bottom)))",
         },
         body: {
-          paddingBottom: 64 + 8,
+          paddingBottom:
+            "calc(var(--bottom-tab-h) + var(--safe-bottom) + 8px)",
         },
       }}
     >
@@ -108,8 +110,8 @@ export function HouseholdSwitcher({ opened, onClose }: HouseholdSwitcherProps) {
                     height: 44,
                     borderRadius: 12,
                     background: isOwner
-                      ? "var(--mantine-color-tossBlue-0)"
-                      : "var(--mantine-color-tossPurple-0)",
+                      ? "var(--mantine-color-info-0)"
+                      : "var(--mantine-color-purple-0)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -120,8 +122,8 @@ export function HouseholdSwitcher({ opened, onClose }: HouseholdSwitcherProps) {
                     size={20}
                     color={
                       isOwner
-                        ? "var(--mantine-color-tossBlue-5)"
-                        : "var(--mantine-color-tossPurple-5)"
+                        ? "var(--mantine-color-info-5)"
+                        : "var(--mantine-color-purple-5)"
                     }
                   />
                 </div>
@@ -152,7 +154,7 @@ export function HouseholdSwitcher({ opened, onClose }: HouseholdSwitcherProps) {
                       width: 24,
                       height: 24,
                       borderRadius: 12,
-                      background: "var(--mantine-color-tossBlue-5)",
+                      background: "var(--mantine-color-info-5)",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",

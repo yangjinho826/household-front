@@ -1,26 +1,48 @@
 "use client";
 
-import { Container, Stack } from "@mantine/core";
+import { Stack } from "@mantine/core";
 import type { ReactNode } from "react";
 
 import AppHeader from "_features/layout/components/app-header";
 import { BottomTab } from "_features/layout/components/bottom-tab";
+import QuickAddFab from "_features/layout/components/quick-add-fab";
+import { SidebarNav } from "_features/layout/components/sidebar-nav";
+import QuickAddSheet from "_features/transaction/components/quick-add-sheet";
 
 /**
- * UserShell — 보호된 사용자 영역의 모바일 컨테이너.
- * - max-width 448 컨테이너 + sticky AppHeader + BottomTab
- * - pb={80} 으로 BottomTab 자리 확보
- * - AppHeader 는 페이지 상단에 항상 sticky (가계부 스위처 + 설정 링크)
- * - 인증 가드는 layout 에서 처리
+ * UserShell — 반응형 셸 (3 viewport).
+ *
+ * - 휴대폰(<sm=768): block, max-width 448, AppHeader sticky + BottomTab fixed
+ * - 패드(sm~lg=768~1199): block, max-width 768, AppHeader + BottomTab 유지 (확장)
+ * - 데스크탑(>=lg=1200): flex (좌 SidebarNav 240 + 우 메인), AppHeader/BottomTab 숨김, max-width 1280
+ *
+ * max-width 는 BaseLayout main 의 `var(--container-max)` 가 처리.
+ * display 분기는 `.user-shell-wrap` utility class (globals.css) 로 CSS only — SSR 안전.
  */
 export function UserShell({ children }: { children: ReactNode }) {
   return (
-    <Container size={448} px="md" py="xl" pb={80} bg="white" mih="100dvh">
-      <AppHeader />
-      <Stack gap="md" mt="md">
-        {children}
-      </Stack>
-      <BottomTab />
-    </Container>
+    <div className="user-shell-wrap">
+      <SidebarNav />
+      <div
+        style={{
+          flex: 1,
+          minWidth: 0,
+          paddingLeft: "var(--mantine-spacing-md)",
+          paddingRight: "var(--mantine-spacing-md)",
+          paddingTop: "var(--mantine-spacing-xl)",
+          paddingBottom:
+            "calc(var(--bottom-tab-h) + var(--safe-bottom) + var(--mantine-spacing-md))",
+        }}
+      >
+        <AppHeader />
+        <Stack gap="md" mt="md">
+          {children}
+        </Stack>
+        <BottomTab />
+      </div>
+
+      <QuickAddFab />
+      <QuickAddSheet />
+    </div>
   );
 }

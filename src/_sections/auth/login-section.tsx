@@ -63,7 +63,15 @@ export default function LoginSection() {
         <Stack gap="md">
           <BrandLogo />
           <Stack gap={4}>
-            <Title order={1} fw={800} style={{ whiteSpace: "pre-line", lineHeight: 1.3 }}>
+            <Title
+              order={2}
+              fw={800}
+              style={{
+                whiteSpace: "pre-line",
+                lineHeight: 1.3,
+                fontSize: 32,
+              }}
+            >
               {t("welcome_title")}
             </Title>
             <Text size="sm" c="dimmed">

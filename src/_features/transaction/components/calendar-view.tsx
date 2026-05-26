@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, SimpleGrid, Stack, Text, UnstyledButton } from "@mantine/core";
+import { Card, Grid, SimpleGrid, Stack, Text, UnstyledButton } from "@mantine/core";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 
@@ -76,16 +76,17 @@ export default function TransactionCalendarView({ year, month }: CalendarViewPro
   );
 
   return (
-    <Stack gap="md">
-      {/* 월간 합계 */}
-      <Card radius="lg" p="md">
+    <Grid gutter="md" align="stretch">
+      {/* 캘린더 — 모바일/패드 풀폭, 데스크탑(>=lg) 절반 */}
+      <Grid.Col span={{ base: 12, lg: 6 }}>
+      <Card radius="lg" p="md" h="100%">
         <Stack gap="sm">
           <SimpleGrid cols={3} spacing="xs">
             <Stack gap={2} align="center">
               <Text size="10px" c="dimmed" fw={600}>
                 수입
               </Text>
-              <Text size="xs" fw={700} c="tossGreen.5" style={{ fontVariantNumeric: "tabular-nums" }}>
+              <Text size="xs" fw={700} c="info.5" style={{ fontVariantNumeric: "tabular-nums" }}>
                 +{calendar.monthlyIncome.toLocaleString("ko-KR")}
               </Text>
             </Stack>
@@ -93,7 +94,7 @@ export default function TransactionCalendarView({ year, month }: CalendarViewPro
               <Text size="10px" c="dimmed" fw={600}>
                 지출
               </Text>
-              <Text size="xs" fw={700} c="tossRed.5" style={{ fontVariantNumeric: "tabular-nums" }}>
+              <Text size="xs" fw={700} c="danger.5" style={{ fontVariantNumeric: "tabular-nums" }}>
                 -{calendar.monthlyExpense.toLocaleString("ko-KR")}
               </Text>
             </Stack>
@@ -101,7 +102,7 @@ export default function TransactionCalendarView({ year, month }: CalendarViewPro
               <Text size="10px" c="dimmed" fw={600}>
                 이체
               </Text>
-              <Text size="xs" fw={700} c="tossPurple.5" style={{ fontVariantNumeric: "tabular-nums" }}>
+              <Text size="xs" fw={700} c="purple.5" style={{ fontVariantNumeric: "tabular-nums" }}>
                 {calendar.monthlyTransfer.toLocaleString("ko-KR")}
               </Text>
             </Stack>
@@ -114,7 +115,7 @@ export default function TransactionCalendarView({ year, month }: CalendarViewPro
                 size="10px"
                 fw={700}
                 ta="center"
-                c={i === 0 ? "tossRed.5" : i === 6 ? "tossBlue.5" : "dimmed"}
+                c={i === 0 ? "danger.5" : i === 6 ? "info.5" : "dimmed"}
                 py={4}
               >
                 {d}
@@ -129,9 +130,9 @@ export default function TransactionCalendarView({ year, month }: CalendarViewPro
               const dow = idx % 7;
               const dayColor =
                 dow === 0
-                  ? "var(--mantine-color-tossRed-5)"
+                  ? "var(--mantine-color-danger-5)"
                   : dow === 6
-                    ? "var(--mantine-color-tossBlue-5)"
+                    ? "var(--mantine-color-info-5)"
                     : "var(--mantine-color-gray-9)";
               return (
                 <UnstyledButton
@@ -146,9 +147,9 @@ export default function TransactionCalendarView({ year, month }: CalendarViewPro
                     justifyContent: "center",
                     gap: 2,
                     background: isSelected
-                      ? "var(--mantine-color-tossBlue-5)"
+                      ? "var(--mantine-color-info-5)"
                       : isToday
-                        ? "var(--mantine-color-tossBlue-0)"
+                        ? "var(--mantine-color-info-0)"
                         : "transparent",
                   }}
                 >
@@ -165,7 +166,7 @@ export default function TransactionCalendarView({ year, month }: CalendarViewPro
                         <Text
                           size="8px"
                           fw={700}
-                          c={isSelected ? "white" : "tossGreen.5"}
+                          c={isSelected ? "white" : "info.5"}
                         >
                           +{Math.round(stat.income / 10000)}만
                         </Text>
@@ -174,7 +175,7 @@ export default function TransactionCalendarView({ year, month }: CalendarViewPro
                         <Text
                           size="8px"
                           fw={700}
-                          c={isSelected ? "white" : "tossRed.5"}
+                          c={isSelected ? "white" : "danger.5"}
                         >
                           -{Math.round(stat.expense / 10000)}만
                         </Text>
@@ -187,25 +188,29 @@ export default function TransactionCalendarView({ year, month }: CalendarViewPro
           </SimpleGrid>
         </Stack>
       </Card>
+      </Grid.Col>
 
-      <Stack gap="xs">
-        <Text size="sm" fw={700} px={4}>
-          {selectedDate.slice(5).replace("-", "월 ")}일 거래
-        </Text>
-        <Card radius="lg" p="xs">
-          {selectedTx.length === 0 ? (
-            <Text size="sm" c="dimmed" ta="center" py="lg">
-              거래가 없습니다
-            </Text>
-          ) : (
-            <Stack gap={0}>
-              {selectedTx.map((tx) => (
-                <TxRow key={tx.transactionId} t={tx} />
-              ))}
-            </Stack>
-          )}
-        </Card>
-      </Stack>
-    </Stack>
+      {/* 선택일 거래 — 모바일/패드 캘린더 아래, 데스크탑 캘린더 오른쪽 (높이 일치) */}
+      <Grid.Col span={{ base: 12, lg: 6 }}>
+        <Stack gap="xs" h="100%">
+          <Text size="sm" fw={700} px={4}>
+            {selectedDate.slice(5).replace("-", "월 ")}일 거래
+          </Text>
+          <Card radius="lg" p="xs" style={{ flex: 1, overflow: "auto" }}>
+            {selectedTx.length === 0 ? (
+              <Text size="sm" c="dimmed" ta="center" py="lg">
+                거래가 없습니다
+              </Text>
+            ) : (
+              <Stack gap={0}>
+                {selectedTx.map((tx) => (
+                  <TxRow key={tx.transactionId} t={tx} />
+                ))}
+              </Stack>
+            )}
+          </Card>
+        </Stack>
+      </Grid.Col>
+    </Grid>
   );
 }

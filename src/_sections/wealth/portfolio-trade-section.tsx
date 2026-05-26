@@ -10,15 +10,15 @@ import {
   SimpleGrid,
   Stack,
   Text,
-  Title,
   UnstyledButton,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { IconArrowLeft, IconPencil } from "@tabler/icons-react";
+import { IconPencil } from "@tabler/icons-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter, useParams } from "next/navigation";
 import { useState } from "react";
 
+import SubHeader from "_features/layout/components/sub-header";
 import TradeForm from "_features/portfolio/components/trade-form";
 import type {
   PortfolioTransactionItemType,
@@ -85,28 +85,21 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
 
   return (
     <Stack gap="md">
-      <Group justify="space-between" align="center">
-        <Group gap={4} align="center">
+      <SubHeader
+        title={portfolio.name}
+        right={
           <ActionIcon
             variant="subtle"
-            onClick={() => router.back()}
-            aria-label="back"
+            onClick={handleEditPortfolio}
+            aria-label="edit"
           >
-            <IconArrowLeft size={18} />
+            <IconPencil size={18} />
           </ActionIcon>
-          <Title order={3}>{portfolio.name}</Title>
-        </Group>
-        <ActionIcon
-          variant="subtle"
-          onClick={handleEditPortfolio}
-          aria-label="edit"
-        >
-          <IconPencil size={18} />
-        </ActionIcon>
-      </Group>
+        }
+      />
 
       {/* 종목 hero */}
-      <Card radius="xl" p="lg">
+      <Card radius="xl" p="xl" shadow="md">
         <Stack gap={4}>
           <Text size="xs" fw={500} c="dimmed">
             평가금액
@@ -188,11 +181,11 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
           style={{
             padding: "14px 0",
             borderRadius: 12,
-            background: "var(--mantine-color-tossRed-0)",
+            background: "var(--mantine-color-danger-0)",
             textAlign: "center",
           }}
         >
-          <Text size="sm" fw={700} c="tossRed.5">
+          <Text size="sm" fw={700} c="danger.5">
             매수
           </Text>
         </UnstyledButton>
@@ -201,11 +194,11 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
           style={{
             padding: "14px 0",
             borderRadius: 12,
-            background: "var(--mantine-color-tossBlue-0)",
+            background: "var(--mantine-color-info-0)",
             textAlign: "center",
           }}
         >
-          <Text size="sm" fw={700} c="tossBlue.5">
+          <Text size="sm" fw={700} c="info.5">
             매도
           </Text>
         </UnstyledButton>
@@ -242,7 +235,7 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
                   <Group justify="space-between" align="center">
                     <Group gap={6}>
                       <Badge
-                        color={t.ptType === "BUY" ? "tossRed" : "tossBlue"}
+                        color={t.ptType === "BUY" ? "danger" : "info"}
                         variant="light"
                         size="sm"
                       >

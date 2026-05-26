@@ -44,14 +44,17 @@ export default function AppHeader() {
         justify="space-between"
         align="center"
         wrap="nowrap"
+        hiddenFrom="lg"
         px="md"
-        py="xs"
-        h={56}
+        pb="xs"
         bg="white"
         style={{
           position: "sticky",
           top: 0,
-          zIndex: 30,
+          zIndex: "var(--z-app-header)" as React.CSSProperties["zIndex"],
+          // 노치/상태바 영역 흡수 — paddingTop 으로 콘텐츠가 노치 아래로 내려옴
+          paddingTop: "calc(var(--safe-top) + var(--mantine-spacing-xs))",
+          minHeight: "calc(var(--app-header-h) + var(--safe-top))",
           borderBottom: "1px solid var(--mantine-color-gray-1)",
           marginLeft: "calc(var(--mantine-spacing-md) * -1)",
           marginRight: "calc(var(--mantine-spacing-md) * -1)",

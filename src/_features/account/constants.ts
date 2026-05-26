@@ -4,9 +4,9 @@ import type { AccountType } from "./types";
 
 /** AccountType → Mantine 색상 키 (tossXxx) */
 export const ACCOUNT_TYPE_MANTINE_COLOR: Record<AccountType, string> = {
-  LIVING: "tossBlue",
-  SAVINGS: "tossGreen",
-  INVESTMENT: "tossPurple",
+  LIVING: "info",
+  SAVINGS: "linerGreen",
+  INVESTMENT: "purple",
   OTHER: "gray",
 };
 

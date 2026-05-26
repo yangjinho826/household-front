@@ -1,30 +1,28 @@
 "use client";
 
 import {
-  ActionIcon,
   Button,
   Card,
   Group,
   Stack,
   Text,
   TextInput,
-  Title,
   UnstyledButton,
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import {
-  IconArrowLeft,
   IconCrown,
   IconSearch,
   IconTrash,
   IconUserPlus,
 } from "@tabler/icons-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useRouter, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useState } from "react";
 
 import { GetAuthUserSearchByEmailApi } from "_features/auth/api";
 import { useHouseholdMutations } from "_features/household/queries/use-mutations";
+import SubHeader from "_features/layout/components/sub-header";
 import { queryKeys } from "_constants/queries";
 import { ApiResponseError } from "_libraries/fetch/api-response-error";
 import { getErrorMessage } from "_libraries/fetch/error-message";
@@ -35,7 +33,6 @@ interface MembersSectionProps {
 }
 
 export default function MembersSection({ householdId }: MembersSectionProps) {
-  const router = useRouter();
   const routeParams = useParams<{ locale: string }>();
   const t = useTranslations("household.member");
   const te = useTranslations("error");
@@ -118,19 +115,7 @@ export default function MembersSection({ householdId }: MembersSectionProps) {
 
   return (
     <Stack gap="md">
-      <Group gap={8}>
-        <ActionIcon
-          variant="subtle"
-          color="gray"
-          onClick={() =>
-            router.push(`/${routeParams.locale}/settings`)
-          }
-          aria-label="back"
-        >
-          <IconArrowLeft size={20} />
-        </ActionIcon>
-        <Title order={3}>{t("title")}</Title>
-      </Group>
+      <SubHeader title={t("title")} back={`/${routeParams.locale}/settings`} />
 
       <Text size="xs" c="dimmed" px={4}>
         {t("subtitle", { name: household.name, count: members.length })}
@@ -190,7 +175,7 @@ export default function MembersSection({ householdId }: MembersSectionProps) {
                     height: 40,
                     borderRadius: 20,
                     background: isMemberOwner
-                      ? "var(--mantine-color-tossBlue-0)"
+                      ? "var(--mantine-color-info-0)"
                       : "var(--mantine-color-gray-1)",
                     display: "flex",
                     alignItems: "center",
@@ -201,7 +186,7 @@ export default function MembersSection({ householdId }: MembersSectionProps) {
                   <Text
                     size="sm"
                     fw={800}
-                    c={isMemberOwner ? "tossBlue.5" : undefined}
+                    c={isMemberOwner ? "info.5" : undefined}
                   >
                     {m.userName?.[0] ?? "?"}
                   </Text>
@@ -231,7 +216,7 @@ export default function MembersSection({ householdId }: MembersSectionProps) {
                     }
                     style={{ padding: 6, borderRadius: 8 }}
                   >
-                    <IconTrash size={16} color="#F04452" />
+                    <IconTrash size={16} color="#EF4444" />
                   </UnstyledButton>
                 ) : (
                   <Text size="10px" fw={700} c="dimmed">

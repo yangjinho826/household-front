@@ -64,7 +64,7 @@ export function ErrorFallback({ error, reset }: ErrorFallbackProps) {
         <Center mih="100dvh">
           <Card radius="xl" p="xl" w="100%" bg="white">
             <Stack gap="md" align="center">
-              <IconAlertCircle size={40} color="#F04452" stroke={2} />
+              <IconAlertCircle size={40} color="#EF4444" stroke={2} />
               <Stack gap={4} align="center">
                 <Text size="md" fw={700}>
                   {title}

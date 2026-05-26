@@ -16,7 +16,14 @@ export default async function GuestLayout({
   }
 
   return (
-    <Container size={448} px="md" py="xl" bg="white" mih="100dvh">
+    <Container
+      size={448}
+      px="md"
+      py="xl"
+      bg="white"
+      mih="100dvh"
+      style={{ marginLeft: "auto", marginRight: "auto" }}
+    >
       {children}
     </Container>
   );

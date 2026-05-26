@@ -114,7 +114,7 @@ export default function WealthSection() {
     <Stack gap="md">
       <Title order={3}>자산</Title>
 
-      <Card radius="xl" p="lg">
+      <Card radius="xl" p="xl" shadow="md">
         <Stack gap={4}>
           <Group justify="space-between" align="center">
             <Text size="xs" fw={500} c="dimmed">
@@ -128,7 +128,7 @@ export default function WealthSection() {
                 borderRadius: 999,
                 background: hasTargetMonth
                   ? "var(--mantine-color-gray-0)"
-                  : "var(--mantine-color-tossBlue-0)",
+                  : "var(--mantine-color-info-0)",
                 opacity: createMutation.isPending ? 0.5 : 1,
               }}
             >
@@ -136,12 +136,12 @@ export default function WealthSection() {
                 {hasTargetMonth ? (
                   <IconCheck size={12} stroke={3} color="#8B95A1" />
                 ) : (
-                  <IconPlus size={12} stroke={3} color="#3182F6" />
+                  <IconPlus size={12} stroke={3} color="#3B82F6" />
                 )}
                 <Text
                   size="10px"
                   fw={700}
-                  c={hasTargetMonth ? "dimmed" : "tossBlue.5"}
+                  c={hasTargetMonth ? "dimmed" : "info.5"}
                 >
                   {hasTargetMonth
                     ? `${targetMonthLabel} 저장됨`
@@ -160,33 +160,35 @@ export default function WealthSection() {
               원
             </Text>
           </Text>
-          <ResponsiveContainer width="100%" height={96} minWidth={0}>
-            <AreaChart
-              data={trendData}
-              margin={{ top: 12, right: 0, bottom: 0, left: 0 }}
-            >
-              <defs>
-                <linearGradient id="wealthTrend" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#3182F6" stopOpacity={0.3} />
-                  <stop offset="100%" stopColor="#3182F6" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <Area
-                type="monotone"
-                dataKey="value"
-                stroke="#3182F6"
-                strokeWidth={2.5}
-                fill="url(#wealthTrend)"
-              />
-              <XAxis
-                dataKey="month"
-                tick={{ fontSize: 9, fill: "#8B95A1" }}
-                axisLine={false}
-                tickLine={false}
-                interval={1}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+          <div className="chart-trend-wrap">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+              <AreaChart
+                data={trendData}
+                margin={{ top: 12, right: 0, bottom: 0, left: 0 }}
+              >
+                <defs>
+                  <linearGradient id="wealthTrend" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#3B82F6" stopOpacity={0.3} />
+                    <stop offset="100%" stopColor="#3B82F6" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <Area
+                  type="monotone"
+                  dataKey="value"
+                  stroke="#3B82F6"
+                  strokeWidth={2.5}
+                  fill="url(#wealthTrend)"
+                />
+                <XAxis
+                  dataKey="month"
+                  tick={{ fontSize: 9, fill: "#8B95A1" }}
+                  axisLine={false}
+                  tickLine={false}
+                  interval={1}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </Stack>
       </Card>
 
@@ -242,7 +244,7 @@ export default function WealthSection() {
         <UnstyledButton
           onClick={() => router.push(`/${routeParams.locale}/account/new`)}
         >
-          <Text size="xs" fw={700} c="tossBlue.5">
+          <Text size="xs" fw={700} c="info.5">
             + 추가
           </Text>
         </UnstyledButton>
@@ -299,7 +301,7 @@ export default function WealthSection() {
                   size="sm"
                   fw={700}
                   style={{ fontVariantNumeric: "tabular-nums" }}
-                  c={a.balance < 0 ? "tossRed.5" : undefined}
+                  c={a.balance < 0 ? "danger.5" : undefined}
                 >
                   {fmt(a.balance)}원
                 </Text>

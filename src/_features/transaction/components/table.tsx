@@ -16,10 +16,10 @@ import { fmt } from "_utilities/fmt";
 import type { TransactionListItemType, TxType } from "../types";
 
 const TYPE_COLOR: Record<TxType, string> = {
-  EXPENSE: "tossRed.5",
-  FIXED_EXPENSE: "tossRed.5",
-  INCOME: "tossGreen.5",
-  TRANSFER: "tossPurple.5",
+  EXPENSE: "danger.5",
+  FIXED_EXPENSE: "danger.5",
+  INCOME: "info.5",
+  TRANSFER: "purple.5",
 };
 
 interface TransactionTableProps {

@@ -77,7 +77,7 @@ export default function AccountTable({
                   </Group>
                   <Text
                     fw={800}
-                    c={isNegative ? "tossRed.5" : undefined}
+                    c={isNegative ? "danger.5" : undefined}
                     style={{
                       fontVariantNumeric: "tabular-nums",
                       flexShrink: 0,

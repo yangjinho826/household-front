@@ -1,10 +1,77 @@
 @import "tailwindcss";
 
-/* Mantine body 배경을 토스 회색으로 override (light-only)
+/* Mantine body 배경 (light-only) — 토스 회색 페이지 bg 유지.
    Mantine 의 selector specificity 와 매칭: :root[data-mantine-color-scheme='light'] */
 :root[data-mantine-color-scheme="light"],
 :host([data-mantine-color-scheme="light"]) {
   --mantine-color-body: #f2f4f6;
+}
+
+/* 모바일 PWA 골격 토큰. fixed/sticky 요소가 모두 이 토큰 참조 — magic number 일원화.
+   env(safe-area-inset-*) 는 standalone 외 환경에선 0px → 항상 적용해도 무해. */
+:root {
+  --safe-top: env(safe-area-inset-top);
+  --safe-bottom: env(safe-area-inset-bottom);
+  --safe-left: env(safe-area-inset-left);
+  --safe-right: env(safe-area-inset-right);
+  --app-header-h: 56px;
+  --bottom-tab-h: 64px;
+  --sidebar-w: 240px;
+  --container-max: 448px; /* 휴대폰 박스 */
+  --z-app-header: 30;
+  --z-fab: 200;
+  --z-bottom-tab: 500;
+}
+
+/* 패드 (>= sm = 768) — 메인 박스 768, 카드 grid 반응 영역 */
+@media (min-width: 768px) {
+  :root {
+    --container-max: 768px;
+  }
+}
+
+/* 데스크탑 (>= lg = 1200) — 사이드바 240 + 메인 합쳐서 1280 max */
+@media (min-width: 1200px) {
+  :root {
+    --container-max: 1280px;
+  }
+}
+
+/* UserShell wrapper — 모바일/패드 박스 + 데스크탑 flex (좌 Sidebar + 우 메인).
+   max-width: var(--container-max) 가 viewport 별 박스 폭 결정. CSS only — SSR 안전. */
+.user-shell-wrap {
+  display: block;
+  min-height: 100dvh;
+  width: 100%;
+  max-width: var(--container-max);
+  margin: 0 auto;
+  background: #f2f4f6;
+}
+@media (min-width: 1200px) {
+  .user-shell-wrap {
+    display: flex;
+  }
+}
+
+/* 차트 wrapper — 데스크탑(>=lg) 에서 자연스럽게 확대. recharts ResponsiveContainer
+   가 wrapper 의 width/height 100% 흡수하므로 wrapper 만 분기. */
+.chart-trend-wrap {
+  width: 100%;
+  height: 96px;
+}
+.chart-donut-wrap {
+  width: 88px;
+  height: 88px;
+  flex-shrink: 0;
+}
+@media (min-width: 1200px) {
+  .chart-trend-wrap {
+    height: 200px;
+  }
+  .chart-donut-wrap {
+    width: 144px;
+    height: 144px;
+  }
 }
 
 html,
@@ -12,8 +79,26 @@ body {
   min-height: 100dvh;
 }
 
+/* iOS PWA 의 pull-to-refresh / overscroll bounce 차단 — 네이티브 앱 느낌 */
 body {
+  overscroll-behavior-y: contain;
+}
+
+/* 글로벌 타이포 — Pretendard + 한글 본문 표준 자간/행간.
+   토스/네이버/리디북스 본문 자간 -0.02em / 행간 1.5 따름.
+   tnum 으로 가계부 금액 자릿수 정렬. */
+html {
   font-family:
     Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   font-feature-settings: "tnum" on;
+  letter-spacing: -0.02em;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 작은 글자(caption, small)는 자간 0 — 좁은 자간 가독성 저하 보정 */
+small,
+.text-caption {
+  letter-spacing: 0;
 }

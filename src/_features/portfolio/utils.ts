@@ -52,8 +52,8 @@ export function portfolioCalc(items: AnyPortfolio[]): PortfolioStat {
 
 /** 한국 주식 표기 — 양수 빨강(상승), 음수 파랑(하락), 0 회색 */
 export function profitColor(profit: number): string {
-  if (profit > 0) return "tossRed.5";
-  if (profit < 0) return "tossBlue.5";
+  if (profit > 0) return "danger.5";
+  if (profit < 0) return "info.5";
   return "gray.6";
 }
 

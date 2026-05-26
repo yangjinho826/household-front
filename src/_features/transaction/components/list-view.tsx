@@ -31,11 +31,11 @@ export default function TransactionListView({ searchParams }: ListViewProps) {
     [data],
   );
 
-  // 월별 그룹화 — txDate "YYYY-MM-DD" 의 앞 7자리 (YYYY-MM)
+  // 일별 그룹화 — txDate "YYYY-MM-DD" 전체
   const grouped = useMemo(() => {
     const map = new Map<string, TransactionListItemType[]>();
     for (const it of items) {
-      const key = it.txDate.slice(0, 7);
+      const key = it.txDate.slice(0, 10);
       const arr = map.get(key) ?? [];
       arr.push(it);
       map.set(key, arr);
@@ -69,10 +69,10 @@ export default function TransactionListView({ searchParams }: ListViewProps) {
 
   return (
     <Stack gap="md">
-      {grouped.map(([month, txns]) => (
-        <Stack key={month} gap="xs">
+      {grouped.map(([date, txns]) => (
+        <Stack key={date} gap="xs">
           <Text size="sm" fw={700} c="dimmed" px={4}>
-            {formatMonth(month)}
+            {formatDate(date)}
           </Text>
           <Card radius="lg" p="xs">
             <Stack gap={0}>
@@ -93,7 +93,10 @@ export default function TransactionListView({ searchParams }: ListViewProps) {
   );
 }
 
-function formatMonth(yyyymm: string): string {
-  const [y, m] = yyyymm.split("-");
-  return `${y}년 ${Number(m)}월`;
+const DOW = ["일", "월", "화", "수", "목", "금", "토"] as const;
+
+function formatDate(yyyymmdd: string): string {
+  const [y, m, d] = yyyymmdd.split("-").map(Number) as [number, number, number];
+  const dow = DOW[new Date(y, m - 1, d).getDay()] ?? "";
+  return `${m}월 ${d}일 (${dow})`;
 }

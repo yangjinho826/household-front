@@ -9,7 +9,6 @@ import {
   Title,
 } from "@mantine/core";
 import { IconCalendar, IconList, IconPlus } from "@tabler/icons-react";
-import { useRouter, useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import FilterChip from "_features/common/components/filter-chip";
@@ -18,13 +17,13 @@ import { useEnumOptions } from "_features/enum/queries/use-query";
 import TransactionCalendarView from "_features/transaction/components/calendar-view";
 import TransactionListView from "_features/transaction/components/list-view";
 import { useTransactionSearch } from "_features/transaction/hooks/use-sub/use-search";
+import { useQuickAddStore } from "_features/transaction/store";
 import type { TxType } from "_features/transaction/types";
 
 export default function TransactionsSection() {
   const t = useTranslations("transaction");
   const tTxType = useTranslations("enum.tx-type");
-  const router = useRouter();
-  const routeParams = useParams<{ locale: string }>();
+  const openQuickAdd = useQuickAddStore((s) => s.open);
 
   const {
     view,
@@ -47,9 +46,7 @@ export default function TransactionsSection() {
         <ActionIcon
           size="lg"
           radius="xl"
-          onClick={() =>
-            router.push(`/${routeParams.locale}/transactions/new`)
-          }
+          onClick={openQuickAdd}
           aria-label={t("add")}
         >
           <IconPlus size={18} />

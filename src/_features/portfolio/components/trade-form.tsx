@@ -188,7 +188,7 @@ export default function TradeForm({
             value: v,
             label: tPt(v),
           }))}
-          color={isBuy ? "tossRed" : "tossBlue"}
+          color={isBuy ? "danger" : "info"}
           disabled={isEdit}
         />
         <NumberInput
@@ -244,7 +244,7 @@ export default function TradeForm({
         <Button
           type="submit"
           loading={isPending}
-          color={isBuy ? "tossRed" : "tossBlue"}
+          color={isBuy ? "danger" : "info"}
           size="md"
         >
           {isEdit ? "거래 수정" : isBuy ? "매수 기록" : "매도 기록"}

@@ -1,20 +1,19 @@
 "use client";
 
 import {
-  ActionIcon,
   Card,
   Group,
   Stack,
   Text,
-  Title,
   UnstyledButton,
 } from "@mantine/core";
-import { IconArrowLeft, IconChevronRight } from "@tabler/icons-react";
+import { IconChevronRight } from "@tabler/icons-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter, useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 
+import SubHeader from "_features/layout/components/sub-header";
 import PortfolioDonut from "_features/portfolio/components/portfolio-donut";
 import {
   formatProfitAmount,
@@ -79,19 +78,10 @@ export default function AccountPortfolioSection({ accountId }: Props) {
 
   return (
     <Stack gap="md">
-      <Group gap={4} align="center">
-        <ActionIcon
-          variant="subtle"
-          onClick={() => router.back()}
-          aria-label="back"
-        >
-          <IconArrowLeft size={18} />
-        </ActionIcon>
-        <Title order={3}>{account.name}</Title>
-      </Group>
+      <SubHeader title={account.name} />
 
       {/* hero — 통장 전체 자산 + 손익 + 현금/평가/종목 메타 */}
-      <Card radius="xl" p="lg">
+      <Card radius="xl" p="xl" shadow="md">
         <Stack gap={4}>
           <Text size="xs" fw={500} c="dimmed">
             통장 전체 자산
@@ -187,7 +177,7 @@ export default function AccountPortfolioSection({ accountId }: Props) {
         <UnstyledButton
           onClick={() => router.push(`/${routeParams.locale}/portfolio/new`)}
         >
-          <Text size="xs" fw={700} c="tossBlue.5">
+          <Text size="xs" fw={700} c="info.5">
             + 종목 추가
           </Text>
         </UnstyledButton>

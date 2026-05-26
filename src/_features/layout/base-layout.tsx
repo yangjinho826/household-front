@@ -35,10 +35,18 @@ export async function BaseLayout({
         />
         <meta
           name="viewport"
-          content="minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no"
+          content="minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no, viewport-fit=cover"
         />
+        <meta name="theme-color" content="#3B82F6" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="가계부" />
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
-      <body style={{ background: "#f2f4f6" }}>
+      {/* 양옆 bg 는 살짝 어두운 회색 — 박스를 시각적으로 분리.
+          박스 max-width / bg / minHeight 는 각 layout (UserShell / GuestLayout) 책임. */}
+      <body style={{ background: "#e5e8eb" }}>
         <NextIntlClientProvider messages={messages}>
           <MantineProviders>
             <QueryProvider>
