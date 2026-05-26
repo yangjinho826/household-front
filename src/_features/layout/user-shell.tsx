@@ -5,7 +5,9 @@ import type { ReactNode } from "react";
 
 import AppHeader from "_features/layout/components/app-header";
 import { BottomTab } from "_features/layout/components/bottom-tab";
+import QuickAddFab from "_features/layout/components/quick-add-fab";
 import { SidebarNav } from "_features/layout/components/sidebar-nav";
+import QuickAddSheet from "_features/transaction/components/quick-add-sheet";
 
 /**
  * UserShell — 반응형 셸 (3 viewport).
@@ -38,6 +40,9 @@ export function UserShell({ children }: { children: ReactNode }) {
         </Stack>
         <BottomTab />
       </div>
+
+      <QuickAddFab />
+      <QuickAddSheet />
     </div>
   );
 }

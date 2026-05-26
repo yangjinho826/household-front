@@ -21,10 +21,13 @@ import { useTransactionForm } from "../hooks/use-sub/use-form";
 
 interface TransactionFormProps {
   transactionId?: string;
+  /** 성공/취소 후 호출. 시트 모드용. 없으면 라우트 이동 (기존 동작). */
+  onDone?: () => void;
 }
 
 export default function TransactionForm({
   transactionId,
+  onDone,
 }: TransactionFormProps) {
   const t = useTranslations("transaction");
   const tTxType = useTranslations("enum.tx-type");
@@ -51,7 +54,7 @@ export default function TransactionForm({
     handleSubmit,
     handleRemove,
     handleCancel,
-  } = useTransactionForm({ transactionId });
+  } = useTransactionForm({ transactionId, onDone });
 
   // 통장 + 카테고리 + 고정지출 데이터
   const { data: accountsData } = useSuspenseQuery(

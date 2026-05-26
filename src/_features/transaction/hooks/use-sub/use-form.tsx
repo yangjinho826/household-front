@@ -18,10 +18,16 @@ import type {
 
 interface UseTransactionFormOptions {
   transactionId?: string;
+  /**
+   * 성공/취소/삭제 완료 후 호출. 시트 모드: close 호출 (라우트 이동 X).
+   * 없으면 기본 동작 = router.replace(/transactions) 또는 router.back().
+   */
+  onDone?: () => void;
 }
 
 export function useTransactionForm({
   transactionId,
+  onDone,
 }: UseTransactionFormOptions) {
   const t = useTranslations("transaction");
   const tg = useTranslations("general.common");
@@ -112,7 +118,11 @@ export function useTransactionForm({
           color: "green",
         });
       }
-      router.replace(`/${routeParams.locale}/transactions`);
+      if (onDone) {
+        onDone();
+      } else {
+        router.replace(`/${routeParams.locale}/transactions`);
+      }
     } catch (error) {
       notifications.show({
         title: tg("notificationstitle"),
@@ -136,13 +146,21 @@ export function useTransactionForm({
           message: tg("confirmyescontent"),
           color: "green",
         });
-        router.replace(`/${routeParams.locale}/transactions`);
+        if (onDone) {
+          onDone();
+        } else {
+          router.replace(`/${routeParams.locale}/transactions`);
+        }
       },
     });
   };
 
   const handleCancel = () => {
-    router.back();
+    if (onDone) {
+      onDone();
+    } else {
+      router.back();
+    }
   };
 
   return {
