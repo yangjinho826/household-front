@@ -17,10 +17,10 @@ const SIGN: Record<TxType, string> = {
 };
 
 const TYPE_COLOR: Record<TxType, string> = {
-  EXPENSE: "tossRed.5",
-  FIXED_EXPENSE: "tossRed.5",
-  INCOME: "tossGreen.5",
-  TRANSFER: "tossPurple.5",
+  EXPENSE: "danger.5",
+  FIXED_EXPENSE: "danger.5",
+  INCOME: "info.5",
+  TRANSFER: "purple.5",
 };
 
 // 카테고리 색상 없을 때 tx_type 기준 fallback

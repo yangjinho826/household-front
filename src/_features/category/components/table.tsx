@@ -64,7 +64,7 @@ export default function CategoryTable({
                 <Badge
                   size="sm"
                   variant="light"
-                  color={it.kind === "INCOME" ? "tossGreen" : "tossRed"}
+                  color={it.kind === "INCOME" ? "info" : "danger"}
                   style={{ flexShrink: 0 }}
                 >
                   {tKind(it.kind)}

@@ -46,13 +46,13 @@ export default function InvestmentAccountCard({ account, portfolios }: Props) {
                   borderRadius: 6,
                   background: account.color
                     ? `${account.color}20`
-                    : "var(--mantine-color-tossPurple-0)",
+                    : "var(--mantine-color-purple-0)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   fontSize: 11,
                   fontWeight: 700,
-                  color: account.color ?? "var(--mantine-color-tossPurple-5)",
+                  color: account.color ?? "var(--mantine-color-purple-5)",
                 }}
               >
                 {account.name.slice(0, 1)}

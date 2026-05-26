@@ -84,7 +84,7 @@ export default function HomeSection() {
             href={`/${routeParams.locale}/wealth`}
             size="xs"
             fw={700}
-            c="tossBlue.5"
+            c="info.5"
             mt={4}
           >
             <Group gap={2}>
@@ -161,7 +161,7 @@ export default function HomeSection() {
             <Text
               size="lg"
               fw={700}
-              c="tossBlue.5"
+              c="info.5"
               style={{ fontVariantNumeric: "tabular-nums" }}
             >
               {savingRate.toFixed(0)}%

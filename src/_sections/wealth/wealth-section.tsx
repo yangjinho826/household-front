@@ -128,7 +128,7 @@ export default function WealthSection() {
                 borderRadius: 999,
                 background: hasTargetMonth
                   ? "var(--mantine-color-gray-0)"
-                  : "var(--mantine-color-tossBlue-0)",
+                  : "var(--mantine-color-info-0)",
                 opacity: createMutation.isPending ? 0.5 : 1,
               }}
             >
@@ -141,7 +141,7 @@ export default function WealthSection() {
                 <Text
                   size="10px"
                   fw={700}
-                  c={hasTargetMonth ? "dimmed" : "tossBlue.5"}
+                  c={hasTargetMonth ? "dimmed" : "info.5"}
                 >
                   {hasTargetMonth
                     ? `${targetMonthLabel} 저장됨`
@@ -242,7 +242,7 @@ export default function WealthSection() {
         <UnstyledButton
           onClick={() => router.push(`/${routeParams.locale}/account/new`)}
         >
-          <Text size="xs" fw={700} c="tossBlue.5">
+          <Text size="xs" fw={700} c="info.5">
             + 추가
           </Text>
         </UnstyledButton>
@@ -299,7 +299,7 @@ export default function WealthSection() {
                   size="sm"
                   fw={700}
                   style={{ fontVariantNumeric: "tabular-nums" }}
-                  c={a.balance < 0 ? "tossRed.5" : undefined}
+                  c={a.balance < 0 ? "danger.5" : undefined}
                 >
                   {fmt(a.balance)}원
                 </Text>

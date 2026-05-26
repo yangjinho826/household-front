@@ -81,14 +81,14 @@ export default function SettingsSection() {
                 width: 56,
                 height: 56,
                 borderRadius: 28,
-                background: "var(--mantine-color-tossBlue-0)",
+                background: "var(--mantine-color-info-0)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 flexShrink: 0,
               }}
             >
-              <Text size="xl" fw={800} c="tossBlue.5">
+              <Text size="xl" fw={800} c="info.5">
                 {user.name?.[0] ?? "U"}
               </Text>
             </div>
@@ -121,14 +121,14 @@ export default function SettingsSection() {
                     width: 40,
                     height: 40,
                     borderRadius: 12,
-                    background: "var(--mantine-color-tossBlue-0)",
+                    background: "var(--mantine-color-info-0)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     flexShrink: 0,
                   }}
                 >
-                  <Text size="sm" fw={800} c="tossBlue.5">
+                  <Text size="sm" fw={800} c="info.5">
                     {currentHousehold?.name?.[0] ?? "H"}
                   </Text>
                 </div>
@@ -141,7 +141,7 @@ export default function SettingsSection() {
                     전체 {households.length}개
                   </Text>
                 </Stack>
-                <Text size="xs" fw={700} c="tossBlue.5">
+                <Text size="xs" fw={700} c="info.5">
                   전환
                 </Text>
               </Group>

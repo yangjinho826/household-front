@@ -111,12 +111,6 @@ const grayScale: MantineColorsTuple = [
   "#191F28",
 ];
 
-// 기존 toss* 키 alias 재정렬 — 사용처 22곳 자동 반영.
-const tossBlue: MantineColorsTuple = info;
-const tossRed: MantineColorsTuple = danger;
-const tossGreen: MantineColorsTuple = success;
-const tossPurple: MantineColorsTuple = purple;
-
 export const mantineTheme = createTheme({
   // primary = info (blue) — 시그니처 파랑. linerGreen 은 success/적립 의미로만 유지.
   primaryColor: "info",
@@ -136,10 +130,6 @@ export const mantineTheme = createTheme({
     warning,
     info,
     purple,
-    tossBlue,
-    tossRed,
-    tossGreen,
-    tossPurple,
     gray: grayScale,
   },
 

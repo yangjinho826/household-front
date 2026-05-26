@@ -67,7 +67,7 @@ export default function PortfolioTable({
                   </Text>
                   <Text
                     size="xs"
-                    c={profit >= 0 ? "tossRed.5" : "tossBlue.5"}
+                    c={profit >= 0 ? "danger.5" : "info.5"}
                     style={{ fontVariantNumeric: "tabular-nums" }}
                   >
                     {profit >= 0 ? "+" : ""}

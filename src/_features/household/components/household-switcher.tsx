@@ -110,8 +110,8 @@ export function HouseholdSwitcher({ opened, onClose }: HouseholdSwitcherProps) {
                     height: 44,
                     borderRadius: 12,
                     background: isOwner
-                      ? "var(--mantine-color-tossBlue-0)"
-                      : "var(--mantine-color-tossPurple-0)",
+                      ? "var(--mantine-color-info-0)"
+                      : "var(--mantine-color-purple-0)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -122,8 +122,8 @@ export function HouseholdSwitcher({ opened, onClose }: HouseholdSwitcherProps) {
                     size={20}
                     color={
                       isOwner
-                        ? "var(--mantine-color-tossBlue-5)"
-                        : "var(--mantine-color-tossPurple-5)"
+                        ? "var(--mantine-color-info-5)"
+                        : "var(--mantine-color-purple-5)"
                     }
                   />
                 </div>
@@ -154,7 +154,7 @@ export function HouseholdSwitcher({ opened, onClose }: HouseholdSwitcherProps) {
                       width: 24,
                       height: 24,
                       borderRadius: 12,
-                      background: "var(--mantine-color-tossBlue-5)",
+                      background: "var(--mantine-color-info-5)",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",

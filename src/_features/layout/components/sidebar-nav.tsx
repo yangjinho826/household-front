@@ -95,7 +95,7 @@ export function SidebarNav() {
           {TABS.map(({ id, label, icon: Icon, href, match }) => {
             const active = match(pathname);
             const color = active
-              ? (theme.colors.tossBlue?.[5] ?? "#3B82F6")
+              ? (theme.colors.info?.[5] ?? "#3B82F6")
               : (theme.colors.gray?.[7] ?? "#4E5968");
             return (
               <UnstyledButton
@@ -107,7 +107,7 @@ export function SidebarNav() {
                   padding: "10px 12px",
                   borderRadius: 10,
                   background: active
-                    ? (theme.colors.tossBlue?.[0] ?? "#E8F3FF")
+                    ? (theme.colors.info?.[0] ?? "#E8F3FF")
                     : "transparent",
                 }}
               >

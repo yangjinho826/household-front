@@ -19,10 +19,10 @@ export default function FilterChip({ label, active, onClick }: FilterChipProps) 
         padding: "6px 14px",
         borderRadius: 999,
         background: active
-          ? "var(--mantine-color-tossBlue-0)"
+          ? "var(--mantine-color-info-0)"
           : "var(--mantine-color-gray-0)",
         color: active
-          ? "var(--mantine-color-tossBlue-5)"
+          ? "var(--mantine-color-info-5)"
           : "var(--mantine-color-gray-7)",
         fontSize: 12,
         fontWeight: 600,

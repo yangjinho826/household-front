@@ -41,10 +41,10 @@ export default function IconPicker({
                 alignItems: "center",
                 justifyContent: "center",
                 background: selected
-                  ? "var(--mantine-color-tossBlue-0)"
+                  ? "var(--mantine-color-info-0)"
                   : "var(--mantine-color-gray-0)",
                 border: selected
-                  ? "2px solid var(--mantine-color-tossBlue-5)"
+                  ? "2px solid var(--mantine-color-info-5)"
                   : "2px solid transparent",
               }}
             >
@@ -54,7 +54,7 @@ export default function IconPicker({
                 stroke={2}
                 color={
                   selected
-                    ? "var(--mantine-color-tossBlue-5)"
+                    ? "var(--mantine-color-info-5)"
                     : "var(--mantine-color-gray-7)"
                 }
               />
