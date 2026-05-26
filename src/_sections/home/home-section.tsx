@@ -193,10 +193,10 @@ export default function HomeSection() {
         </Group>
       </Card>
 
-      {/* 카테고리 Top5 + 최근 거래 — 데스크탑(>=lg) 에서 좌/우 */}
+      {/* 카테고리 Top5 + 최근 거래 — 데스크탑(>=lg) 에서 좌/우 (높이 일치) */}
       <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="md">
         {/* 카테고리별 지출 Top5 */}
-        <Stack gap="xs">
+        <Stack gap="xs" h="100%">
           <Group justify="space-between" align="center" px={4}>
             <Text size="sm" fw={700}>
               이번 달 지출
@@ -211,7 +211,7 @@ export default function HomeSection() {
               전체 →
             </Anchor>
           </Group>
-          <Card>
+          <Card style={{ flex: 1 }}>
             {topExpenseCategories.length === 0 ? (
               <Center py="md">
                 <Text c="dimmed" size="sm">
@@ -264,7 +264,7 @@ export default function HomeSection() {
         </Stack>
 
         {/* 최근 거래 */}
-        <Stack gap="xs">
+        <Stack gap="xs" h="100%">
           <Group justify="space-between" align="center" px={4}>
             <Text size="sm" fw={700}>
               최근 거래
@@ -279,7 +279,7 @@ export default function HomeSection() {
               전체 →
             </Anchor>
           </Group>
-          <Card radius="lg" p="xs">
+          <Card radius="lg" p="xs" style={{ flex: 1 }}>
             {txns.length === 0 ? (
               <Center py="lg">
                 <Text c="dimmed" size="sm">

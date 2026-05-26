@@ -76,10 +76,10 @@ export default function TransactionCalendarView({ year, month }: CalendarViewPro
   );
 
   return (
-    <Grid gutter="md" align="flex-start">
+    <Grid gutter="md" align="stretch">
       {/* 캘린더 — 모바일/패드 풀폭, 데스크탑(>=lg) 절반 */}
       <Grid.Col span={{ base: 12, lg: 6 }}>
-      <Card radius="lg" p="md">
+      <Card radius="lg" p="md" h="100%">
         <Stack gap="sm">
           <SimpleGrid cols={3} spacing="xs">
             <Stack gap={2} align="center">
@@ -190,13 +190,13 @@ export default function TransactionCalendarView({ year, month }: CalendarViewPro
       </Card>
       </Grid.Col>
 
-      {/* 선택일 거래 — 모바일/패드 캘린더 아래, 데스크탑 캘린더 오른쪽 */}
+      {/* 선택일 거래 — 모바일/패드 캘린더 아래, 데스크탑 캘린더 오른쪽 (높이 일치) */}
       <Grid.Col span={{ base: 12, lg: 6 }}>
-        <Stack gap="xs">
+        <Stack gap="xs" h="100%">
           <Text size="sm" fw={700} px={4}>
             {selectedDate.slice(5).replace("-", "월 ")}일 거래
           </Text>
-          <Card radius="lg" p="xs">
+          <Card radius="lg" p="xs" style={{ flex: 1, overflow: "auto" }}>
             {selectedTx.length === 0 ? (
               <Text size="sm" c="dimmed" ta="center" py="lg">
                 거래가 없습니다
