@@ -10,7 +10,7 @@ interface BrandLogoProps {
 }
 
 /**
- * 가계부 앱 브랜드 로고 — tossBlue 배경 + 흰색 IconWallet.
+ * 가계부 앱 브랜드 로고 — primary 색 배경 + 흰색 IconWallet.
  *
  * 로그인/회원가입/온보딩 등 인증 화면 상단에 사용.
  * IconBox 와 의도가 다름: BrandLogo 는 불투명 100% 색 배경 + 흰 아이콘.
@@ -22,7 +22,7 @@ export default function BrandLogo({ size = 56 }: BrandLogoProps) {
         width: size,
         height: size,
         borderRadius: Math.round(size * 0.3),
-        background: TOKEN.blue,
+        background: TOKEN.green,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",

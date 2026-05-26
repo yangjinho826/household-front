@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* Mantine body 배경을 토스 회색으로 override (light-only)
+/* Mantine body 배경 (light-only) — 토스 회색 페이지 bg 유지.
    Mantine 의 selector specificity 와 매칭: :root[data-mantine-color-scheme='light'] */
 :root[data-mantine-color-scheme="light"],
 :host([data-mantine-color-scheme="light"]) {
@@ -12,8 +12,21 @@ body {
   min-height: 100dvh;
 }
 
-body {
+/* 글로벌 타이포 — Pretendard + 한글 본문 표준 자간/행간.
+   토스/네이버/리디북스 본문 자간 -0.02em / 행간 1.5 따름.
+   tnum 으로 가계부 금액 자릿수 정렬. */
+html {
   font-family:
     Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   font-feature-settings: "tnum" on;
+  letter-spacing: -0.02em;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 작은 글자(caption, small)는 자간 0 — 좁은 자간 가독성 저하 보정 */
+small,
+.text-caption {
+  letter-spacing: 0;
 }
