@@ -37,12 +37,15 @@
   }
 }
 
-/* UserShell display 분기 — 데스크탑(>=lg) 만 flex (좌 Sidebar + 우 메인), 그 외 block.
-   CSS only 라 SSR 안전 (Mantine useMediaQuery hydration 미스매치 회피). */
+/* UserShell wrapper — 모바일/패드 박스 + 데스크탑 flex (좌 Sidebar + 우 메인).
+   max-width: var(--container-max) 가 viewport 별 박스 폭 결정. CSS only — SSR 안전. */
 .user-shell-wrap {
   display: block;
   min-height: 100dvh;
-  background: white;
+  width: 100%;
+  max-width: var(--container-max);
+  margin: 0 auto;
+  background: #f2f4f6;
 }
 @media (min-width: 1200px) {
   .user-shell-wrap {

@@ -44,26 +44,13 @@ export async function BaseLayout({
         <link rel="manifest" href="/manifest.json" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
-      {/* 양옆 (데스크탑) bg 는 살짝 어두운 회색 — 모바일 박스를 시각적으로 분리. */}
+      {/* 양옆 bg 는 살짝 어두운 회색 — 박스를 시각적으로 분리.
+          박스 max-width / bg / minHeight 는 각 layout (UserShell / GuestLayout) 책임. */}
       <body style={{ background: "#e5e8eb" }}>
         <NextIntlClientProvider messages={messages}>
           <MantineProviders>
             <QueryProvider>
-              <SearchParamsProvider>
-                {/* 모바일 우선 박스 — 데스크탑에선 가운데 정렬, 양옆 회색 노출.
-                    448px 는 bottom-tab.tsx 와 동일 (시각 일관성). */}
-                <main
-                  style={{
-                    margin: "0 auto",
-                    width: "100%",
-                    maxWidth: "var(--container-max)",
-                    minHeight: "100dvh",
-                    background: "#f2f4f6",
-                  }}
-                >
-                  {children}
-                </main>
-              </SearchParamsProvider>
+              <SearchParamsProvider>{children}</SearchParamsProvider>
             </QueryProvider>
           </MantineProviders>
         </NextIntlClientProvider>
