@@ -11,7 +11,7 @@ import {
 import Link from "next/link";
 import { usePathname, useParams } from "next/navigation";
 
-interface Tab {
+export interface Tab {
   id: string;
   label: string;
   icon: typeof IconHome;
@@ -19,7 +19,7 @@ interface Tab {
   match: (pathname: string) => boolean;
 }
 
-const TABS: Tab[] = [
+export const TABS: Tab[] = [
   {
     id: "home",
     label: "홈",
@@ -65,17 +65,22 @@ export function BottomTab() {
   return (
     <Box
       component="nav"
+      hiddenFrom="lg"
       style={{
         position: "fixed",
         bottom: 0,
         left: "50%",
         transform: "translateX(-50%)",
         width: "100%",
-        maxWidth: 448,
+        maxWidth: "var(--container-max)",
         background: "white",
         borderTop: `1px solid ${theme.colors.gray?.[1] ?? "#E5E8EB"}`,
-        // Mantine Drawer/Modal 기본 z-index(200대) 위. 바텀시트가 떠도 메뉴바는 항상 사용 가능.
-        zIndex: 500,
+        // iOS 홈 인디케이터 / Android 제스처 영역 보호
+        paddingBottom: "var(--safe-bottom)",
+        paddingLeft: "var(--safe-left)",
+        paddingRight: "var(--safe-right)",
+        // Drawer/Modal 기본 z-index(200대) 위 — 바텀시트 떠도 메뉴 항상 사용 가능
+        zIndex: "var(--z-bottom-tab)" as React.CSSProperties["zIndex"],
       }}
     >
       <Box
@@ -83,7 +88,7 @@ export function BottomTab() {
           display: "flex",
           justifyContent: "space-around",
           alignItems: "center",
-          height: 64,
+          height: "var(--bottom-tab-h)",
         }}
       >
         {TABS.map(({ id, label, icon: Icon, href, match }) => {

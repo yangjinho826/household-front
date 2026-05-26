@@ -7,9 +7,57 @@
   --mantine-color-body: #f2f4f6;
 }
 
+/* 모바일 PWA 골격 토큰. fixed/sticky 요소가 모두 이 토큰 참조 — magic number 일원화.
+   env(safe-area-inset-*) 는 standalone 외 환경에선 0px → 항상 적용해도 무해. */
+:root {
+  --safe-top: env(safe-area-inset-top);
+  --safe-bottom: env(safe-area-inset-bottom);
+  --safe-left: env(safe-area-inset-left);
+  --safe-right: env(safe-area-inset-right);
+  --app-header-h: 56px;
+  --bottom-tab-h: 64px;
+  --sidebar-w: 240px;
+  --container-max: 448px; /* 휴대폰 박스 */
+  --z-app-header: 30;
+  --z-fab: 200;
+  --z-bottom-tab: 500;
+}
+
+/* 패드 (>= sm = 768) — 메인 박스 768, 카드 grid 반응 영역 */
+@media (min-width: 768px) {
+  :root {
+    --container-max: 768px;
+  }
+}
+
+/* 데스크탑 (>= lg = 1200) — 사이드바 240 + 메인 합쳐서 1280 max */
+@media (min-width: 1200px) {
+  :root {
+    --container-max: 1280px;
+  }
+}
+
+/* UserShell display 분기 — 데스크탑(>=lg) 만 flex (좌 Sidebar + 우 메인), 그 외 block.
+   CSS only 라 SSR 안전 (Mantine useMediaQuery hydration 미스매치 회피). */
+.user-shell-wrap {
+  display: block;
+  min-height: 100dvh;
+  background: white;
+}
+@media (min-width: 1200px) {
+  .user-shell-wrap {
+    display: flex;
+  }
+}
+
 html,
 body {
   min-height: 100dvh;
+}
+
+/* iOS PWA 의 pull-to-refresh / overscroll bounce 차단 — 네이티브 앱 느낌 */
+body {
+  overscroll-behavior-y: contain;
 }
 
 /* 글로벌 타이포 — Pretendard + 한글 본문 표준 자간/행간.

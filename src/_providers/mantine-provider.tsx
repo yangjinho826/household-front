@@ -14,7 +14,7 @@ import { mantineTheme } from "_styles/mantineTheme";
 export function MantineProviders({ children }: PropsWithChildren) {
   return (
     <MantineProvider theme={mantineTheme}>
-      <Notifications position="bottom-center" />
+      <Notifications position="top-center" />
       <ModalsProvider>{children}</ModalsProvider>
     </MantineProvider>
   );
