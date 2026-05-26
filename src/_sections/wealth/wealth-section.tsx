@@ -136,7 +136,7 @@ export default function WealthSection() {
                 {hasTargetMonth ? (
                   <IconCheck size={12} stroke={3} color="#8B95A1" />
                 ) : (
-                  <IconPlus size={12} stroke={3} color="#3182F6" />
+                  <IconPlus size={12} stroke={3} color="#3B82F6" />
                 )}
                 <Text
                   size="10px"
@@ -167,14 +167,14 @@ export default function WealthSection() {
             >
               <defs>
                 <linearGradient id="wealthTrend" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#3182F6" stopOpacity={0.3} />
-                  <stop offset="100%" stopColor="#3182F6" stopOpacity={0} />
+                  <stop offset="0%" stopColor="#3B82F6" stopOpacity={0.3} />
+                  <stop offset="100%" stopColor="#3B82F6" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <Area
                 type="monotone"
                 dataKey="value"
-                stroke="#3182F6"
+                stroke="#3B82F6"
                 strokeWidth={2.5}
                 fill="url(#wealthTrend)"
               />

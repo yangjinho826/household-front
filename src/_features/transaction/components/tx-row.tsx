@@ -27,7 +27,7 @@ const TYPE_COLOR: Record<TxType, string> = {
 const TYPE_FALLBACK_HEX: Record<TxType, string> = {
   EXPENSE: TOKEN.red,
   FIXED_EXPENSE: TOKEN.red,
-  INCOME: TOKEN.green,
+  INCOME: TOKEN.blue,
   TRANSFER: TOKEN.purple,
 };
 

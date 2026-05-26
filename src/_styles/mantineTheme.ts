@@ -20,64 +20,81 @@ import {
 import { DateInput } from "@mantine/dates";
 
 // ============================================================
-// Liner-based Design System
-// Primary green `#265A3A` 기준. 가계부의 긍정적 흐름(수입/저축) =
-// 브랜드 가치라 success 와 primary 팔레트 통합.
-// 기존 toss* 색상 키는 새 톤으로 alias — 사용처 22곳 자동 적용.
+// 색상 시스템 — Tailwind 500 시리즈 (채도 일관)
+// primary green #22C55E. 의미 색 = info(수입)/danger(지출)/warning(주의)/purple(투자).
+// 기존 toss* 키는 alias 재정렬 — 사용처 22곳 자동 반영.
 // ============================================================
 
+// linerGreen — Tailwind green (primary, success)
 const linerGreen: MantineColorsTuple = [
-  "#F0F6F2",
-  "#D9EADF",
-  "#B4D3C1",
-  "#8ABAA1",
-  "#62A080",
-  "#265A3A",
-  "#1E4A2F",
-  "#173924",
-  "#10291A",
-  "#09180F",
+  "#F0FDF4",
+  "#DCFCE7",
+  "#BBF7D0",
+  "#86EFAC",
+  "#4ADE80",
+  "#22C55E",
+  "#16A34A",
+  "#15803D",
+  "#166534",
+  "#14532D",
 ];
 
 const success: MantineColorsTuple = linerGreen;
 
+// danger — Tailwind red (지출/위험)
 const danger: MantineColorsTuple = [
-  "#FFF5F5",
-  "#FFE3E3",
-  "#FFC9C9",
-  "#FFA8A8",
-  "#FF8787",
-  "#FF6B6B",
-  "#FA5252",
-  "#E03131",
-  "#C92A2A",
-  "#B02020",
+  "#FEF2F2",
+  "#FEE2E2",
+  "#FECACA",
+  "#FCA5A5",
+  "#F87171",
+  "#EF4444",
+  "#DC2626",
+  "#B91C1C",
+  "#991B1B",
+  "#7F1D1D",
 ];
 
+// warning — Tailwind amber (주의/임박)
 const warning: MantineColorsTuple = [
-  "#FFF9DB",
-  "#FFF3BF",
-  "#FFEC99",
-  "#FFE066",
-  "#FFD43B",
-  "#FCC419",
-  "#FAB005",
-  "#F59F00",
-  "#E67700",
-  "#D9480F",
+  "#FFFBEB",
+  "#FEF3C7",
+  "#FDE68A",
+  "#FCD34D",
+  "#FBBF24",
+  "#F59E0B",
+  "#D97706",
+  "#B45309",
+  "#92400E",
+  "#78350F",
 ];
 
+// info — Tailwind blue (수입/안내)
 const info: MantineColorsTuple = [
-  "#E7F5FF",
-  "#D0EBFF",
-  "#A5D8FF",
-  "#74C0FC",
-  "#4DABF7",
-  "#339AF0",
-  "#228BE6",
-  "#1971C2",
-  "#1864AB",
-  "#183153",
+  "#EFF6FF",
+  "#DBEAFE",
+  "#BFDBFE",
+  "#93C5FD",
+  "#60A5FA",
+  "#3B82F6",
+  "#2563EB",
+  "#1D4ED8",
+  "#1E40AF",
+  "#1E3A8A",
+];
+
+// purple — Tailwind violet (보조 강조 / 포트폴리오)
+const purple: MantineColorsTuple = [
+  "#F5F3FF",
+  "#EDE9FE",
+  "#DDD6FE",
+  "#C4B5FD",
+  "#A78BFA",
+  "#8B5CF6",
+  "#7C3AED",
+  "#6D28D9",
+  "#5B21B6",
+  "#4C1D95",
 ];
 
 // 회색 9단계 — 페이지 bg / 텍스트 회색 톤. 토스 회색 유지.
@@ -94,16 +111,15 @@ const grayScale: MantineColorsTuple = [
   "#191F28",
 ];
 
-// 기존 toss* 색상 키는 새 톤으로 alias.
-// c="tossBlue.5" 같은 사용처(22곳)가 자동으로 새 톤을 받는다.
+// 기존 toss* 키 alias 재정렬 — 사용처 22곳 자동 반영.
 const tossBlue: MantineColorsTuple = info;
 const tossRed: MantineColorsTuple = danger;
 const tossGreen: MantineColorsTuple = success;
-// 통일성 — 새 시스템에 보라 없음. 캄 블루(info) 와 매핑해 톤 일관성 유지.
-const tossPurple: MantineColorsTuple = info;
+const tossPurple: MantineColorsTuple = purple;
 
 export const mantineTheme = createTheme({
-  primaryColor: "linerGreen",
+  // primary = info (blue) — 시그니처 파랑. linerGreen 은 success/적립 의미로만 유지.
+  primaryColor: "info",
   primaryShade: { light: 5, dark: 4 },
   autoContrast: true,
 
@@ -119,6 +135,7 @@ export const mantineTheme = createTheme({
     danger,
     warning,
     info,
+    purple,
     tossBlue,
     tossRed,
     tossGreen,

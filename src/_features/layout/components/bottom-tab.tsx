@@ -94,7 +94,7 @@ export function BottomTab() {
         {TABS.map(({ id, label, icon: Icon, href, match }) => {
           const active = match(pathname);
           const color = active
-            ? (theme.colors.tossBlue?.[5] ?? "#3182F6")
+            ? (theme.colors.tossBlue?.[5] ?? "#3B82F6")
             : (theme.colors.gray?.[5] ?? "#8B95A1");
           return (
             <UnstyledButton

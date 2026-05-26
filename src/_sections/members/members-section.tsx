@@ -231,7 +231,7 @@ export default function MembersSection({ householdId }: MembersSectionProps) {
                     }
                     style={{ padding: 6, borderRadius: 8 }}
                   >
-                    <IconTrash size={16} color="#F04452" />
+                    <IconTrash size={16} color="#EF4444" />
                   </UnstyledButton>
                 ) : (
                   <Text size="10px" fw={700} c="dimmed">

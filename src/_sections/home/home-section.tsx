@@ -100,7 +100,7 @@ export default function HomeSection() {
         <Card radius="lg">
           <Stack gap={4}>
             <Group gap={4}>
-              <IconArrowDown size={12} stroke={3} color="#3182F6" />
+              <IconArrowDown size={12} stroke={3} color="#3B82F6" />
               <Text size="xs" fw={500} c="dimmed">
                 수입
               </Text>
@@ -120,7 +120,7 @@ export default function HomeSection() {
         <Card radius="lg">
           <Stack gap={4}>
             <Group gap={4}>
-              <IconArrowUp size={12} stroke={3} color="#F04452" />
+              <IconArrowUp size={12} stroke={3} color="#EF4444" />
               <Text size="xs" fw={500} c="dimmed">
                 지출
               </Text>
