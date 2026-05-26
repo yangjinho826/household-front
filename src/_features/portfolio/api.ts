@@ -144,8 +144,8 @@ export async function GetPortfolioValueHistoryByAccountApi(
   params: PortfolioValueHistoryByAccountRequest,
 ) {
   const queryParams: Record<string, unknown> = { accountId: params.accountId };
-  if (params.from) queryParams.from = params.from;
-  if (params.to) queryParams.to = params.to;
+  if (params.fromDate) queryParams.fromDate = params.fromDate;
+  if (params.toDate) queryParams.toDate = params.toDate;
   const queryString = objectToParams(queryParams).toString();
   return apiFetch<ApiResponse<PortfolioValueHistoryByItem[]>>(
     `/api/portfolio/value-history?${queryString}`,
@@ -158,8 +158,8 @@ export async function GetPortfolioValueHistoryByItemApi(
   params: PortfolioValueHistoryByItemRequest,
 ) {
   const queryParams: Record<string, unknown> = {};
-  if (params.from) queryParams.from = params.from;
-  if (params.to) queryParams.to = params.to;
+  if (params.fromDate) queryParams.fromDate = params.fromDate;
+  if (params.toDate) queryParams.toDate = params.toDate;
   const queryString = objectToParams(queryParams).toString();
   return apiFetch<ApiResponse<PortfolioValueHistoryByItem>>(
     `/api/portfolio/${params.portfolioItemId}/value-history${queryString ? `?${queryString}` : ""}`,
