@@ -38,11 +38,26 @@ export async function BaseLayout({
           content="minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no"
         />
       </head>
-      <body style={{ background: "#f2f4f6" }}>
+      {/* 양옆 (데스크탑) bg 는 살짝 어두운 회색 — 모바일 박스를 시각적으로 분리. */}
+      <body style={{ background: "#e5e8eb" }}>
         <NextIntlClientProvider messages={messages}>
           <MantineProviders>
             <QueryProvider>
-              <SearchParamsProvider>{children}</SearchParamsProvider>
+              <SearchParamsProvider>
+                {/* 모바일 우선 박스 — 데스크탑에선 가운데 정렬, 양옆 회색 노출.
+                    448px 는 bottom-tab.tsx 와 동일 (시각 일관성). */}
+                <main
+                  style={{
+                    margin: "0 auto",
+                    width: "100%",
+                    maxWidth: 448,
+                    minHeight: "100dvh",
+                    background: "#f2f4f6",
+                  }}
+                >
+                  {children}
+                </main>
+              </SearchParamsProvider>
             </QueryProvider>
           </MantineProviders>
         </NextIntlClientProvider>
