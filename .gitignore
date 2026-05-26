@@ -31,6 +31,8 @@ nginx/ssl/
 .vscode/
 .claude/*
 !.claude/settings.json
+!.claude/memory-bank/
+!.claude/memory-bank/**
 .serena/
 
 # test
