@@ -1,6 +1,6 @@
 export interface AccountSnapshotYearlyRequest {
-  from?: string; // YYYY-MM-DD (월 1일)
-  to?: string; // YYYY-MM-DD (월 1일)
+  fromDate?: string; // YYYY-MM-DD (월 1일)
+  toDate?: string; // YYYY-MM-DD (월 1일)
 }
 
 // 월별 묶음 안의 계좌별 row

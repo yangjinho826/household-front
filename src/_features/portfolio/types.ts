@@ -130,12 +130,12 @@ export interface PortfolioValueHistoryByItem {
 
 export interface PortfolioValueHistoryByAccountRequest {
   accountId: string;
-  from?: string;
-  to?: string;
+  fromDate?: string;
+  toDate?: string;
 }
 
 export interface PortfolioValueHistoryByItemRequest {
   portfolioItemId: string;
-  from?: string;
-  to?: string;
+  fromDate?: string;
+  toDate?: string;
 }
