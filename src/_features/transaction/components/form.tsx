@@ -23,11 +23,14 @@ interface TransactionFormProps {
   transactionId?: string;
   /** 성공/취소 후 호출. 시트 모드용. 없으면 라우트 이동 (기존 동작). */
   onDone?: () => void;
+  /** true 면 외곽 Card 제거 — Drawer/시트 안에서 사용할 때 padding 이중 방지 */
+  hideCard?: boolean;
 }
 
 export default function TransactionForm({
   transactionId,
   onDone,
+  hideCard = false,
 }: TransactionFormProps) {
   const t = useTranslations("transaction");
   const tTxType = useTranslations("enum.tx-type");
@@ -105,10 +108,9 @@ export default function TransactionForm({
     [categories, txType],
   );
 
-  return (
-    <Card>
-      <form onSubmit={form.onSubmit(handleSubmit)}>
-        <Stack gap="sm">
+  const formContent = (
+    <form onSubmit={form.onSubmit(handleSubmit)}>
+      <Stack gap="sm">
           <Select
             {...form.getInputProps("txType")}
             label={t("tx_type")}
@@ -216,6 +218,7 @@ export default function TransactionForm({
           )}
         </Stack>
       </form>
-    </Card>
   );
+
+  return hideCard ? formContent : <Card>{formContent}</Card>;
 }
