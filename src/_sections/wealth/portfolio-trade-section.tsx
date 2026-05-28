@@ -5,8 +5,8 @@ import {
   Badge,
   Card,
   Center,
+  Drawer,
   Group,
-  Modal,
   SimpleGrid,
   Stack,
   Text,
@@ -276,27 +276,57 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
         </>
       )}
 
-      <Modal
+      {/* 거래 추가 시트(quick-add-sheet) 와 동일 패턴 — 핸들바 + 바텀시트.
+          모달 통일 (Image #1 케이스). */}
+      <Drawer
         opened={opened}
         onClose={handleCloseModal}
-        title={
-          editingTx
-            ? "거래 수정"
-            : initialType === "BUY"
-              ? "매수 기록"
-              : "매도 기록"
-        }
-        centered
-        size="md"
+        position="bottom"
+        size="auto"
+        withCloseButton={false}
+        styles={{
+          content: {
+            borderTopLeftRadius: 24,
+            borderTopRightRadius: 24,
+            maxWidth: 448,
+            margin: "0 auto",
+            maxHeight: "min(90dvh, calc(100dvh - var(--safe-bottom)))",
+          },
+          body: {
+            paddingBottom: "calc(var(--safe-bottom) + 16px)",
+          },
+        }}
       >
+        <Group justify="center" pt={4} pb={8}>
+          <div
+            style={{
+              width: 40,
+              height: 4,
+              borderRadius: 2,
+              background: "var(--mantine-color-gray-3)",
+            }}
+          />
+        </Group>
+
+        <Stack gap={4} px="md" pb="xs">
+          <Text size="md" fw={800}>
+            {editingTx
+              ? "거래 수정"
+              : initialType === "BUY"
+                ? "매수 기록"
+                : "매도 기록"}
+          </Text>
+        </Stack>
+
         <TradeForm
           key={editingTx?.txId ?? "new"}
           portfolioId={portfolio.portfolioId}
           initialType={editingTx?.ptType ?? initialType}
           editingTx={editingTx ?? undefined}
           onSuccess={handleCloseModal}
+          onCancel={handleCloseModal}
         />
-      </Modal>
+      </Drawer>
     </Stack>
   );
 }

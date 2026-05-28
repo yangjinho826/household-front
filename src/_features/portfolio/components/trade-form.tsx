@@ -33,6 +33,8 @@ interface TradeFormProps {
   /** 있으면 수정 모드 — initialValues 채움 + tradeType 잠금 + 삭제 버튼 노출 */
   editingTx?: PortfolioTransactionItemType;
   onSuccess?: () => void;
+  /** 시트/모달에서 사용할 때 — 취소 버튼 노출 + 닫기 콜백 */
+  onCancel?: () => void;
 }
 
 interface FormValues {
@@ -48,6 +50,7 @@ export default function TradeForm({
   initialType = "BUY",
   editingTx,
   onSuccess,
+  onCancel,
 }: TradeFormProps) {
   const te = useTranslations("error");
   const tPt = useTranslations("enum.portfolio-tx-type");
@@ -241,14 +244,27 @@ export default function TradeForm({
           </span>
         </Group>
 
-        <Button
-          type="submit"
-          loading={isPending}
-          color={isBuy ? "danger" : "info"}
-          size="md"
-        >
-          {isEdit ? "거래 수정" : isBuy ? "매수 기록" : "매도 기록"}
-        </Button>
+        {/* 거래 추가 시트(transaction/form.tsx) 와 동일 패턴 — 취소 + 액션 2버튼.
+            매수/매도 색상은 유지 (UX 핵심). */}
+        <Group grow mt="md">
+          {onCancel && (
+            <Button
+              type="button"
+              variant="light"
+              onClick={onCancel}
+              disabled={isPending}
+            >
+              취소
+            </Button>
+          )}
+          <Button
+            type="submit"
+            loading={isPending}
+            color={isBuy ? "danger" : "info"}
+          >
+            {isEdit ? "거래 수정" : isBuy ? "매수 기록" : "매도 기록"}
+          </Button>
+        </Group>
 
         {isEdit && (
           <Button
