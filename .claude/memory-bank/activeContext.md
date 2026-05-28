@@ -14,9 +14,11 @@
 |---|---|---|
 | `041ea3a` | back | refactor: CursorPage 봉투 통일 + portfolio overview 도입 (PR 0+1) |
 | `fdb3c38` | back | refactor: account/category/fixed list 무한 스크롤 (PR 2) |
+| `ff9c421` | back | refactor: home/wealth/settings overview endpoint 추가 (PR 3) |
 | `6d63363` | front | refactor: CursorPage 봉투 통일 + portfolio overview 도입 (PR 0+1) |
 | `7f02c01` | front | chore(memory): activeContext PR 0+1 완료 반영 |
 | `0907892` | front | refactor: account/category/fixed 관리 페이지 무한 스크롤 (PR 2) |
+| `060f750` | front | refactor: home/wealth/settings overview 1호출 통합 (PR 3) |
 
 #### PR 0 — 봉투 통일 인프라
 - 백엔드: `app/core/pagination.py` (`CursorPage[T]`), `TransactionListResponse` 를 alias 로
@@ -39,11 +41,21 @@
 - 프론트: 세 도메인 api/query-key/use-query/use-search/table/section 무한 스크롤 전환
 - 다른 페이지 임시 패치: transaction/form, home/settings/wealth section (content→items, listSize→limit)
 
+#### PR 3 — home / wealth / settings overview
+- 백엔드 신규: `app/domain/{home,wealth,settings}/` (router/service/schema)
+- 백엔드 신규 endpoint: `GET /home/overview`, `GET /wealth/overview`, `GET /settings/overview`
+- 백엔드: `PortfolioItemRepository.count_active_by_household_id` 추가 (settings 카운트용)
+- 백엔드 위임 패턴: 기존 도메인 service 호출만 (account/transaction/stats/account_snapshot)
+- 프론트 신규: `_features/{home,wealth,settings}/` (api/types/query-key)
+- 프론트: home 4→1호출, wealth 2→1호출, settings 6→2호출 (settings.overview + household.list)
+- 프론트: 각 도메인 mutation invalidation 에 home/wealth/settings._def 추가
+- 결정 #4 ("stats 도메인 유지") 일관: `/stats/monthly` endpoint 그대로, home.overview 안에 데이터만 포함
+- 결정 #5 ("wealth.overview 에 accounts 포함"): wealth.overview 안에 통장 목록 + yearly_snapshots, 통장 클릭 시 `/portfolio/accounts/{id}/overview` 별도 유지
+
 ### 남은 PR
 
 | PR | 작업 |
 |---|---|
-| 3 | home / wealth / settings overview |
 | 4 | transaction calendar/{year}/{month}/full + transaction form-options |
 | 5 | household / members 봉투만 통일 |
 | 6 | 정리 (`pageNo/listSize` 매직 넘버, 클라 필터, `ApiListResponse` 삭제, 데드 코드) |
@@ -80,8 +92,9 @@
 
 ## Next Step
 
-PR 2 진행 — account / category / fixed 관리 페이지 무한 스크롤 + CursorPage 적용.
+PR 4 진행 — transaction calendar/{year}/{month}/full + transaction form-options.
 
-1. 백엔드: 세 도메인 repository 에 `list_by_cursor` + service 갱신, schema 응답 `CursorPage[T]` 로 교체
-2. 프론트: `_libraries/query/use-infinite-list.ts` 헬퍼 + `infinite-sentinel.tsx`, 세 도메인 `use-search.ts` 갱신, table 의 Mantine `Pagination` 제거
-3. typecheck + 커밋
+1. 백엔드: `/transaction/calendar/{year}/{month}/full` 신규 — 달력 + 월간 stats + 카테고리별 합계를 1호출로 (현재는 `/transaction/calendar` 와 `/stats/monthly` 분리)
+2. 백엔드: `/transaction/form-options` 신규 — 거래 폼이 필요한 accounts/categories/fixedExpenses 한 번에
+3. 프론트: transaction calendar / form section 1호출 전환
+4. typecheck + 커밋
