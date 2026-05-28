@@ -8,12 +8,15 @@
 
 ## Status
 
-### 완료 (브랜치 `refactor/api-cursor-overview`, 1 커밋씩 두 레포)
+### 완료 (브랜치 `refactor/api-cursor-overview`)
 
 | 커밋 | 레포 | 내용 |
 |---|---|---|
 | `041ea3a` | back | refactor: CursorPage 봉투 통일 + portfolio overview 도입 (PR 0+1) |
+| `fdb3c38` | back | refactor: account/category/fixed list 무한 스크롤 (PR 2) |
 | `6d63363` | front | refactor: CursorPage 봉투 통일 + portfolio overview 도입 (PR 0+1) |
+| `7f02c01` | front | chore(memory): activeContext PR 0+1 완료 반영 |
+| `0907892` | front | refactor: account/category/fixed 관리 페이지 무한 스크롤 (PR 2) |
 
 #### PR 0 — 봉투 통일 인프라
 - 백엔드: `app/core/pagination.py` (`CursorPage[T]`), `TransactionListResponse` 를 alias 로
@@ -28,11 +31,18 @@
 - 프론트: 4 페이지 + 1 폼 모두 1호출 전환, `portfolio-trade-section` 무한 스크롤 적용
 - settings 의 portfolio 카운트는 overview flatMap 으로 임시 처리 (PR 3 에서 settings.counts 로 대체)
 
+#### PR 2 — account/category/fixed 관리 페이지 무한 스크롤
+- 백엔드: 세 도메인 repository `list_by_cursor` + `count_search` (frst_reg_dt DESC)
+- 백엔드: service 내부용 `list_X` (sort_order) 유지 + 외부용 `list_X_cursor` 신규
+- 백엔드: router `/list` → `CursorPage[XResponse]`, schema `ListQuery` cursor/limit
+- 프론트: `_libraries/query/infinite-sentinel.tsx` 공용 헬퍼
+- 프론트: 세 도메인 api/query-key/use-query/use-search/table/section 무한 스크롤 전환
+- 다른 페이지 임시 패치: transaction/form, home/settings/wealth section (content→items, listSize→limit)
+
 ### 남은 PR
 
 | PR | 작업 |
 |---|---|
-| 2 | account / category / fixed 관리 페이지 무한 스크롤 + CursorPage 적용 |
 | 3 | home / wealth / settings overview |
 | 4 | transaction calendar/{year}/{month}/full + transaction form-options |
 | 5 | household / members 봉투만 통일 |
