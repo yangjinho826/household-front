@@ -13,6 +13,7 @@ import MonthPicker, {
 } from "_features/common/components/month-picker";
 import FixedTable from "_features/fixed/components/table";
 import { useFixedSearch } from "_features/fixed/hooks/use-sub/use-search";
+import { InfiniteSentinel } from "_libraries/query/infinite-sentinel";
 import { fmt } from "_utilities/fmt";
 
 export default function FixedSection() {
@@ -20,13 +21,11 @@ export default function FixedSection() {
   const router = useRouter();
   const routeParams = useParams<{ locale: string }>();
   const {
-    result,
-    params,
-    handlePageChange,
+    items,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
   } = useFixedSearch();
-
-  const items = result?.content ?? [];
-  const totalPages = result?.totalPages ?? 1;
 
   // 선택 월 — 기본 이번달 (YYYY-MM)
   const [month, setMonth] = useState<string>(() => defaultYearMonth());
@@ -77,14 +76,14 @@ export default function FixedSection() {
 
       <FixedTable
         items={items}
-        totalPages={totalPages}
-        pageNo={params.pageNo}
-        listSize={params.listSize}
         usagesByFixed={usagesByFixed}
-        onClickRow={(id) =>
-          router.push(`/${routeParams.locale}/fixed/${id}`)
-        }
-        onPageChange={handlePageChange}
+        onClickRow={(id) => router.push(`/${routeParams.locale}/fixed/${id}`)}
+      />
+
+      <InfiniteSentinel
+        hasNextPage={hasNextPage}
+        isFetchingNextPage={isFetchingNextPage}
+        onLoadMore={fetchNextPage}
       />
     </Stack>
   );

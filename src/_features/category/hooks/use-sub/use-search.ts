@@ -1,15 +1,18 @@
-import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
+import { parseAsString, useQueryStates } from "nuqs";
+import { useMemo } from "react";
 
-import { useCategoryList } from "_features/category/queries/use-query";
-import type { CategoryKind } from "_features/category/types";
+import { useCategoryInfiniteList } from "_features/category/queries/use-query";
+import type {
+  CategoryKind,
+  CategoryListItemType,
+} from "_features/category/types";
 
 const VALID_KINDS: CategoryKind[] = ["EXPENSE", "INCOME"];
+const PAGE_SIZE = 30;
 
 export function useCategorySearch() {
   const [params, setParams] = useQueryStates({
     kind: parseAsString,
-    pageNo: parseAsInteger.withDefault(1),
-    listSize: parseAsInteger.withDefault(20),
   });
 
   const kind: CategoryKind | undefined =
@@ -17,31 +20,32 @@ export function useCategorySearch() {
       ? (params.kind as CategoryKind)
       : undefined;
 
-  const { data, isLoading } = useCategoryList({
-    kind,
-    pageNo: params.pageNo,
-    listSize: params.listSize,
-  });
+  const {
+    data,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+    isLoading,
+  } = useCategoryInfiniteList({ kind }, PAGE_SIZE);
 
-  const result = data?.body?.data ?? undefined;
+  const items: CategoryListItemType[] = useMemo(
+    () => (data?.pages ?? []).flatMap((p) => p.body.data.items),
+    [data],
+  );
+  const totalCount = data?.pages[0]?.body.data.totalCount ?? items.length;
 
   const setKind = (next: CategoryKind | undefined) => {
-    setParams({
-      kind: next ?? null,
-      pageNo: 1,
-    });
-  };
-
-  const handlePageChange = (page: number, pageSize: number) => {
-    setParams({ ...params, pageNo: page, listSize: pageSize });
+    setParams({ kind: next ?? null });
   };
 
   return {
-    handlePageChange,
-    params,
     kind,
     setKind,
-    result,
+    items,
+    totalCount,
+    hasNextPage: hasNextPage ?? false,
+    fetchNextPage,
+    isFetchingNextPage,
     isLoading,
   };
 }

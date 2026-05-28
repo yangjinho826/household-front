@@ -1,15 +1,18 @@
-import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
+import { parseAsString, useQueryStates } from "nuqs";
+import { useMemo } from "react";
 
-import { useAccountList } from "_features/account/queries/use-query";
-import type { AccountType } from "_features/account/types";
+import { useAccountInfiniteList } from "_features/account/queries/use-query";
+import type {
+  AccountListItemType,
+  AccountType,
+} from "_features/account/types";
 
 const VALID_TYPES: AccountType[] = ["LIVING", "SAVINGS", "INVESTMENT", "OTHER"];
+const PAGE_SIZE = 30;
 
 export function useAccountSearch() {
   const [params, setParams] = useQueryStates({
     accountType: parseAsString,
-    pageNo: parseAsInteger.withDefault(1),
-    listSize: parseAsInteger.withDefault(20),
   });
 
   const accountType: AccountType | undefined =
@@ -17,31 +20,32 @@ export function useAccountSearch() {
       ? (params.accountType as AccountType)
       : undefined;
 
-  const { data, isLoading } = useAccountList({
-    accountType,
-    pageNo: params.pageNo,
-    listSize: params.listSize,
-  });
+  const {
+    data,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+    isLoading,
+  } = useAccountInfiniteList({ accountType }, PAGE_SIZE);
 
-  const result = data?.body?.data ?? undefined;
+  const items: AccountListItemType[] = useMemo(
+    () => (data?.pages ?? []).flatMap((p) => p.body.data.items),
+    [data],
+  );
+  const totalCount = data?.pages[0]?.body.data.totalCount ?? items.length;
 
   const setAccountType = (next: AccountType | undefined) => {
-    setParams({
-      accountType: next ?? null,
-      pageNo: 1,
-    });
-  };
-
-  const handlePageChange = (page: number, pageSize: number) => {
-    setParams({ ...params, pageNo: page, listSize: pageSize });
+    setParams({ accountType: next ?? null });
   };
 
   return {
-    handlePageChange,
-    params,
     accountType,
     setAccountType,
-    result,
+    items,
+    totalCount,
+    hasNextPage: hasNextPage ?? false,
+    fetchNextPage,
+    isFetchingNextPage,
     isLoading,
   };
 }

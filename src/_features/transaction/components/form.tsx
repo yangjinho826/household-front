@@ -59,20 +59,20 @@ export default function TransactionForm({
     handleCancel,
   } = useTransactionForm({ transactionId, onDone });
 
-  // 통장 + 카테고리 + 고정지출 데이터
+  // 통장 + 카테고리 + 고정지출 데이터 (PR 4 에서 transaction.formOptions 단일 호출로 갈음)
   const { data: accountsData } = useSuspenseQuery(
-    queryKeys.account.list({ pageNo: 1, listSize: 100 }),
+    queryKeys.account.list({ limit: 200 }),
   );
   const { data: categoriesData } = useSuspenseQuery(
-    queryKeys.category.list({ pageNo: 1, listSize: 100 }),
+    queryKeys.category.list({ limit: 200 }),
   );
   const { data: fixedData } = useSuspenseQuery(
-    queryKeys.fixed.list({ pageNo: 1, listSize: 100 }),
+    queryKeys.fixed.list({ limit: 200 }),
   );
 
-  const accounts = accountsData.body.data.content;
-  const categories = categoriesData.body.data.content;
-  const fixedItems = fixedData.body.data.content;
+  const accounts = accountsData.body.data.items;
+  const categories = categoriesData.body.data.items;
+  const fixedItems = fixedData.body.data.items;
 
   const txType = form.values.txType;
   const isTransfer = txType === "TRANSFER";

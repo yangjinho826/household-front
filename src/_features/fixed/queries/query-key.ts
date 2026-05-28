@@ -1,7 +1,5 @@
 import { createQueryKeys } from "@lukemorales/query-key-factory";
 
-import type { ApiPaginationProps } from "_libraries/fetch/response";
-
 import {
   GetFixedDetailApi,
   GetFixedMonthlySummaryApi,
@@ -10,9 +8,12 @@ import {
 import type { FixedSearchRequestType } from "../types";
 
 export const fixedExpenses = createQueryKeys("fixed", {
-  list: (params: FixedSearchRequestType & ApiPaginationProps) => ({
+  list: (params: FixedSearchRequestType & { limit?: number }) => ({
     queryKey: [params],
     queryFn: () => GetFixedSearchApi(params),
+  }),
+  infinite: (params: FixedSearchRequestType & { pageSize: number }) => ({
+    queryKey: [params],
   }),
   detail: (fixedId: string) => ({
     queryKey: [fixedId],

@@ -30,26 +30,25 @@ export default function SettingsSection() {
   const { data: hData } = useSuspenseQuery(
     queryKeys.household.list({ pageNo: 1, listSize: 100 }),
   );
+  // PR 3 에서 settings.counts endpoint 단일 호출로 갈음 예정
   const { data: aData } = useSuspenseQuery(
-    queryKeys.account.list({ pageNo: 1, listSize: 100 }),
+    queryKeys.account.list({ limit: 200 }),
   );
   const { data: cData } = useSuspenseQuery(
-    queryKeys.category.list({ pageNo: 1, listSize: 100 }),
+    queryKeys.category.list({ limit: 200 }),
   );
   const { data: fData } = useSuspenseQuery(
-    queryKeys.fixed.list({ pageNo: 1, listSize: 100 }),
+    queryKeys.fixed.list({ limit: 200 }),
   );
   const { data: tData } = useSuspenseQuery(
     queryKeys.transaction.list({ pageNo: 1, listSize: 100 }),
   );
-  // PR 1 에서 portfolio.list 제거 — 종목 수는 overview 의 평탄화로 계산
-  // (PR 3 에서 settings.counts endpoint 로 전부 통합 예정)
   const { data: pData } = useSuspenseQuery(queryKeys.portfolio.overview());
 
   const households = hData.body.data.content;
-  const accounts = aData.body.data.content;
-  const categories = cData.body.data.content;
-  const fixedItems = fData.body.data.content;
+  const accounts = aData.body.data.items;
+  const categories = cData.body.data.items;
+  const fixedItems = fData.body.data.items;
   const txns = tData.body.data.items;
   const portfolio = pData.body.data.investmentAccounts.flatMap(
     (g) => g.portfolios,

@@ -39,8 +39,9 @@ export default function WealthSection() {
   const te = useTranslations("error");
   const tType = useTranslations("enum.account-type");
 
+  // PR 3 에서 wealth.overview 단일 호출로 갈음 예정
   const { data: accountData } = useSuspenseQuery(
-    queryKeys.account.list({ pageNo: 1, listSize: 100 }),
+    queryKeys.account.list({ limit: 200 }),
   );
   const { data: snapshotData } = useSuspenseQuery(
     queryKeys.accountSnapshot.yearly({}),
@@ -49,7 +50,7 @@ export default function WealthSection() {
   const { createMutation } = useAccountSnapshotMutations();
 
   // 백엔드 account.balance 는 INVESTMENT 도 cash + 평가금 합산해서 내려옴
-  const accounts: AccountListItemType[] = accountData.body.data.content;
+  const accounts: AccountListItemType[] = accountData.body.data.items;
   const yearly = snapshotData.body.data;
 
   const total = accounts.reduce((sum, a) => sum + a.balance, 0);
