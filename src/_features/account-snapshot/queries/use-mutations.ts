@@ -18,6 +18,11 @@ export function useAccountSnapshotMutations() {
         queryKey: queryKeys.account.list._def,
         refetchType: "all",
       });
+      // wealth overview 가 yearly_snapshots + accounts 묶음으로 받음
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.wealth._def,
+        refetchType: "all",
+      });
     },
   });
 

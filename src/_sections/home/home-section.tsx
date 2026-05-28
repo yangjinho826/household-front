@@ -36,22 +36,13 @@ export default function HomeSection() {
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth() + 1;
 
-  // PR 3 에서 home.overview 1호출로 갈음 예정
-  const { data: aData } = useSuspenseQuery(
-    queryKeys.account.list({ limit: 200 }),
+  const { data: overviewRes } = useSuspenseQuery(
+    queryKeys.home.overview({ year: currentYear, month: currentMonth }),
   );
-  const { data: tData } = useSuspenseQuery(
-    queryKeys.transaction.list({ pageNo: 1, listSize: 100 }),
-  );
-  const { data: statsData } = useSuspenseQuery(
-    queryKeys.stats.monthly({ year: currentYear, month: currentMonth }),
-  );
-
-  const accounts = aData.body.data.items;
-  const txns = tData.body.data.items;
-  const stats = statsData.body.data;
-
-  const totalAssets = accounts.reduce((sum, a) => sum + a.balance, 0);
+  const overview = overviewRes.body.data;
+  const txns = overview.recentTransactions;
+  const stats = overview.stats;
+  const totalAssets = overview.totalBalance;
   const income = stats.monthlyIncome;
   const expense = stats.monthlyExpense;
   const save = income - expense;

@@ -38,6 +38,19 @@ export function usePortfolioMutations() {
       queryKey: queryKeys.accountSnapshot._def,
       refetchType: "all",
     });
+    // 페이지 overview — home(잔액), wealth(잔액/snapshot), settings(종목 카운트)
+    queryClient.invalidateQueries({
+      queryKey: queryKeys.home._def,
+      refetchType: "all",
+    });
+    queryClient.invalidateQueries({
+      queryKey: queryKeys.wealth._def,
+      refetchType: "all",
+    });
+    queryClient.invalidateQueries({
+      queryKey: queryKeys.settings._def,
+      refetchType: "all",
+    });
   };
 
   const createMutation = useMutation({

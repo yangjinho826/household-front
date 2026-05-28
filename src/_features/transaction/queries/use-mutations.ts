@@ -38,6 +38,19 @@ export function useTransactionMutations() {
       queryKey: queryKeys.stats._def,
       refetchType: "all",
     });
+    // 페이지 진입용 overview 들도 stale — home(최근 거래/stats), wealth(잔액), settings(거래 카운트)
+    queryClient.invalidateQueries({
+      queryKey: queryKeys.home._def,
+      refetchType: "all",
+    });
+    queryClient.invalidateQueries({
+      queryKey: queryKeys.wealth._def,
+      refetchType: "all",
+    });
+    queryClient.invalidateQueries({
+      queryKey: queryKeys.settings._def,
+      refetchType: "all",
+    });
   };
 
   const createMutation = useMutation({

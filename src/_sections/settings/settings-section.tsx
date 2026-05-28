@@ -30,29 +30,12 @@ export default function SettingsSection() {
   const { data: hData } = useSuspenseQuery(
     queryKeys.household.list({ pageNo: 1, listSize: 100 }),
   );
-  // PR 3 에서 settings.counts endpoint 단일 호출로 갈음 예정
-  const { data: aData } = useSuspenseQuery(
-    queryKeys.account.list({ limit: 200 }),
+  const { data: overviewRes } = useSuspenseQuery(
+    queryKeys.settings.overview(),
   );
-  const { data: cData } = useSuspenseQuery(
-    queryKeys.category.list({ limit: 200 }),
-  );
-  const { data: fData } = useSuspenseQuery(
-    queryKeys.fixed.list({ limit: 200 }),
-  );
-  const { data: tData } = useSuspenseQuery(
-    queryKeys.transaction.list({ pageNo: 1, listSize: 100 }),
-  );
-  const { data: pData } = useSuspenseQuery(queryKeys.portfolio.overview());
 
   const households = hData.body.data.content;
-  const accounts = aData.body.data.items;
-  const categories = cData.body.data.items;
-  const fixedItems = fData.body.data.items;
-  const txns = tData.body.data.items;
-  const portfolio = pData.body.data.investmentAccounts.flatMap(
-    (g) => g.portfolios,
-  );
+  const counts = overviewRes.body.data;
   const currentHousehold =
     households.find((h) => h.householdId === currentId) ?? households[0];
 
@@ -170,7 +153,7 @@ export default function SettingsSection() {
       <SimpleGrid cols={3} spacing="sm">
         <Card radius="lg" p="sm" ta="center">
           <Text size="lg" fw={800}>
-            {accounts.length}
+            {counts.accountCount}
           </Text>
           <Text size="10px" fw={500} c="dimmed">
             통장
@@ -178,7 +161,7 @@ export default function SettingsSection() {
         </Card>
         <Card radius="lg" p="sm" ta="center">
           <Text size="lg" fw={800}>
-            {txns.length}
+            {counts.transactionCount}
           </Text>
           <Text size="10px" fw={500} c="dimmed">
             거래
@@ -186,7 +169,7 @@ export default function SettingsSection() {
         </Card>
         <Card radius="lg" p="sm" ta="center">
           <Text size="lg" fw={800}>
-            {portfolio.length}
+            {counts.portfolioCount}
           </Text>
           <Text size="10px" fw={500} c="dimmed">
             종목
@@ -203,17 +186,17 @@ export default function SettingsSection() {
           <Stack gap={0}>
             <SettingsRow
               label="카테고리 관리"
-              value={`${categories.length}개`}
+              value={`${counts.categoryCount}개`}
               onClick={() => navTo("/category")}
             />
             <SettingsRow
               label="고정지출 관리"
-              value={`${fixedItems.length}개`}
+              value={`${counts.fixedCount}개`}
               onClick={() => navTo("/fixed")}
             />
             <SettingsRow
               label="통장 관리"
-              value={`${accounts.length}개`}
+              value={`${counts.accountCount}개`}
               onClick={() => navTo("/account")}
             />
           </Stack>
