@@ -26,6 +26,7 @@
 | `d1fce6e` | front | refactor: transaction 캘린더/폼 1호출 통합 (PR 4) |
 | `1eca7af` | front | refactor: household/members 프론트 봉투 매핑 CursorPage 통일 (PR 5) |
 | `4156b0f` | front | refactor: ApiListResponse / 페이징 매직 넘버 / 데드 코드 정리 (PR 6) |
+| `a21e278` | front | refactor: codex 리뷰 반영 — invalidation/봉투/sentinel 정리 (PR 7) |
 
 #### PR 0 — 봉투 통일 인프라
 - 백엔드: `app/core/pagination.py` (`CursorPage[T]`), `TransactionListResponse` 를 alias 로
@@ -78,6 +79,19 @@
 - 프론트: `queryKeys.household.list({...})` → `queryKeys.household.list()` (인자 제거)
 - 프론트: 8개 호출처 (`settings/members/household section`, `layout/{app-header,sidebar-nav}`, `household/{household-switcher,use-search}`, `auth/onboarding-guard`) `.content` → `.items` / `.totalElements` → `.totalCount` 일괄 교체
 
+#### PR 7 — codex 외부 모델 교차 리뷰 반영
+- **트리거**: 사용자가 `/codex` 로 외부 모델(OpenAI) 교차 리뷰 요청
+- 발견된 High 버그 1건 + Med 4건 fix (Low 3건은 follow-up 유보)
+- **High fix**: `transaction/use-mutations.ts`, `account-snapshot/use-mutations.ts` 의
+  `account.list._def` → `account._def` 로 올림. account 도메인은 list/infinite 가
+  별개 namespace 라서 `list._def` 만 invalidate 하면 무한 스크롤 캐시 stale (실 UI 버그)
+- **Med fix-1**: settings 의 `household.list + settings.overview` 2호출은 의식적 예외 (의미·캐시 수명 다름) 주석 명시
+- **Med fix-2**: `household/api.ts` 에 `HOUSEHOLD_LIST_LIMIT=200` 명시 (cursor 봉투지만 switcher 는 한번에 표시 — unbounded 의도)
+- **Med fix-3**: `transaction/list-view.tsx`, `wealth/portfolio-trade-section.tsx` 의
+  IntersectionObserver 직접 구현 제거 → `InfiniteSentinel` 컴포넌트로 통일
+- **검증**: pnpm typecheck / pnpm lint (max-warnings=0) / pnpm build 컴파일+정적페이지 모두 통과
+  (build 의 standalone copy 단계는 Windows EPERM symlink — 환경 이슈, 코드 무관)
+
 #### PR 6 — 정리 (마지막)
 - 백엔드: deprecated `/transaction/calendar` 라우터 삭제 (calendar/full 로 대체, service.get_calendar 는 내부 위임 유지)
 - 프론트 `_libraries/fetch/response.ts`: `ApiListResponse` / `ApiPaginationProps` 삭제 (CursorPage 만 남음)
@@ -88,6 +102,7 @@
 ### 남은 PR
 
 전체 완료 ✅ — `refactor/api-cursor-overview` 브랜치 main 머지만 남음.
+PR 7 (codex 리뷰 반영) 까지 누적. Low 3건은 follow-up 으로 유보.
 
 ## Context
 
@@ -121,8 +136,9 @@
 
 ## Next Step
 
-API 리팩토링 PR 0~6 모두 완료. `refactor/api-cursor-overview` 브랜치에 누적.
+API 리팩토링 PR 0~7 모두 완료. `refactor/api-cursor-overview` 브랜치에 누적.
 
 1. (백엔드/프론트 각각) main 으로 PR 올리기 — push + gh pr create
 2. CHANGELOG/문서 갱신 필요 시 (백엔드 `docs/api-list.md` 의 `/transaction/calendar` 행 제거 등)
 3. 머지 후 브랜치 정리
+4. Low 3건 follow-up 검토 — rowNo 페이지마다 재시작 / enum 응답 `as` 캐스트 / `useAccountList/useCategoryList/useFixedList` 미사용 데드 코드

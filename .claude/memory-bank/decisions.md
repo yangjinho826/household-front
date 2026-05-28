@@ -12,3 +12,6 @@
 2026-05-28: totalCount 정책 — 관리 페이지에서만 count 계산, overview/무한 스크롤은 null (DB 부하 ↓)
 2026-05-28: 종목 URL — `/portfolio/items/{id}` REST 적 (기존 `/detail/{id}` 폐기)
 2026-05-28: 단일 브랜치 누적 — PR 0~6 모두 `refactor/api-cursor-overview` 한 브랜치에 (큰 단위 변경의 일관성 우선)
+2026-05-28: codex 외부 모델 교차 리뷰 도입 — High 1 + Med 4 fix 후 머지 결정 (PR 7) (`account.list._def` 만 잡고 `account.infinite` 누락한 invalidation 버그가 실 UI stale 로 이어지는 결정적 발견)
+2026-05-28: settings 의 household.list + settings.overview 2호출은 의식적 예외 — 묶지 않음 (의미/캐시 수명 다름, 백엔드 추가 변경 회피)
+2026-05-28: household list 페이징 정책 — cursor 봉투 형식 유지 + `HOUSEHOLD_LIST_LIMIT=200` unbounded (가계부는 사용자당 수십개 이내, switcher 는 한번에 표시 필요, infinite 는 over-engineering)
