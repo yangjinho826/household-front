@@ -27,31 +27,16 @@ export default function SettingsSection() {
   const [switcherOpened, switcher] = useDisclosure(false);
   const currentId = useHouseholdStore((s) => s.currentHouseholdId);
 
-  const { data: hData } = useSuspenseQuery(
-    queryKeys.household.list({ pageNo: 1, listSize: 100 }),
-  );
-  const { data: aData } = useSuspenseQuery(
-    queryKeys.account.list({ pageNo: 1, listSize: 100 }),
-  );
-  const { data: cData } = useSuspenseQuery(
-    queryKeys.category.list({ pageNo: 1, listSize: 100 }),
-  );
-  const { data: fData } = useSuspenseQuery(
-    queryKeys.fixed.list({ pageNo: 1, listSize: 100 }),
-  );
-  const { data: tData } = useSuspenseQuery(
-    queryKeys.transaction.list({ pageNo: 1, listSize: 100 }),
-  );
-  const { data: pData } = useSuspenseQuery(
-    queryKeys.portfolio.list({ pageNo: 1, listSize: 100 }),
+  // 의식적 예외 — "한 페이지=한 endpoint" 원칙의 예외 1건.
+  // household.list 는 가계부 전환 (HouseholdSwitcher) 용 전체 목록이라
+  // settings overview (카운트 통계) 와 의미·캐시 수명이 다름. 묶지 않음.
+  const { data: hData } = useSuspenseQuery(queryKeys.household.list());
+  const { data: overviewRes } = useSuspenseQuery(
+    queryKeys.settings.overview(),
   );
 
-  const households = hData.body.data.content;
-  const accounts = aData.body.data.content;
-  const categories = cData.body.data.content;
-  const fixedItems = fData.body.data.content;
-  const txns = tData.body.data.content;
-  const portfolio = pData.body.data.content;
+  const households = hData.body.data.items;
+  const counts = overviewRes.body.data;
   const currentHousehold =
     households.find((h) => h.householdId === currentId) ?? households[0];
 
@@ -169,7 +154,7 @@ export default function SettingsSection() {
       <SimpleGrid cols={3} spacing="sm">
         <Card radius="lg" p="sm" ta="center">
           <Text size="lg" fw={800}>
-            {accounts.length}
+            {counts.accountCount}
           </Text>
           <Text size="10px" fw={500} c="dimmed">
             통장
@@ -177,7 +162,7 @@ export default function SettingsSection() {
         </Card>
         <Card radius="lg" p="sm" ta="center">
           <Text size="lg" fw={800}>
-            {txns.length}
+            {counts.transactionCount}
           </Text>
           <Text size="10px" fw={500} c="dimmed">
             거래
@@ -185,7 +170,7 @@ export default function SettingsSection() {
         </Card>
         <Card radius="lg" p="sm" ta="center">
           <Text size="lg" fw={800}>
-            {portfolio.length}
+            {counts.portfolioCount}
           </Text>
           <Text size="10px" fw={500} c="dimmed">
             종목
@@ -202,17 +187,17 @@ export default function SettingsSection() {
           <Stack gap={0}>
             <SettingsRow
               label="카테고리 관리"
-              value={`${categories.length}개`}
+              value={`${counts.categoryCount}개`}
               onClick={() => navTo("/category")}
             />
             <SettingsRow
               label="고정지출 관리"
-              value={`${fixedItems.length}개`}
+              value={`${counts.fixedCount}개`}
               onClick={() => navTo("/fixed")}
             />
             <SettingsRow
               label="통장 관리"
-              value={`${accounts.length}개`}
+              value={`${counts.accountCount}개`}
               onClick={() => navTo("/account")}
             />
           </Stack>

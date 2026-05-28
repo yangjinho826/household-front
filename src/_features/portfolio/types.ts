@@ -139,3 +139,42 @@ export interface PortfolioValueHistoryByItemRequest {
   fromDate?: string;
   toDate?: string;
 }
+
+// =========================================================
+// Page-level overview / form-options 응답 타입
+// =========================================================
+
+import type { AccountListItemType } from "_features/account/types";
+
+export interface PortfolioOverviewSummary {
+  totalBalance: number;
+  totalCash: number;
+  totalValuation: number;
+  totalCost: number;
+  totalProfit: number;
+  totalRate: number;
+}
+
+export interface InvestmentAccountWithPortfolios {
+  account: AccountListItemType;
+  portfolios: PortfolioListItemType[];
+}
+
+export interface PortfolioOverviewResponse {
+  summary: PortfolioOverviewSummary;
+  investmentAccounts: InvestmentAccountWithPortfolios[];
+}
+
+export interface AccountOverviewResponse {
+  account: AccountListItemType;
+  portfolios: PortfolioListItemType[];
+}
+
+export interface PortfolioFormOptionsResponse {
+  investmentAccounts: AccountListItemType[];
+}
+
+/** 종목 단건 거래 내역 무한 스크롤 요청 */
+export interface PortfolioItemTxSearchRequest {
+  itemId: string;
+}

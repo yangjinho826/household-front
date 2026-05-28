@@ -39,10 +39,8 @@ export function SidebarNav() {
   const [opened, switcher] = useDisclosure(false);
 
   const currentId = useHouseholdStore((s) => s.currentHouseholdId);
-  const { data: hData } = useSuspenseQuery(
-    queryKeys.household.list({ pageNo: 1, listSize: 100 }),
-  );
-  const households = hData.body.data.content;
+  const { data: hData } = useSuspenseQuery(queryKeys.household.list());
+  const households = hData.body.data.items;
   const currentHousehold =
     households.find((h) => h.householdId === currentId) ?? households[0];
 

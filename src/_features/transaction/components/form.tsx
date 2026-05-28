@@ -59,20 +59,13 @@ export default function TransactionForm({
     handleCancel,
   } = useTransactionForm({ transactionId, onDone });
 
-  // 통장 + 카테고리 + 고정지출 데이터
-  const { data: accountsData } = useSuspenseQuery(
-    queryKeys.account.list({ pageNo: 1, listSize: 100 }),
+  // 통장 + 카테고리 + 고정지출 — 폼 옵션 1호출
+  const { data: optionsData } = useSuspenseQuery(
+    queryKeys.transaction.formOptions(),
   );
-  const { data: categoriesData } = useSuspenseQuery(
-    queryKeys.category.list({ pageNo: 1, listSize: 100 }),
-  );
-  const { data: fixedData } = useSuspenseQuery(
-    queryKeys.fixed.list({ pageNo: 1, listSize: 100 }),
-  );
-
-  const accounts = accountsData.body.data.content;
-  const categories = categoriesData.body.data.content;
-  const fixedItems = fixedData.body.data.content;
+  const accounts = optionsData.body.data.accounts;
+  const categories = optionsData.body.data.categories;
+  const fixedItems = optionsData.body.data.fixedExpenses;
 
   const txType = form.values.txType;
   const isTransfer = txType === "TRANSFER";

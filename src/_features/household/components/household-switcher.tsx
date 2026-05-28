@@ -25,10 +25,8 @@ export function HouseholdSwitcher({ opened, onClose }: HouseholdSwitcherProps) {
   const routeParams = useParams<{ locale: string }>();
   const queryClient = useQueryClient();
 
-  const { data: hData } = useSuspenseQuery(
-    queryKeys.household.list({ pageNo: 1, listSize: 100 }),
-  );
-  const households = hData.body.data.content;
+  const { data: hData } = useSuspenseQuery(queryKeys.household.list());
+  const households = hData.body.data.items;
 
   const currentId = useHouseholdStore((s) => s.currentHouseholdId);
   const setCurrentId = useHouseholdStore((s) => s.setCurrentHouseholdId);

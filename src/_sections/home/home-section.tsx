@@ -36,21 +36,13 @@ export default function HomeSection() {
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth() + 1;
 
-  const { data: aData } = useSuspenseQuery(
-    queryKeys.account.list({ pageNo: 1, listSize: 100 }),
+  const { data: overviewRes } = useSuspenseQuery(
+    queryKeys.home.overview({ year: currentYear, month: currentMonth }),
   );
-  const { data: tData } = useSuspenseQuery(
-    queryKeys.transaction.list({ pageNo: 1, listSize: 100 }),
-  );
-  const { data: statsData } = useSuspenseQuery(
-    queryKeys.stats.monthly({ year: currentYear, month: currentMonth }),
-  );
-
-  const accounts = aData.body.data.content;
-  const txns = tData.body.data.content;
-  const stats = statsData.body.data;
-
-  const totalAssets = accounts.reduce((sum, a) => sum + a.balance, 0);
+  const overview = overviewRes.body.data;
+  const txns = overview.recentTransactions;
+  const stats = overview.stats;
+  const totalAssets = overview.totalBalance;
   const income = stats.monthlyIncome;
   const expense = stats.monthlyExpense;
   const save = income - expense;

@@ -39,20 +39,17 @@ export default function WealthSection() {
   const te = useTranslations("error");
   const tType = useTranslations("enum.account-type");
 
-  const { data: accountData } = useSuspenseQuery(
-    queryKeys.account.list({ pageNo: 1, listSize: 100 }),
-  );
-  const { data: snapshotData } = useSuspenseQuery(
-    queryKeys.accountSnapshot.yearly({}),
+  const { data: overviewRes } = useSuspenseQuery(
+    queryKeys.wealth.overview({}),
   );
 
   const { createMutation } = useAccountSnapshotMutations();
 
+  const overview = overviewRes.body.data;
   // 백엔드 account.balance 는 INVESTMENT 도 cash + 평가금 합산해서 내려옴
-  const accounts: AccountListItemType[] = accountData.body.data.content;
-  const yearly = snapshotData.body.data;
-
-  const total = accounts.reduce((sum, a) => sum + a.balance, 0);
+  const accounts: AccountListItemType[] = overview.accounts;
+  const yearly = overview.yearlySnapshots;
+  const total = overview.totalBalance;
 
   const trendData = useMemo(
     () =>

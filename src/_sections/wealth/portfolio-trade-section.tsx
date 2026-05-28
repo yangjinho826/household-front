@@ -5,8 +5,8 @@ import {
   Badge,
   Card,
   Center,
+  Drawer,
   Group,
-  Modal,
   SimpleGrid,
   Stack,
   Text,
@@ -14,12 +14,16 @@ import {
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconPencil } from "@tabler/icons-react";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter, useParams } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import SubHeader from "_features/layout/components/sub-header";
 import TradeForm from "_features/portfolio/components/trade-form";
+import {
+  usePortfolioItem,
+  usePortfolioItemTransactionsInfinite,
+} from "_features/portfolio/queries/use-query";
+import { InfiniteSentinel } from "_libraries/query/infinite-sentinel";
 import type {
   PortfolioTransactionItemType,
   PortfolioTxType,
@@ -29,7 +33,6 @@ import {
   formatProfitRate,
   profitColor,
 } from "_features/portfolio/utils";
-import { queryKeys } from "_constants/queries";
 import { fmt } from "_utilities/fmt";
 
 interface Props {
@@ -40,33 +43,25 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
   const router = useRouter();
   const routeParams = useParams<{ locale: string }>();
 
-  const { data: portfolioData } = useSuspenseQuery(
-    queryKeys.portfolio.list({}),
-  );
-  const portfolio = portfolioData.body.data.content.find(
-    (p) => p.portfolioId === portfolioId,
-  );
+  const { data: itemData } = usePortfolioItem(portfolioId);
+  const portfolio = itemData.body.data;
 
-  const { data: txData } = useSuspenseQuery(
-    queryKeys.portfolio.transactions({ accountId: portfolio?.accountId }),
-  );
-  // 종목 단위 필터 (백엔드는 accountId 만 지원) — (market, code) 로 식별
-  const trades = txData.body.data.content.filter(
-    (t) => t.market === portfolio?.market && t.code === portfolio?.code,
+  const {
+    data: txPages,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = usePortfolioItemTransactionsInfinite(portfolioId, 30);
+
+  const trades: PortfolioTransactionItemType[] = useMemo(
+    () => (txPages?.pages ?? []).flatMap((p) => p.body.data.items),
+    [txPages],
   );
 
   const [opened, { open, close }] = useDisclosure(false);
   const [initialType, setInitialType] = useState<PortfolioTxType>("BUY");
   const [editingTx, setEditingTx] =
     useState<PortfolioTransactionItemType | null>(null);
-
-  if (!portfolio) {
-    return (
-      <Stack gap="md">
-        <Text c="dimmed">종목을 찾을 수 없습니다.</Text>
-      </Stack>
-    );
-  }
 
   const openTrade = (type: PortfolioTxType) => {
     setEditingTx(null);
@@ -204,7 +199,7 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
         </UnstyledButton>
       </SimpleGrid>
 
-      {/* 거래 내역 */}
+      {/* 거래 내역 — 무한 스크롤 */}
       <Group justify="space-between" align="center" px={4}>
         <Text size="sm" fw={700}>
           거래 내역 ({trades.length})
@@ -220,80 +215,118 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
           </Center>
         </Card>
       ) : (
-        <Card radius="lg" p="xs">
-          <Stack gap={0}>
-            {trades.map((t) => (
-              <UnstyledButton
-                key={t.txId}
-                onClick={() => {
-                  setEditingTx(t);
-                  open();
-                }}
-                style={{ width: "100%" }}
-              >
-                <Stack gap={4} style={{ padding: 12, borderRadius: 12 }}>
-                  <Group justify="space-between" align="center">
-                    <Group gap={6}>
-                      <Badge
-                        color={t.ptType === "BUY" ? "danger" : "info"}
-                        variant="light"
+        <>
+          <Card radius="lg" p="xs">
+            <Stack gap={0}>
+              {trades.map((t) => (
+                <UnstyledButton
+                  key={t.txId}
+                  onClick={() => {
+                    setEditingTx(t);
+                    open();
+                  }}
+                  style={{ width: "100%" }}
+                >
+                  <Stack gap={4} style={{ padding: 12, borderRadius: 12 }}>
+                    <Group justify="space-between" align="center">
+                      <Group gap={6}>
+                        <Badge
+                          color={t.ptType === "BUY" ? "danger" : "info"}
+                          variant="light"
+                          size="sm"
+                        >
+                          {t.ptType === "BUY" ? "매수" : "매도"}
+                        </Badge>
+                        <Text size="xs" fw={600} c="dimmed">
+                          {t.txDate}
+                        </Text>
+                      </Group>
+                      <Text
                         size="sm"
+                        fw={700}
+                        style={{ fontVariantNumeric: "tabular-nums" }}
                       >
-                        {t.ptType === "BUY" ? "매수" : "매도"}
-                      </Badge>
-                      <Text size="xs" fw={600} c="dimmed">
-                        {t.txDate}
+                        {fmt(t.total)}원
                       </Text>
                     </Group>
-                    <Text
-                      size="sm"
-                      fw={700}
-                      style={{ fontVariantNumeric: "tabular-nums" }}
-                    >
-                      {fmt(t.total)}원
-                    </Text>
-                  </Group>
-                  <Group gap={8}>
-                    <Text size="11px" c="dimmed">
-                      {t.quantity}주
-                    </Text>
-                    <Text size="11px" c="dimmed">
-                      × {fmt(t.price)}원
-                    </Text>
-                  </Group>
-                  {t.memo && (
-                    <Text size="11px" c="dimmed">
-                      {t.memo}
-                    </Text>
-                  )}
-                </Stack>
-              </UnstyledButton>
-            ))}
-          </Stack>
-        </Card>
+                    <Group gap={8}>
+                      <Text size="11px" c="dimmed">
+                        {t.quantity}주
+                      </Text>
+                      <Text size="11px" c="dimmed">
+                        × {fmt(t.price)}원
+                      </Text>
+                    </Group>
+                    {t.memo && (
+                      <Text size="11px" c="dimmed">
+                        {t.memo}
+                      </Text>
+                    )}
+                  </Stack>
+                </UnstyledButton>
+              ))}
+            </Stack>
+          </Card>
+
+          <InfiniteSentinel
+            hasNextPage={hasNextPage}
+            isFetchingNextPage={isFetchingNextPage}
+            onLoadMore={fetchNextPage}
+          />
+        </>
       )}
 
-      <Modal
+      {/* 거래 추가 시트(quick-add-sheet) 와 동일 패턴 — 핸들바 + 바텀시트.
+          모달 통일 (Image #1 케이스). */}
+      <Drawer
         opened={opened}
         onClose={handleCloseModal}
-        title={
-          editingTx
-            ? "거래 수정"
-            : initialType === "BUY"
-              ? "매수 기록"
-              : "매도 기록"
-        }
-        centered
-        size="md"
+        position="bottom"
+        size="auto"
+        withCloseButton={false}
+        styles={{
+          content: {
+            borderTopLeftRadius: 24,
+            borderTopRightRadius: 24,
+            maxWidth: 448,
+            margin: "0 auto",
+            maxHeight: "min(90dvh, calc(100dvh - var(--safe-bottom)))",
+          },
+          body: {
+            paddingBottom: "calc(var(--safe-bottom) + 16px)",
+          },
+        }}
       >
+        <Group justify="center" pt={4} pb={8}>
+          <div
+            style={{
+              width: 40,
+              height: 4,
+              borderRadius: 2,
+              background: "var(--mantine-color-gray-3)",
+            }}
+          />
+        </Group>
+
+        <Stack gap={4} px="md" pb="xs">
+          <Text size="md" fw={800}>
+            {editingTx
+              ? "거래 수정"
+              : initialType === "BUY"
+                ? "매수 기록"
+                : "매도 기록"}
+          </Text>
+        </Stack>
+
         <TradeForm
           key={editingTx?.txId ?? "new"}
           portfolioId={portfolio.portfolioId}
           initialType={editingTx?.ptType ?? initialType}
           editingTx={editingTx ?? undefined}
           onSuccess={handleCloseModal}
+          onCancel={handleCloseModal}
         />
-      </Modal>
+      </Drawer>
     </Stack>
   );
 }

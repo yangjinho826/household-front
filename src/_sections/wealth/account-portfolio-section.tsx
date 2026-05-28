@@ -8,20 +8,19 @@ import {
   UnstyledButton,
 } from "@mantine/core";
 import { IconChevronRight } from "@tabler/icons-react";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter, useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 
 import SubHeader from "_features/layout/components/sub-header";
 import PortfolioDonut from "_features/portfolio/components/portfolio-donut";
+import { useAccountOverview } from "_features/portfolio/queries/use-query";
 import {
   formatProfitAmount,
   formatProfitRate,
   pickPortfolioColor,
   profitColor,
 } from "_features/portfolio/utils";
-import { queryKeys } from "_constants/queries";
 import { fmt } from "_utilities/fmt";
 
 interface Props {
@@ -33,22 +32,12 @@ export default function AccountPortfolioSection({ accountId }: Props) {
   const routeParams = useParams<{ locale: string }>();
   const tMarket = useTranslations("enum.market");
 
-  const { data: accountData } = useSuspenseQuery(
-    queryKeys.account.list({ pageNo: 1, listSize: 100 }),
-  );
-  const { data: portfolioData } = useSuspenseQuery(
-    queryKeys.portfolio.list({ pageNo: 1, listSize: 200 }),
-  );
-
-  const account = accountData.body.data.content.find(
-    (a) => a.accountId === accountId,
-  );
+  const { data } = useAccountOverview(accountId);
+  const account = data.body.data.account;
+  // 백엔드 응답에 isArchived 포함 — 활성 종목만 노출
   const portfolios = useMemo(
-    () =>
-      portfolioData.body.data.content.filter(
-        (p) => p.accountId === accountId && !p.isArchived,
-      ),
-    [portfolioData, accountId],
+    () => data.body.data.portfolios.filter((p) => !p.isArchived),
+    [data],
   );
 
   const stockBreakdown = useMemo(
@@ -61,14 +50,6 @@ export default function AccountPortfolioSection({ accountId }: Props) {
       })),
     [portfolios],
   );
-
-  if (!account) {
-    return (
-      <Stack gap="md">
-        <Text c="dimmed">계좌를 찾을 수 없습니다.</Text>
-      </Stack>
-    );
-  }
 
   // 백엔드가 통장 balance = cash + portfolio_valuation 으로 합산해서 내려줌
   const profitLoss = account.portfolioProfitLoss ?? 0;

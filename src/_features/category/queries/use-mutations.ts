@@ -29,6 +29,15 @@ export function useCategoryMutations() {
       queryKey: queryKeys.fixed._def,
       refetchType: "all",
     });
+    // 페이지 overview — home(stats), settings(카테고리 카운트)
+    queryClient.invalidateQueries({
+      queryKey: queryKeys.home._def,
+      refetchType: "all",
+    });
+    queryClient.invalidateQueries({
+      queryKey: queryKeys.settings._def,
+      refetchType: "all",
+    });
   };
 
   const createMutation = useMutation({

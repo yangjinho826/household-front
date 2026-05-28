@@ -1,14 +1,9 @@
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 
 import { queryKeys } from "_constants/queries";
-import type { ApiPaginationProps } from "_libraries/fetch/response";
 
-import type { HouseholdSearchRequestType } from "../types";
-
-export const useHouseholdList = (
-  params: HouseholdSearchRequestType & ApiPaginationProps,
-) => {
-  return useSuspenseQuery(queryKeys.household.list(params));
+export const useHouseholdList = () => {
+  return useSuspenseQuery(queryKeys.household.list());
 };
 
 export const useHouseholdMembers = (householdId: string) => {

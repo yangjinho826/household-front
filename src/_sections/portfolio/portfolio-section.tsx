@@ -9,10 +9,10 @@ import {
   Text,
   Title,
 } from "@mantine/core";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
 import PortfolioDonut from "_features/portfolio/components/portfolio-donut";
+import { usePortfolioOverview } from "_features/portfolio/queries/use-query";
 import {
   formatProfitAmount,
   formatProfitRate,
@@ -20,54 +20,17 @@ import {
   profitColor,
 } from "_features/portfolio/utils";
 import InvestmentAccountCard from "_sections/wealth/components/investment-account-card";
-import { queryKeys } from "_constants/queries";
 import { fmt } from "_utilities/fmt";
 
 export default function PortfolioSection() {
-  const { data: accountData } = useSuspenseQuery(
-    queryKeys.account.list({ pageNo: 1, listSize: 100 }),
-  );
-  const { data: portfolioData } = useSuspenseQuery(
-    queryKeys.portfolio.list({ pageNo: 1, listSize: 200 }),
-  );
-
-  const accounts = accountData.body.data.content;
-  const portfolios = portfolioData.body.data.content;
-
-  const investmentAccounts = useMemo(
-    () => accounts.filter((a) => a.accountType === "INVESTMENT"),
-    [accounts],
-  );
-
-  // 백엔드가 계좌별 cash/portfolio_* 다 내려주니까 그대로 합산
-  const summary = useMemo(() => {
-    let totalBalance = 0;
-    let totalCash = 0;
-    let totalValuation = 0;
-    let totalCost = 0;
-    let totalProfit = 0;
-    for (const a of investmentAccounts) {
-      totalBalance += a.balance;
-      totalCash += a.cash ?? 0;
-      totalValuation += a.portfolioValuation ?? 0;
-      totalCost += a.portfolioCost ?? 0;
-      totalProfit += a.portfolioProfitLoss ?? 0;
-    }
-    const totalRate = totalCost > 0 ? (totalProfit / totalCost) * 100 : 0;
-    return {
-      totalBalance,
-      totalCash,
-      totalValuation,
-      totalCost,
-      totalProfit,
-      totalRate,
-    };
-  }, [investmentAccounts]);
+  const { data } = usePortfolioOverview();
+  const { summary, investmentAccounts } = data.body.data;
 
   // 계좌별 도넛 — 전체 자산 안에서 각 투자 계좌의 비중
   const accountBreakdown = useMemo(
     () =>
       investmentAccounts
+        .map((g) => g.account)
         .filter((a) => a.balance > 0)
         .map((a) => ({
           key: a.accountId,
@@ -177,18 +140,13 @@ export default function PortfolioSection() {
         </Card>
       ) : (
         <Stack gap="sm">
-          {investmentAccounts.map((a) => {
-            const owned = portfolios.filter(
-              (p) => p.accountId === a.accountId && !p.isArchived,
-            );
-            return (
-              <InvestmentAccountCard
-                key={a.accountId}
-                account={a}
-                portfolios={owned}
-              />
-            );
-          })}
+          {investmentAccounts.map((g) => (
+            <InvestmentAccountCard
+              key={g.account.accountId}
+              account={g.account}
+              portfolios={g.portfolios.filter((p) => !p.isArchived)}
+            />
+          ))}
         </Stack>
       )}
     </Stack>

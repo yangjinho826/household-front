@@ -1,15 +1,19 @@
 import { apiFetch } from "_libraries/fetch/api-fetch";
 import { objectToParams } from "_libraries/fetch/object-to-params";
 import type {
-  ApiListResponse,
-  ApiPaginationProps,
+  ApiCursorPage,
   ApiResponse,
 } from "_libraries/fetch/response";
 
+import type { AccountListItemType } from "_features/account/types";
+import type { CategoryListItemType } from "_features/category/types";
+import type { FixedListItemType } from "_features/fixed/types";
+
 import type {
-  TransactionCalendarResponse,
+  TransactionCalendarFullType,
   TransactionCreateRequest,
   TransactionDetailItemType,
+  TransactionFormOptionsType,
   TransactionListItemType,
   TransactionSearchRequestType,
   TransactionUpdateRequest,
@@ -24,7 +28,7 @@ interface BackendTransactionListPage {
   items: BackendTransactionResponse[];
   nextCursor: string | null;
   hasNext: boolean;
-  totalCount: number;
+  totalCount: number | null;
 }
 
 function toListItem(
@@ -41,13 +45,14 @@ function toDetail(b: BackendTransactionResponse): TransactionDetailItemType {
 }
 
 export async function GetTransactionSearchApi(
-  params: TransactionSearchRequestType &
-    Partial<ApiPaginationProps> & { cursor?: string | null; limit?: number },
+  params: TransactionSearchRequestType & {
+    cursor?: string | null;
+    limit?: number;
+  },
 ) {
-  const limit = params.limit ?? params.listSize;
   const queryParams: Record<string, unknown> = {};
   if (params.cursor) queryParams.cursor = params.cursor;
-  if (limit) queryParams.limit = limit;
+  if (params.limit) queryParams.limit = params.limit;
   if (params.txType) queryParams.txType = params.txType;
   if (params.accountId) queryParams.accountId = params.accountId;
   if (params.categoryId) queryParams.categoryId = params.categoryId;
@@ -64,28 +69,15 @@ export async function GetTransactionSearchApi(
   const items = (res.body.data?.items ?? []).map((b, idx) =>
     toListItem(b, idx + 1),
   );
-  const nextCursor = res.body.data?.nextCursor ?? null;
-  const hasNext = res.body.data?.hasNext ?? false;
-  const totalCount = res.body.data?.totalCount ?? items.length;
-
-  const wrapped: ApiListResponse<TransactionListItemType> & {
-    data: ApiListResponse<TransactionListItemType>["data"] & {
-      nextCursor: string | null;
-      hasNext: boolean;
-    };
-  } = {
+  const wrapped: ApiCursorPage<TransactionListItemType> = {
     code: res.body.code,
     message: res.body.message,
     status: res.body.status,
     data: {
-      listSize: items.length,
-      currentPage: 1,
-      currentCount: items.length,
-      totalElements: totalCount,
-      totalPages: hasNext ? 2 : 1,
-      content: items,
-      nextCursor,
-      hasNext,
+      items,
+      nextCursor: res.body.data?.nextCursor ?? null,
+      hasNext: res.body.data?.hasNext ?? false,
+      totalCount: res.body.data?.totalCount ?? null,
     },
   };
   return { ...res, body: wrapped };
@@ -126,13 +118,71 @@ export function DeleteTransactionDeleteApi(transactionId: string) {
   );
 }
 
-/** 달력 — 일별/월별 합계 (백엔드 미리 계산) */
-export async function GetTransactionCalendarApi(params: {
+type BackendAccount = Omit<AccountListItemType, "accountId" | "rowNo"> & {
+  id: string;
+};
+type BackendCategory = Omit<CategoryListItemType, "categoryId" | "rowNo"> & {
+  id: string;
+};
+type BackendFixed = Omit<FixedListItemType, "fixedId" | "rowNo"> & {
+  id: string;
+};
+
+interface BackendCalendarFull
+  extends Omit<TransactionCalendarFullType, "transactions"> {
+  transactions: BackendTransactionResponse[];
+}
+
+interface BackendFormOptions {
+  accounts: BackendAccount[];
+  categories: BackendCategory[];
+  fixedExpenses: BackendFixed[];
+}
+
+/** 달력 페이지 1호출 — calendar + stats + 그달 거래 */
+export async function GetTransactionCalendarFullApi(params: {
   year: number;
   month: number;
 }) {
-  return apiFetch<ApiResponse<TransactionCalendarResponse>>(
-    `/api/transaction/calendar?year=${params.year}&month=${params.month}`,
+  const res = await apiFetch<ApiResponse<BackendCalendarFull>>(
+    `/api/transaction/calendar/${params.year}/${params.month}/full`,
     { method: "GET" },
   );
+  const transactions = res.body.data.transactions.map((b, i) =>
+    toListItem(b, i + 1),
+  );
+  const mapped: TransactionCalendarFullType = {
+    year: res.body.data.year,
+    month: res.body.data.month,
+    monthlyIncome: res.body.data.monthlyIncome,
+    monthlyExpense: res.body.data.monthlyExpense,
+    monthlyTransfer: res.body.data.monthlyTransfer,
+    days: res.body.data.days,
+    byCategory: res.body.data.byCategory,
+    transactions,
+  };
+  return { ...res, body: { ...res.body, data: mapped } };
+}
+
+/** 거래 등록/수정 폼 옵션 — 통장 + 카테고리 + 활성 고정지출 */
+export async function GetTransactionFormOptionsApi() {
+  const res = await apiFetch<ApiResponse<BackendFormOptions>>(
+    `/api/transaction/form-options`,
+    { method: "GET" },
+  );
+  const accounts: AccountListItemType[] = res.body.data.accounts.map(
+    ({ id, ...rest }, i) => ({ ...rest, accountId: id, rowNo: i + 1 }),
+  );
+  const categories: CategoryListItemType[] = res.body.data.categories.map(
+    ({ id, ...rest }, i) => ({ ...rest, categoryId: id, rowNo: i + 1 }),
+  );
+  const fixedExpenses: FixedListItemType[] = res.body.data.fixedExpenses.map(
+    ({ id, ...rest }, i) => ({ ...rest, fixedId: id, rowNo: i + 1 }),
+  );
+  const mapped: TransactionFormOptionsType = {
+    accounts,
+    categories,
+    fixedExpenses,
+  };
+  return { ...res, body: { ...res.body, data: mapped } };
 }

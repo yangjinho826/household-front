@@ -10,6 +10,7 @@ import { useCategorySearch } from "_features/category/hooks/use-sub/use-search";
 import type { CategoryKind } from "_features/category/types";
 import FilterChip from "_features/common/components/filter-chip";
 import { useEnumOptions } from "_features/enum/queries/use-query";
+import { InfiniteSentinel } from "_libraries/query/infinite-sentinel";
 
 export default function CategorySection() {
   const t = useTranslations("category");
@@ -19,16 +20,14 @@ export default function CategorySection() {
   const {
     kind,
     setKind,
-    result,
-    params,
-    handlePageChange,
+    items,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
   } = useCategorySearch();
 
   const { data: kindData } = useEnumOptions("category-kind");
   const kinds = kindData.body.data as CategoryKind[];
-
-  const items = result?.content ?? [];
-  const totalPages = result?.totalPages ?? 1;
 
   return (
     <Stack gap="md">
@@ -62,13 +61,15 @@ export default function CategorySection() {
 
       <CategoryTable
         items={items}
-        totalPages={totalPages}
-        pageNo={params.pageNo}
-        listSize={params.listSize}
         onClickRow={(id) =>
           router.push(`/${routeParams.locale}/category/${id}`)
         }
-        onPageChange={handlePageChange}
+      />
+
+      <InfiniteSentinel
+        hasNextPage={hasNextPage}
+        isFetchingNextPage={isFetchingNextPage}
+        onLoadMore={fetchNextPage}
       />
     </Stack>
   );

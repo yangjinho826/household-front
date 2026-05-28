@@ -12,6 +12,7 @@ import { useAccountSearch } from "_features/account/hooks/use-sub/use-search";
 import type { AccountListItemType, AccountType } from "_features/account/types";
 import FilterChip from "_features/common/components/filter-chip";
 import { useEnumOptions } from "_features/enum/queries/use-query";
+import { InfiniteSentinel } from "_libraries/query/infinite-sentinel";
 
 export default function AccountSection() {
   const t = useTranslations("account");
@@ -21,19 +22,14 @@ export default function AccountSection() {
   const {
     accountType,
     setAccountType,
-    result,
-    params,
-    handlePageChange,
+    items,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
   } = useAccountSearch();
 
   const { data: typeData } = useEnumOptions("account-type");
   const types = typeData.body.data as AccountType[];
-
-  const items: AccountListItemType[] = useMemo(
-    () => result?.content ?? [],
-    [result],
-  );
-  const totalPages = result?.totalPages ?? 1;
 
   // "전체" 칩이면 타입별 그룹화. 특정 타입 칩이면 그대로 단일 리스트.
   const groupedByType = useMemo(() => {
@@ -43,8 +39,9 @@ export default function AccountSection() {
       list.push(it);
       map.set(it.accountType, list);
     }
-    return ACCOUNT_TYPE_ORDER.filter((tp) => (map.get(tp) ?? []).length > 0)
-      .map((tp) => ({ type: tp, items: map.get(tp) ?? [] }));
+    return ACCOUNT_TYPE_ORDER.filter((tp) => (map.get(tp) ?? []).length > 0).map(
+      (tp) => ({ type: tp, items: map.get(tp) ?? [] }),
+    );
   }, [items]);
 
   const showGrouped = accountType === undefined;
@@ -88,14 +85,9 @@ export default function AccountSection() {
               </Text>
               <AccountTable
                 items={group.items}
-                totalPages={1}
-                pageNo={1}
-                listSize={params.listSize}
                 onClickRow={(id) =>
                   router.push(`/${routeParams.locale}/account/${id}`)
                 }
-                onPageChange={handlePageChange}
-                showPagination={false}
               />
             </Stack>
           ))}
@@ -103,15 +95,17 @@ export default function AccountSection() {
       ) : (
         <AccountTable
           items={items}
-          totalPages={totalPages}
-          pageNo={params.pageNo}
-          listSize={params.listSize}
           onClickRow={(id) =>
             router.push(`/${routeParams.locale}/account/${id}`)
           }
-          onPageChange={handlePageChange}
         />
       )}
+
+      <InfiniteSentinel
+        hasNextPage={hasNextPage}
+        isFetchingNextPage={isFetchingNextPage}
+        onLoadMore={fetchNextPage}
+      />
     </Stack>
   );
 }

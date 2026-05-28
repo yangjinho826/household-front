@@ -45,7 +45,7 @@ export default function MembersSection({ householdId }: MembersSectionProps) {
   );
 
   const household = hData.body.data;
-  const members = mData.body.data.content;
+  const members = mData.body.data.items;
   const isOwner = household.role === "OWNER";
 
   const { addMemberMutation, removeMemberMutation } = useHouseholdMutations();

@@ -1,28 +1,31 @@
-import { parseAsInteger, useQueryStates } from "nuqs";
+import { useMemo } from "react";
 
-import { useFixedList } from "_features/fixed/queries/use-query";
+import { useFixedInfiniteList } from "_features/fixed/queries/use-query";
+import type { FixedListItemType } from "_features/fixed/types";
+
+const PAGE_SIZE = 30;
 
 export function useFixedSearch() {
-  const [params, setParams] = useQueryStates({
-    pageNo: parseAsInteger.withDefault(1),
-    listSize: parseAsInteger.withDefault(20),
-  });
+  const {
+    data,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+    isLoading,
+  } = useFixedInfiniteList({}, PAGE_SIZE);
 
-  const { data, isLoading } = useFixedList({
-    pageNo: params.pageNo,
-    listSize: params.listSize,
-  });
-
-  const result = data?.body?.data ?? undefined;
-
-  const handlePageChange = (page: number, pageSize: number) => {
-    setParams({ ...params, pageNo: page, listSize: pageSize });
-  };
+  const items: FixedListItemType[] = useMemo(
+    () => (data?.pages ?? []).flatMap((p) => p.body.data.items),
+    [data],
+  );
+  const totalCount = data?.pages[0]?.body.data.totalCount ?? items.length;
 
   return {
-    handlePageChange,
-    params,
-    result,
+    items,
+    totalCount,
+    hasNextPage: hasNextPage ?? false,
+    fetchNextPage,
+    isFetchingNextPage,
     isLoading,
   };
 }

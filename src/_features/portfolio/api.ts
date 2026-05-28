@@ -1,17 +1,20 @@
 import { apiFetch } from "_libraries/fetch/api-fetch";
 import { objectToParams } from "_libraries/fetch/object-to-params";
 import type {
-  ApiListResponse,
+  ApiCursorPage,
   ApiResponse,
 } from "_libraries/fetch/response";
 
 import type {
+  AccountOverviewResponse,
+  InvestmentAccountWithPortfolios,
   Market,
   PortfolioBuyRequest,
   PortfolioCreateRequest,
+  PortfolioFormOptionsResponse,
   PortfolioListItemType,
   PortfolioLookupResponse,
-  PortfolioSearchRequestType,
+  PortfolioOverviewResponse,
   PortfolioSellRequest,
   PortfolioTransactionItemType,
   PortfolioTxUpdateRequest,
@@ -20,6 +23,7 @@ import type {
   PortfolioValueHistoryByItem,
   PortfolioValueHistoryByItemRequest,
 } from "./types";
+import type { AccountListItemType } from "_features/account/types";
 
 // 백엔드는 `id`(PK) + `valuation`(평가액). 프론트는 `portfolioId` + `currentValue`.
 type BackendPortfolioResponse = Omit<
@@ -34,6 +38,10 @@ type BackendPortfolioTxResponse = Omit<
   PortfolioTransactionItemType,
   "rowNo" | "txId"
 > & { id: string };
+
+type BackendAccountResponse = Omit<AccountListItemType, "accountId" | "rowNo"> & {
+  id: string;
+};
 
 function toListItem(
   b: BackendPortfolioResponse,
@@ -51,40 +59,119 @@ function toTx(
   return { ...rest, txId: id, rowNo };
 }
 
-export async function GetPortfolioSearchApi(
-  params: PortfolioSearchRequestType,
-) {
-  const queryParams: Record<string, unknown> = {};
-  if (params.accountId) queryParams.accountId = params.accountId;
-  const queryString = objectToParams(queryParams).toString();
-  const res = await apiFetch<ApiResponse<BackendPortfolioResponse[]>>(
-    `/api/portfolio/list${queryString ? `?${queryString}` : ""}`,
+function toAccount(
+  b: BackendAccountResponse,
+  rowNo: number,
+): AccountListItemType {
+  const { id, ...rest } = b;
+  return { ...rest, accountId: id, rowNo };
+}
+
+// =========================================================
+// Page-level entry (페이지 진입 시 1호출)
+// =========================================================
+
+export async function GetPortfolioOverviewApi() {
+  const res = await apiFetch<
+    ApiResponse<{
+      summary: PortfolioOverviewResponse["summary"];
+      investmentAccounts: Array<{
+        account: BackendAccountResponse;
+        portfolios: BackendPortfolioResponse[];
+      }>;
+    }>
+  >(`/api/portfolio/overview`, { method: "GET" });
+
+  const investmentAccounts: InvestmentAccountWithPortfolios[] =
+    res.body.data.investmentAccounts.map((g, gi) => ({
+      account: toAccount(g.account, gi + 1),
+      portfolios: g.portfolios.map((p, pi) => toListItem(p, pi + 1)),
+    }));
+
+  const mapped: PortfolioOverviewResponse = {
+    summary: res.body.data.summary,
+    investmentAccounts,
+  };
+  return { ...res, body: { ...res.body, data: mapped } };
+}
+
+export async function GetAccountOverviewApi(accountId: string) {
+  const res = await apiFetch<
+    ApiResponse<{
+      account: BackendAccountResponse;
+      portfolios: BackendPortfolioResponse[];
+    }>
+  >(`/api/portfolio/accounts/${accountId}/overview`, { method: "GET" });
+
+  const mapped: AccountOverviewResponse = {
+    account: toAccount(res.body.data.account, 1),
+    portfolios: res.body.data.portfolios.map((p, i) => toListItem(p, i + 1)),
+  };
+  return { ...res, body: { ...res.body, data: mapped } };
+}
+
+export async function GetPortfolioFormOptionsApi() {
+  const res = await apiFetch<
+    ApiResponse<{ investmentAccounts: BackendAccountResponse[] }>
+  >(`/api/portfolio/form-options`, { method: "GET" });
+
+  const mapped: PortfolioFormOptionsResponse = {
+    investmentAccounts: res.body.data.investmentAccounts.map((a, i) =>
+      toAccount(a, i + 1),
+    ),
+  };
+  return { ...res, body: { ...res.body, data: mapped } };
+}
+
+// =========================================================
+// Item-level
+// =========================================================
+
+export async function GetPortfolioItemApi(itemId: string) {
+  const res = await apiFetch<ApiResponse<BackendPortfolioResponse>>(
+    `/api/portfolio/items/${itemId}`,
     { method: "GET" },
   );
-  const items = (res.body.data ?? []).map((b, idx) => toListItem(b, idx + 1));
-  const wrapped: ApiListResponse<PortfolioListItemType> = {
+  return { ...res, body: { ...res.body, data: toListItem(res.body.data, 1) } };
+}
+
+export async function GetPortfolioItemTransactionsApi(
+  itemId: string,
+  cursor: string | null,
+  limit: number,
+) {
+  const queryString = objectToParams({
+    ...(cursor ? { cursor } : {}),
+    limit,
+  }).toString();
+  const res = await apiFetch<
+    ApiResponse<{
+      items: BackendPortfolioTxResponse[];
+      nextCursor: string | null;
+      hasNext: boolean;
+      totalCount: number | null;
+    }>
+  >(`/api/portfolio/items/${itemId}/transactions?${queryString}`, {
+    method: "GET",
+  });
+  const items = res.body.data.items.map((b, i) => toTx(b, i + 1));
+  const wrapped: ApiCursorPage<PortfolioTransactionItemType> = {
     code: res.body.code,
     message: res.body.message,
     status: res.body.status,
     data: {
-      listSize: items.length,
-      currentPage: 1,
-      currentCount: items.length,
-      totalElements: items.length,
-      totalPages: 1,
-      content: items,
+      items,
+      nextCursor: res.body.data.nextCursor,
+      hasNext: res.body.data.hasNext,
+      totalCount: res.body.data.totalCount,
     },
   };
   return { ...res, body: wrapped };
 }
 
-export async function GetPortfolioDetailApi(portfolioId: string) {
-  const res = await apiFetch<ApiResponse<BackendPortfolioResponse>>(
-    `/api/portfolio/detail/${portfolioId}`,
-    { method: "GET" },
-  );
-  return { ...res, body: { ...res.body, data: toListItem(res.body.data, 1) } };
-}
+// =========================================================
+// Mutations + utility
+// =========================================================
 
 /** 종목 등록 — 메타만 (qty=0 시작) */
 export async function PostPortfolioCreateApi(params: PortfolioCreateRequest) {
@@ -135,8 +222,28 @@ export async function PutPortfolioUpdateApi(params: PortfolioUpdateRequest) {
   return { ...res, body: { ...res.body, data: toListItem(res.body.data, 1) } };
 }
 
+/** 매수/매도 거래 수정 (pt_type 불변) */
+export async function PutPortfolioTxUpdateApi(
+  params: PortfolioTxUpdateRequest,
+) {
+  const { txId, ...body } = params;
+  const res = await apiFetch<ApiResponse<BackendPortfolioTxResponse>>(
+    `/api/portfolio/transactions/${txId}`,
+    { method: "PUT", body, errorHandleMethod: "reject" },
+  );
+  return { ...res, body: { ...res.body, data: toTx(res.body.data, 1) } };
+}
+
+/** 매수/매도 거래 soft delete — 해당 종목 quantity/avg_price 자동 재계산 */
+export async function DeletePortfolioTxApi(txId: string) {
+  return apiFetch<ApiResponse<null>>(
+    `/api/portfolio/transactions/${txId}`,
+    { method: "DELETE", errorHandleMethod: "reject" },
+  );
+}
+
 // =========================================================
-// Value History — 차트용 월별 평가액 추이
+// Value history (차트)
 // =========================================================
 
 /** 통장 단위 — 종목별 월별 평가액 추이 (기본: 최근 12개월) */
@@ -162,55 +269,7 @@ export async function GetPortfolioValueHistoryByItemApi(
   if (params.toDate) queryParams.toDate = params.toDate;
   const queryString = objectToParams(queryParams).toString();
   return apiFetch<ApiResponse<PortfolioValueHistoryByItem>>(
-    `/api/portfolio/${params.portfolioItemId}/value-history${queryString ? `?${queryString}` : ""}`,
+    `/api/portfolio/items/${params.portfolioItemId}/value-history${queryString ? `?${queryString}` : ""}`,
     { method: "GET" },
   );
-}
-
-/** 매수/매도 거래 수정 (pt_type 불변) */
-export async function PutPortfolioTxUpdateApi(
-  params: PortfolioTxUpdateRequest,
-) {
-  const { txId, ...body } = params;
-  const res = await apiFetch<ApiResponse<BackendPortfolioTxResponse>>(
-    `/api/portfolio/transactions/${txId}`,
-    { method: "PUT", body, errorHandleMethod: "reject" },
-  );
-  return { ...res, body: { ...res.body, data: toTx(res.body.data, 1) } };
-}
-
-/** 매수/매도 거래 soft delete — 해당 종목 quantity/avg_price 자동 재계산 */
-export async function DeletePortfolioTxApi(txId: string) {
-  return apiFetch<ApiResponse<null>>(
-    `/api/portfolio/transactions/${txId}`,
-    { method: "DELETE", errorHandleMethod: "reject" },
-  );
-}
-
-/** 매수/매도 거래 이력 */
-export async function GetPortfolioTransactionsApi(params: {
-  accountId?: string;
-}) {
-  const queryParams: Record<string, unknown> = {};
-  if (params.accountId) queryParams.accountId = params.accountId;
-  const queryString = objectToParams(queryParams).toString();
-  const res = await apiFetch<ApiResponse<BackendPortfolioTxResponse[]>>(
-    `/api/portfolio/transactions${queryString ? `?${queryString}` : ""}`,
-    { method: "GET" },
-  );
-  const items = (res.body.data ?? []).map((b, idx) => toTx(b, idx + 1));
-  const wrapped: ApiListResponse<PortfolioTransactionItemType> = {
-    code: res.body.code,
-    message: res.body.message,
-    status: res.body.status,
-    data: {
-      listSize: items.length,
-      currentPage: 1,
-      currentCount: items.length,
-      totalElements: items.length,
-      totalPages: 1,
-      content: items,
-    },
-  };
-  return { ...res, body: wrapped };
 }

@@ -7,9 +7,7 @@ import { useTranslations } from "next-intl";
 import type { HouseholdSearchRequestType } from "../types";
 
 interface HouseholdSearchProps {
-  form: UseFormReturnType<
-    HouseholdSearchRequestType & { pageNo: number; listSize: number }
-  >;
+  form: UseFormReturnType<HouseholdSearchRequestType>;
   onSearch: (values: HouseholdSearchRequestType) => void;
   onReset: () => void;
 }

@@ -34,6 +34,19 @@ export function useAccountMutations() {
       queryKey: queryKeys.accountSnapshot._def,
       refetchType: "all",
     });
+    // 페이지 overview — home(잔액/통장), wealth(통장/snapshot), settings(통장 카운트)
+    queryClient.invalidateQueries({
+      queryKey: queryKeys.home._def,
+      refetchType: "all",
+    });
+    queryClient.invalidateQueries({
+      queryKey: queryKeys.wealth._def,
+      refetchType: "all",
+    });
+    queryClient.invalidateQueries({
+      queryKey: queryKeys.settings._def,
+      refetchType: "all",
+    });
   };
 
   const createMutation = useMutation({
