@@ -2,9 +2,10 @@
 
 ## Goal
 
-가계부 API 리팩토링 — 한 페이지 = 한 endpoint (overview 도입) + 모든 list 응답을
-`CursorPage[T]` 봉투로 통일 + 관리 페이지 무한 스크롤 도입. 단일 브랜치
-`refactor/api-cursor-overview` 에 PR 0~6 누적.
+가계부 API 리팩토링 **완료** — 한 페이지 = 한 endpoint (overview 도입) +
+모든 list 응답 `CursorPage[T]` 봉투 통일 + 관리 페이지 무한 스크롤 도입.
+단일 브랜치 `refactor/api-cursor-overview` 에 PR 0~6 누적 완료.
+다음 작업은 이 브랜치를 main 으로 머지 (PR/리뷰).
 
 ## Status
 
@@ -17,12 +18,14 @@
 | `ff9c421` | back | refactor: home/wealth/settings overview endpoint 추가 (PR 3) |
 | `68e995b` | back | refactor: transaction calendar/full + form-options endpoint 추가 (PR 4) |
 | `24aad03` | back | refactor: household/members list 응답 CursorPage 봉투 통일 (PR 5) |
+| `69b7e0a` | back | refactor: deprecated /transaction/calendar endpoint 제거 (PR 6) |
 | `6d63363` | front | refactor: CursorPage 봉투 통일 + portfolio overview 도입 (PR 0+1) |
 | `7f02c01` | front | chore(memory): activeContext PR 0+1 완료 반영 |
 | `0907892` | front | refactor: account/category/fixed 관리 페이지 무한 스크롤 (PR 2) |
 | `060f750` | front | refactor: home/wealth/settings overview 1호출 통합 (PR 3) |
 | `d1fce6e` | front | refactor: transaction 캘린더/폼 1호출 통합 (PR 4) |
 | `1eca7af` | front | refactor: household/members 프론트 봉투 매핑 CursorPage 통일 (PR 5) |
+| `4156b0f` | front | refactor: ApiListResponse / 페이징 매직 넘버 / 데드 코드 정리 (PR 6) |
 
 #### PR 0 — 봉투 통일 인프라
 - 백엔드: `app/core/pagination.py` (`CursorPage[T]`), `TransactionListResponse` 를 alias 로
@@ -74,13 +77,17 @@
 - 프론트: `_features/household/api.ts` 의 `ApiListResponse(content/totalElements)` 어댑터를 `ApiCursorPage(items/totalCount)` 로 정리
 - 프론트: `queryKeys.household.list({...})` → `queryKeys.household.list()` (인자 제거)
 - 프론트: 8개 호출처 (`settings/members/household section`, `layout/{app-header,sidebar-nav}`, `household/{household-switcher,use-search}`, `auth/onboarding-guard`) `.content` → `.items` / `.totalElements` → `.totalCount` 일괄 교체
-- household-section 의 totalPages/페이지 UI 는 호환 표시용으로 잔존 — PR 6 에서 함께 정리
+
+#### PR 6 — 정리 (마지막)
+- 백엔드: deprecated `/transaction/calendar` 라우터 삭제 (calendar/full 로 대체, service.get_calendar 는 내부 위임 유지)
+- 프론트 `_libraries/fetch/response.ts`: `ApiListResponse` / `ApiPaginationProps` 삭제 (CursorPage 만 남음)
+- 프론트 transaction: `GetTransactionCalendarApi` / `TransactionCalendarResponse` / `useTransactionList` / `params.listSize` fallback 모두 제거
+- 프론트 데드 컴포넌트 삭제: `_features/{portfolio,transaction}/components/table.tsx` (PR 2 무한 스크롤 후 호출처 없음 — Mantine `Pagination` 사용했던 잔재)
+- 프론트 household: `components/table.tsx` 의 pageNo/listSize/totalPages prop 제거, `hooks/use-sub/use-search.ts` 의 nuqs pageNo/listSize 제거, `household-section` 도 단순화
 
 ### 남은 PR
 
-| PR | 작업 |
-|---|---|
-| 6 | 정리 (`pageNo/listSize` 매직 넘버, 클라 필터, `ApiListResponse` 삭제, household 페이징 UI 데드 코드) |
+전체 완료 ✅ — `refactor/api-cursor-overview` 브랜치 main 머지만 남음.
 
 ## Context
 
@@ -114,12 +121,8 @@
 
 ## Next Step
 
-PR 6 진행 — 마지막 정리.
+API 리팩토링 PR 0~6 모두 완료. `refactor/api-cursor-overview` 브랜치에 누적.
 
-1. 프론트 `_libraries/fetch/response.ts` 의 `ApiListResponse` / `ApiPaginationProps` 삭제
-2. `pageNo/listSize` 매직 넘버 잔재 (transaction/form 의 listSize 100 류) 검색해서 제거
-3. `_features/transaction/api.ts` 의 `params.listSize` fallback 등 deprecated 코드 정리
-4. 백엔드: deprecated `/transaction/calendar` (calendar/full 로 대체됨) 제거 검토 — 호출처 없으면 삭제
-5. household-section 의 totalPages/페이지 UI 잔재 정리 (`HouseholdTable` 의 pageNo/listSize/onPageChange prop 제거 또는 단순화)
-6. 클라 필터로 처리하던 곳 백엔드 쿼리로 위임 (PR 0~5 에서 이미 대부분 했지만 잔재 확인)
-7. typecheck + 커밋
+1. (백엔드/프론트 각각) main 으로 PR 올리기 — push + gh pr create
+2. CHANGELOG/문서 갱신 필요 시 (백엔드 `docs/api-list.md` 의 `/transaction/calendar` 행 제거 등)
+3. 머지 후 브랜치 정리

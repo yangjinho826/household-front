@@ -7,8 +7,9 @@
 - [x] 2026-05-28: API 리팩토링 PR 3 — home / wealth / settings overview 1호출 통합
 - [x] 2026-05-28: API 리팩토링 PR 4 — transaction 캘린더/폼 1호출 통합
 - [x] 2026-05-28: API 리팩토링 PR 5 — household / members CursorPage 봉투 통일
+- [x] 2026-05-28: API 리팩토링 PR 6 — 정리 (ApiListResponse 삭제 / 데드 코드 / household 페이징 UI / deprecated calendar endpoint)
 
 ## 진행 중
-- [ ] API 리팩토링 PR 6 — 정리 (매직 넘버 / 클라 필터 / ApiListResponse 삭제 / household 페이징 UI 데드코드)
+- [ ] `refactor/api-cursor-overview` → main 머지 (백/프 각각 PR)
 
 ## 막힘
