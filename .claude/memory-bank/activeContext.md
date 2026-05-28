@@ -2,73 +2,76 @@
 
 ## Goal
 
-가계부 앱 — 3 viewport 반응형 (휴대폰 <768 / 패드 768~1199 / 데스크탑 >=1200) + 편한가계부 시그니처 (빠른 입력 시트 ✅) + 시각 시스템 정리 (카드 위계 / 타이포 / 색).
+가계부 API 리팩토링 — 한 페이지 = 한 endpoint (overview 도입) + 모든 list 응답을
+`CursorPage[T]` 봉투로 통일 + 관리 페이지 무한 스크롤 도입. 단일 브랜치
+`refactor/api-cursor-overview` 에 PR 0~6 누적.
 
 ## Status
 
-### 완료 (브랜치 `feat/design-liner-tone`, 12 커밋, 미푸시)
+### 완료 (브랜치 `refactor/api-cursor-overview`, 1 커밋씩 두 레포)
 
-| 커밋 | 내용 |
+| 커밋 | 레포 | 내용 |
+|---|---|---|
+| `041ea3a` | back | refactor: CursorPage 봉투 통일 + portfolio overview 도입 (PR 0+1) |
+| `6d63363` | front | refactor: CursorPage 봉투 통일 + portfolio overview 도입 (PR 0+1) |
+
+#### PR 0 — 봉투 통일 인프라
+- 백엔드: `app/core/pagination.py` (`CursorPage[T]`), `TransactionListResponse` 를 alias 로
+- 프론트: `ApiCursorPage<T>` 추가, transaction api content → items 통일
+- 부가 fix: `useTransactionInfiniteList` queryKey 를 factory 통과 → `_def` invalidate 잡힘
+- 부가 fix: transaction mutation 에 `stats._def` invalidate 누락 추가
+
+#### PR 1 — portfolio overview/item/form-options
+- 백엔드 신규: `/portfolio/overview`, `/accounts/{id}/overview`, `/items/{id}`,
+  `/items/{id}/transactions` (cursor), `/form-options`
+- 백엔드 제거: `/portfolio/list`, `/transactions`, `/detail/{id}`
+- 프론트: 4 페이지 + 1 폼 모두 1호출 전환, `portfolio-trade-section` 무한 스크롤 적용
+- settings 의 portfolio 카운트는 overview flatMap 으로 임시 처리 (PR 3 에서 settings.counts 로 대체)
+
+### 남은 PR
+
+| PR | 작업 |
 |---|---|
-| `4f92f37` | **데스크탑 좌/우 카드 높이 일치** — 홈 카테고리/최근거래 + 거래 캘린더/선택일거래 |
-| `00fd9b3` | 모자이크 토글(홈 총자산 blur) + 카테고리/최근거래 데스크탑 flex + FilterChip bg gray-1 + list 일별 그룹화 + 캘린더 좌/우 분할 |
-| `e7284ea` | 카드 위계 분리 (hero p=xl shadow=md / sub padding lg shadow xs) |
-| `1a84e32` | **빠른 입력 바텀시트** — 편한가계부 시그니처 1/2. FAB(모든 페이지 우하단) + Drawer 90% + TransactionForm 재사용 + useQuickAddStore |
-| `8ddd5e9` | 데스크탑(>=lg) 차트 크게 (트렌드 96→200, 도넛 88→144) |
-| `8332e3f` | 타이포 스케일 다운 (h3 28→24, login welcome 32) |
-| `8b92723` | SubHeader 표준 컴포넌트화 + toss* alias 제거 + INCOME 색 = info(blue) |
-| `c962396` | base-layout main 제거 — 박스 책임 각 layout 으로 |
-| `5edb1d6` | primary 블루 시그니처 (#3B82F6) + Tailwind 500 일관 팔레트 |
-| `cc0cb8d` | 3 viewport 반응형 + PWA standalone (safe-area, SidebarNav 신규) |
-| `433fb59` | .env.claude gitignore |
-
-### 폐기 (reset 됨)
-- `2c902eb` 메인 캘린더 — "취소해줘"
-- `2bee59b` 홈/거래 우측 패널 — "필요없을 듯"
-- `949208e` 폼 maw 768 — "별로다"
-
-### Skip (사용자 명시)
-- 키보드 단축키
-- 색상 전체 균형 재설계 (보류)
-- icon 실제 디자인 (현재 SVG `₩` 그대로 OK)
+| 2 | account / category / fixed 관리 페이지 무한 스크롤 + CursorPage 적용 |
+| 3 | home / wealth / settings overview |
+| 4 | transaction calendar/{year}/{month}/full + transaction form-options |
+| 5 | household / members 봉투만 통일 |
+| 6 | 정리 (`pageNo/listSize` 매직 넘버, 클라 필터, `ApiListResponse` 삭제, 데드 코드) |
 
 ## Context
 
-### 핵심 결정
-- primary = `info` (Tailwind blue-500 `#3B82F6`) — "파란색 시그니처"
-- 팔레트 = Tailwind 500 시리즈 일관 (linerGreen/danger/info/warning/purple)
-- toss* alias 완전 제거 (22+곳 의미적 키로 sed)
-- 메인 캘린더 = 사용자 의도 X (시도 후 reset). 홈 = 기존 카드 흐름 유지 + 모자이크 + 데스크탑 flex
-- 빠른 입력 시트 = TransactionForm 재사용 + `useQuickAddStore` (zustand) + 어디서나 FAB
+### 사용자 결정 (8가지)
+
+| # | 결정 |
+|---|---|
+| 1 | cursor 형식: 평문 `{sort_key}\|{uuid}` (transaction 패턴 그대로) |
+| 2 | totalCount: 관리 페이지만 count, overview/infinite 는 null |
+| 3 | PR 0 안에 stats invalidation + infinite key 버그 같이 fix |
+| 4 | stats 도메인 유지 (home.overview 와 별도, 나중에 흡수 검토) |
+| 5 | wealth.overview 안에 accounts 포함 |
+| 6 | 종목 거래내역 page size 30 (transaction 동일) |
+| 7 | URL `/portfolio/items/{id}` REST 적 |
+| 8 | PR 순서: 인프라 → portfolio → 관리 → home/wealth/settings → calendar/form-options → household → 정리 |
 
 ### 기술 결정
-- 반응형 = CSS only (`visibleFrom`/`hiddenFrom` + media query) — SSR 안전
-- safe-area 토큰 `--safe-*` 모든 fixed 요소 (PWA standalone 대응)
-- 컨테이너 max-width 토큰 `--container-max`: 448 / 768 / 1280
-- BottomTab z=500 / QuickAddFab z=600 / Drawer/Modal z=1000
-- 데스크탑 좌/우 분할 시 박스 높이 일치 = `Stack h="100%"` + `Card flex:1` (SimpleGrid/Grid stretch)
 
-### 사용자 흐름 결정
-- "수입은 파랑" — INCOME 색 = info(blue) 일관 (tx-row/table/calendar-view/category Badge)
-- 홈 총자산 모자이크 = 기본 hidden + 클릭 토글, 세션 동안만 (localStorage X)
-- 거래 list = 일별 그룹화 ("5월 26일 (월)" 헤더)
-- 거래 캘린더 = 데스크탑 좌/우 분할 (모바일/패드 위/아래)
-- /transactions/new 풀페이지 라우트 = 보조용 유지 (딥링크)
+- **호환 전략**: "기존 깨고 통일". `ApiListResponse` 는 deprecated 표시만 두고 마지막 PR 6 에서 삭제
+- **cursor 정렬**: account/category/fixed `created_at DESC, id DESC` / portfolio.tx `tx_date DESC, id DESC`
+- **봉투 통일**: 모든 list 응답이 `CursorPage[T]` (백엔드) ↔ `ApiCursorPage<T>` (프론트)
+- **detail API 활용**: 종목/통장/카테고리/고정지출 단건은 detail endpoint (list 에서 find 패턴 폐기)
+- **클라 필터 제거**: 백엔드 쿼리 (`accountId`, `kind`, `accountType=INVESTMENT`, `isArchived` 등) 활용
 
 ### 제약
-- 사용자 본인이 매일 쓰는 도구 — 회귀 0 우선
-- Mantine 8 + Next 14 + Tailwind 4
-- pnpm 만 (npm/yarn 금지)
-- 새 의존성 안 늘림
-- 모바일 viewport 우선 (향후 PWA 설치)
+
+- 단일 브랜치 `refactor/api-cursor-overview` 에 누적 (PR 분리 X)
+- 룰 체인 준수 (common / typescript / typescript-react / typescript-nextjs / cnnet 응답 래퍼 사상)
+- 프론트 `pnpm typecheck` 매 단계 통과 / 백엔드 import 검증
+- 데드 코드 즉시 제거
 
 ## Next Step
 
-**현재 상태 안정** — 12 커밋 미푸시, 빌드/타입/린트 다 통과.
+PR 2 진행 — account / category / fixed 관리 페이지 무한 스크롤 + CursorPage 적용.
 
-사용자 시각 확인 (`pnpm dev`) 후 다음 결정:
-1. 어색한 곳 있으면 추가 조정
-2. 색상 전체 균형 재설계 (~4h, 보류 중) 진행 여부
-3. push 또는 PR 생성 여부 (현재 12 커밋 origin 보다 앞섬)
-
-메인 캘린더 / 단축키 / icon 디자인 / 우측 패널 = 사용자 의도 X 또는 폐기 → 다시 제안 X.
+1. 백엔드: 세 도메인 repository 에 `list_by_cursor` + service 갱신, schema 응답 `CursorPage[T]` 로 교체
+2. 프론트: `_libraries/query/use-infinite-list.ts` 헬퍼 + `infinite-sentinel.tsx`, 세 도메인 `use-search.ts` 갱신, table 의 Mantine `Pagination` 제거
+3. typecheck + 커밋
