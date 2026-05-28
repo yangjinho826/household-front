@@ -22,8 +22,9 @@ export default function HouseholdSection() {
     handlePageChange,
   } = useHouseholdSearch();
 
-  const items = result?.content ?? [];
-  const totalPages = result?.totalPages ?? 1;
+  const items = result?.items ?? [];
+  // PR 5 봉투 통일 — totalPages 는 호환 표시용. PR 6 에서 페이징 UI 자체 정리 예정.
+  const totalPages = 1;
 
   return (
     <Stack gap="md">

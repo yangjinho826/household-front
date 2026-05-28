@@ -1,7 +1,6 @@
 import { apiFetch } from "_libraries/fetch/api-fetch";
-import { objectToParams } from "_libraries/fetch/object-to-params";
 import type {
-  ApiListResponse,
+  ApiCursorPage,
   ApiResponse,
 } from "_libraries/fetch/response";
 
@@ -10,7 +9,6 @@ import type {
   HouseholdDetailItemType,
   HouseholdListItemType,
   HouseholdMemberItemType,
-  HouseholdSearchRequestType,
   HouseholdUpdateRequest,
   MemberCreateRequest,
 } from "./types";
@@ -19,36 +17,37 @@ type BackendHouseholdResponse = Omit<HouseholdDetailItemType, "householdId"> & {
   id: string;
 };
 
+interface BackendCursorPage<T> {
+  items: T[];
+  nextCursor: string | null;
+  hasNext: boolean;
+  totalCount: number | null;
+}
+
 // =========================================================
 // Household CRUD
 // =========================================================
 
-export async function GetHouseholdSearchApi(
-  params: HouseholdSearchRequestType,
-) {
-  const queryString = objectToParams({ ...params }).toString();
-  const res = await apiFetch<ApiResponse<BackendHouseholdResponse[]>>(
-    `/api/household/list${queryString ? `?${queryString}` : ""}`,
-    { method: "GET" },
-  );
-  const items = (res.body.data ?? []).map(
+export async function GetHouseholdSearchApi() {
+  const res = await apiFetch<
+    ApiResponse<BackendCursorPage<BackendHouseholdResponse>>
+  >(`/api/household/list`, { method: "GET" });
+  const items = res.body.data.items.map(
     ({ id, ...rest }, idx): HouseholdListItemType => ({
       ...rest,
       householdId: id,
       rowNo: idx + 1,
     }),
   );
-  const wrapped: ApiListResponse<HouseholdListItemType> = {
+  const wrapped: ApiCursorPage<HouseholdListItemType> = {
     code: res.body.code,
     message: res.body.message,
     status: res.body.status,
     data: {
-      listSize: items.length,
-      currentPage: 1,
-      currentCount: items.length,
-      totalElements: items.length,
-      totalPages: 1,
-      content: items,
+      items,
+      nextCursor: res.body.data.nextCursor,
+      hasNext: res.body.data.hasNext,
+      totalCount: res.body.data.totalCount,
     },
   };
   return { ...res, body: wrapped };
@@ -102,24 +101,21 @@ type BackendHouseholdMemberResponse = Omit<
 };
 
 export async function GetHouseholdMembersApi(householdId: string) {
-  const res = await apiFetch<ApiResponse<BackendHouseholdMemberResponse[]>>(
-    `/api/household/${householdId}/members`,
-    { method: "GET" },
-  );
-  const items = (res.body.data ?? []).map(
+  const res = await apiFetch<
+    ApiResponse<BackendCursorPage<BackendHouseholdMemberResponse>>
+  >(`/api/household/${householdId}/members`, { method: "GET" });
+  const items = res.body.data.items.map(
     ({ id, ...rest }): HouseholdMemberItemType => ({ ...rest, memberId: id }),
   );
-  const wrapped: ApiListResponse<HouseholdMemberItemType> = {
+  const wrapped: ApiCursorPage<HouseholdMemberItemType> = {
     code: res.body.code,
     message: res.body.message,
     status: res.body.status,
     data: {
-      listSize: items.length,
-      currentPage: 1,
-      currentCount: items.length,
-      totalElements: items.length,
-      totalPages: 1,
-      content: items,
+      items,
+      nextCursor: res.body.data.nextCursor,
+      hasNext: res.body.data.hasNext,
+      totalCount: res.body.data.totalCount,
     },
   };
   return { ...res, body: wrapped };

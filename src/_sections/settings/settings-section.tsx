@@ -27,14 +27,12 @@ export default function SettingsSection() {
   const [switcherOpened, switcher] = useDisclosure(false);
   const currentId = useHouseholdStore((s) => s.currentHouseholdId);
 
-  const { data: hData } = useSuspenseQuery(
-    queryKeys.household.list({ pageNo: 1, listSize: 100 }),
-  );
+  const { data: hData } = useSuspenseQuery(queryKeys.household.list());
   const { data: overviewRes } = useSuspenseQuery(
     queryKeys.settings.overview(),
   );
 
-  const households = hData.body.data.content;
+  const households = hData.body.data.items;
   const counts = overviewRes.body.data;
   const currentHousehold =
     households.find((h) => h.householdId === currentId) ?? households[0];
