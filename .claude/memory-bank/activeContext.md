@@ -15,10 +15,12 @@
 | `041ea3a` | back | refactor: CursorPage 봉투 통일 + portfolio overview 도입 (PR 0+1) |
 | `fdb3c38` | back | refactor: account/category/fixed list 무한 스크롤 (PR 2) |
 | `ff9c421` | back | refactor: home/wealth/settings overview endpoint 추가 (PR 3) |
+| `68e995b` | back | refactor: transaction calendar/full + form-options endpoint 추가 (PR 4) |
 | `6d63363` | front | refactor: CursorPage 봉투 통일 + portfolio overview 도입 (PR 0+1) |
 | `7f02c01` | front | chore(memory): activeContext PR 0+1 완료 반영 |
 | `0907892` | front | refactor: account/category/fixed 관리 페이지 무한 스크롤 (PR 2) |
 | `060f750` | front | refactor: home/wealth/settings overview 1호출 통합 (PR 3) |
+| `d1fce6e` | front | refactor: transaction 캘린더/폼 1호출 통합 (PR 4) |
 
 #### PR 0 — 봉투 통일 인프라
 - 백엔드: `app/core/pagination.py` (`CursorPage[T]`), `TransactionListResponse` 를 alias 로
@@ -52,11 +54,21 @@
 - 결정 #4 ("stats 도메인 유지") 일관: `/stats/monthly` endpoint 그대로, home.overview 안에 데이터만 포함
 - 결정 #5 ("wealth.overview 에 accounts 포함"): wealth.overview 안에 통장 목록 + yearly_snapshots, 통장 클릭 시 `/portfolio/accounts/{id}/overview` 별도 유지
 
+#### PR 4 — transaction calendar/full + form-options
+- 백엔드 신규 endpoint:
+  - `GET /transaction/calendar/{year}/{month}/full` — days + 월간 totals + by_category(stats) + 그달 거래 전부
+  - `GET /transaction/form-options` — accounts + categories + fixedExpenses (활성)
+- 백엔드: stats.get_monthly_stats / list_transactions / account/category/fixed list_* 위임만
+- 프론트: transaction api/types/query-key 에 `calendarFull` / `formOptions` 추가
+- 프론트: calendar-view 2호출 → 1호출, form 3호출 → 1호출
+- 프론트: fixed mutation invalidation 에 transaction._def 추가 (formOptions stale 반영)
+- transaction._def invalidate 가 calendarFull/formOptions/list/calendar/detail 모두 잡아주므로 다른 mutation 의 invalidation 은 변경 X
+- `/transaction/calendar` 기존 endpoint 는 일단 유지 (deprecated 표시 X — PR 6 에서 데드코드 검토)
+
 ### 남은 PR
 
 | PR | 작업 |
 |---|---|
-| 4 | transaction calendar/{year}/{month}/full + transaction form-options |
 | 5 | household / members 봉투만 통일 |
 | 6 | 정리 (`pageNo/listSize` 매직 넘버, 클라 필터, `ApiListResponse` 삭제, 데드 코드) |
 
@@ -92,9 +104,10 @@
 
 ## Next Step
 
-PR 4 진행 — transaction calendar/{year}/{month}/full + transaction form-options.
+PR 5 진행 — household / members 봉투만 통일.
 
-1. 백엔드: `/transaction/calendar/{year}/{month}/full` 신규 — 달력 + 월간 stats + 카테고리별 합계를 1호출로 (현재는 `/transaction/calendar` 와 `/stats/monthly` 분리)
-2. 백엔드: `/transaction/form-options` 신규 — 거래 폼이 필요한 accounts/categories/fixedExpenses 한 번에
-3. 프론트: transaction calendar / form section 1호출 전환
+1. 백엔드 `/household/list` 응답을 `ApiListResponse`(content/totalCount 봉투) → `CursorPage[T]` (items/nextCursor/hasNext/totalCount) 로 교체
+2. 백엔드 members 도 동일 (가구 멤버 list)
+3. 프론트 household features `content` → `items` 정리, settings-section / household-section 의 임시 패치 제거
 4. typecheck + 커밋
+5. household 도메인은 PR 6 에서 매직 넘버/클라 필터 정리 함께
