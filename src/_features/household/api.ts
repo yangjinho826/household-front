@@ -28,10 +28,14 @@ interface BackendCursorPage<T> {
 // Household CRUD
 // =========================================================
 
+// 한 사용자가 속한 가계부 개수는 실무상 수십개 이내 — switcher 에서 한번에 보여줘야 해서
+// infinite 가 아닌 unbounded limit 으로 처리. cursor 봉투는 통일성 유지용.
+const HOUSEHOLD_LIST_LIMIT = 200;
+
 export async function GetHouseholdSearchApi() {
   const res = await apiFetch<
     ApiResponse<BackendCursorPage<BackendHouseholdResponse>>
-  >(`/api/household/list`, { method: "GET" });
+  >(`/api/household/list?limit=${HOUSEHOLD_LIST_LIMIT}`, { method: "GET" });
   const items = res.body.data.items.map(
     ({ id, ...rest }, idx): HouseholdListItemType => ({
       ...rest,

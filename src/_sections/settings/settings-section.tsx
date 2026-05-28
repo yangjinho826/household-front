@@ -27,6 +27,9 @@ export default function SettingsSection() {
   const [switcherOpened, switcher] = useDisclosure(false);
   const currentId = useHouseholdStore((s) => s.currentHouseholdId);
 
+  // 의식적 예외 — "한 페이지=한 endpoint" 원칙의 예외 1건.
+  // household.list 는 가계부 전환 (HouseholdSwitcher) 용 전체 목록이라
+  // settings overview (카운트 통계) 와 의미·캐시 수명이 다름. 묶지 않음.
   const { data: hData } = useSuspenseQuery(queryKeys.household.list());
   const { data: overviewRes } = useSuspenseQuery(
     queryKeys.settings.overview(),

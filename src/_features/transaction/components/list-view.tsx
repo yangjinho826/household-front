@@ -1,8 +1,10 @@
 "use client";
 
-import { Card, Center, Loader, Stack, Text } from "@mantine/core";
+import { Card, Center, Stack, Text } from "@mantine/core";
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo, useRef } from "react";
+import { useMemo } from "react";
+
+import { InfiniteSentinel } from "_libraries/query/infinite-sentinel";
 
 import { useTransactionInfiniteList } from "../queries/use-query";
 import type {
@@ -43,22 +45,6 @@ export default function TransactionListView({ searchParams }: ListViewProps) {
     return Array.from(map.entries()).sort((a, b) => b[0].localeCompare(a[0]));
   }, [items]);
 
-  const loadMoreRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const target = loadMoreRef.current;
-    if (!target || !hasNextPage) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting && !isFetchingNextPage) {
-          fetchNextPage();
-        }
-      },
-      { rootMargin: "120px" },
-    );
-    observer.observe(target);
-    return () => observer.disconnect();
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
-
   if (items.length === 0) {
     return (
       <Center py="xl">
@@ -84,11 +70,11 @@ export default function TransactionListView({ searchParams }: ListViewProps) {
         </Stack>
       ))}
 
-      {hasNextPage && (
-        <Center ref={loadMoreRef} py="md">
-          {isFetchingNextPage && <Loader size="sm" />}
-        </Center>
-      )}
+      <InfiniteSentinel
+        hasNextPage={hasNextPage}
+        isFetchingNextPage={isFetchingNextPage}
+        onLoadMore={fetchNextPage}
+      />
     </Stack>
   );
 }

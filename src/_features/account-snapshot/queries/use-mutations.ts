@@ -14,8 +14,9 @@ export function useAccountSnapshotMutations() {
         queryKey: queryKeys.accountSnapshot.yearly._def,
         refetchType: "all",
       });
+      // account 도메인 전체 (list + infinite) — 잔액 변경 화면 모두 stale
       queryClient.invalidateQueries({
-        queryKey: queryKeys.account.list._def,
+        queryKey: queryKeys.account._def,
         refetchType: "all",
       });
       // wealth overview 가 yearly_snapshots + accounts 묶음으로 받음

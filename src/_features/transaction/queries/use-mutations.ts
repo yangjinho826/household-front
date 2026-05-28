@@ -21,8 +21,9 @@ export function useTransactionMutations() {
       queryKey: queryKeys.transaction._def,
       refetchType: "all",
     });
+    // account 도메인 전체 (list + infinite) — 잔액 의존 화면 모두 stale
     queryClient.invalidateQueries({
-      queryKey: queryKeys.account.list._def,
+      queryKey: queryKeys.account._def,
       refetchType: "all",
     });
     queryClient.invalidateQueries({

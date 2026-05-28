@@ -6,7 +6,6 @@ import {
   Card,
   Center,
   Group,
-  Loader,
   Modal,
   SimpleGrid,
   Stack,
@@ -16,7 +15,7 @@ import {
 import { useDisclosure } from "@mantine/hooks";
 import { IconPencil } from "@tabler/icons-react";
 import { useRouter, useParams } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 
 import SubHeader from "_features/layout/components/sub-header";
 import TradeForm from "_features/portfolio/components/trade-form";
@@ -24,6 +23,7 @@ import {
   usePortfolioItem,
   usePortfolioItemTransactionsInfinite,
 } from "_features/portfolio/queries/use-query";
+import { InfiniteSentinel } from "_libraries/query/infinite-sentinel";
 import type {
   PortfolioTransactionItemType,
   PortfolioTxType,
@@ -62,22 +62,6 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
   const [initialType, setInitialType] = useState<PortfolioTxType>("BUY");
   const [editingTx, setEditingTx] =
     useState<PortfolioTransactionItemType | null>(null);
-
-  const loadMoreRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const target = loadMoreRef.current;
-    if (!target || !hasNextPage) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting && !isFetchingNextPage) {
-          fetchNextPage();
-        }
-      },
-      { rootMargin: "120px" },
-    );
-    observer.observe(target);
-    return () => observer.disconnect();
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const openTrade = (type: PortfolioTxType) => {
     setEditingTx(null);
@@ -284,11 +268,11 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
             </Stack>
           </Card>
 
-          {hasNextPage && (
-            <Center ref={loadMoreRef} py="md">
-              {isFetchingNextPage && <Loader size="sm" />}
-            </Center>
-          )}
+          <InfiniteSentinel
+            hasNextPage={hasNextPage}
+            isFetchingNextPage={isFetchingNextPage}
+            onLoadMore={fetchNextPage}
+          />
         </>
       )}
 
