@@ -14,6 +14,11 @@ export const transactions = createQueryKeys("transaction", {
     queryKey: [params],
     queryFn: () => GetTransactionSearchApi(params),
   }),
+  // 무한 스크롤 — queryFn 은 useInfiniteList 헬퍼에서 cursor 주입해서 호출
+  // queryKey 만 등록해서 transaction._def invalidate 에 자동으로 잡히게 함
+  infinite: (params: TransactionSearchRequestType & { pageSize: number }) => ({
+    queryKey: [params],
+  }),
   detail: (transactionId: string) => ({
     queryKey: [transactionId],
     queryFn: () => GetTransactionDetailApi(transactionId),

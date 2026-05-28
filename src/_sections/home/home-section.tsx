@@ -47,7 +47,7 @@ export default function HomeSection() {
   );
 
   const accounts = aData.body.data.content;
-  const txns = tData.body.data.content;
+  const txns = tData.body.data.items;
   const stats = statsData.body.data;
 
   const totalAssets = accounts.reduce((sum, a) => sum + a.balance, 0);

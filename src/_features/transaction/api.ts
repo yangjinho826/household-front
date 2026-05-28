@@ -1,7 +1,7 @@
 import { apiFetch } from "_libraries/fetch/api-fetch";
 import { objectToParams } from "_libraries/fetch/object-to-params";
 import type {
-  ApiListResponse,
+  ApiCursorPage,
   ApiPaginationProps,
   ApiResponse,
 } from "_libraries/fetch/response";
@@ -24,7 +24,7 @@ interface BackendTransactionListPage {
   items: BackendTransactionResponse[];
   nextCursor: string | null;
   hasNext: boolean;
-  totalCount: number;
+  totalCount: number | null;
 }
 
 function toListItem(
@@ -64,28 +64,15 @@ export async function GetTransactionSearchApi(
   const items = (res.body.data?.items ?? []).map((b, idx) =>
     toListItem(b, idx + 1),
   );
-  const nextCursor = res.body.data?.nextCursor ?? null;
-  const hasNext = res.body.data?.hasNext ?? false;
-  const totalCount = res.body.data?.totalCount ?? items.length;
-
-  const wrapped: ApiListResponse<TransactionListItemType> & {
-    data: ApiListResponse<TransactionListItemType>["data"] & {
-      nextCursor: string | null;
-      hasNext: boolean;
-    };
-  } = {
+  const wrapped: ApiCursorPage<TransactionListItemType> = {
     code: res.body.code,
     message: res.body.message,
     status: res.body.status,
     data: {
-      listSize: items.length,
-      currentPage: 1,
-      currentCount: items.length,
-      totalElements: totalCount,
-      totalPages: hasNext ? 2 : 1,
-      content: items,
-      nextCursor,
-      hasNext,
+      items,
+      nextCursor: res.body.data?.nextCursor ?? null,
+      hasNext: res.body.data?.hasNext ?? false,
+      totalCount: res.body.data?.totalCount ?? null,
     },
   };
   return { ...res, body: wrapped };

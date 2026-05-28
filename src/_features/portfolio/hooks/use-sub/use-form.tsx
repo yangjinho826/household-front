@@ -10,7 +10,7 @@ import { usePortfolioMutations } from "_features/portfolio/queries/use-mutations
 import type { Market } from "_features/portfolio/types";
 import { getErrorMessage } from "_libraries/fetch/error-message";
 
-import { usePortfolioDetail as usePortfolioDetailQuery } from "../../queries/use-query";
+import { usePortfolioItemFetch } from "../../queries/use-query";
 
 interface UsePortfolioFormOptions {
   portfolioId?: string;
@@ -32,7 +32,7 @@ export function usePortfolioForm({ portfolioId }: UsePortfolioFormOptions) {
   const router = useRouter();
   const routeParams = useParams<{ locale: string }>();
 
-  const fetchDetail = usePortfolioDetailQuery();
+  const fetchDetail = usePortfolioItemFetch();
   const { createMutation, updateMutation, lookupMutation } = usePortfolioMutations();
 
   const isUpdate = Boolean(portfolioId);

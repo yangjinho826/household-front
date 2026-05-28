@@ -27,7 +27,7 @@ export default function TransactionListView({ searchParams }: ListViewProps) {
     useTransactionInfiniteList(searchParams, 30);
 
   const items: TransactionListItemType[] = useMemo(
-    () => (data?.pages ?? []).flatMap((p) => p.body.data.content),
+    () => (data?.pages ?? []).flatMap((p) => p.body.data.items),
     [data],
   );
 

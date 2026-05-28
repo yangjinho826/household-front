@@ -10,14 +10,13 @@ import {
   Text,
   TextInput,
 } from "@mantine/core";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
 import { useTranslations } from "next-intl";
 
-import { queryKeys } from "_constants/queries";
 import { useEnumOptions } from "_features/enum/queries/use-query";
 
 import { usePortfolioForm } from "../hooks/use-sub/use-form";
+import { usePortfolioFormOptions } from "../queries/use-query";
 
 interface PortfolioFormProps {
   portfolioId?: string;
@@ -55,16 +54,15 @@ export default function PortfolioForm({ portfolioId }: PortfolioFormProps) {
       ? "AAPL"
       : "005930";
 
-  // INVESTMENT 통장만 노출
-  const { data: accountsData } = useSuspenseQuery(
-    queryKeys.account.list({ pageNo: 1, listSize: 100 }),
-  );
+  // INVESTMENT 통장만 — 백엔드 form-options endpoint 가 필터해서 줌
+  const { data: formOptionsData } = usePortfolioFormOptions();
   const investAccountOptions = useMemo(
     () =>
-      accountsData.body.data.content
-        .filter((a) => a.accountType === "INVESTMENT" && !a.isArchived)
-        .map((a) => ({ value: a.accountId, label: a.name })),
-    [accountsData],
+      formOptionsData.body.data.investmentAccounts.map((a) => ({
+        value: a.accountId,
+        label: a.name,
+      })),
+    [formOptionsData],
   );
 
   // 신규 생성 시 INVESTMENT 계좌가 1개면 자동 선택

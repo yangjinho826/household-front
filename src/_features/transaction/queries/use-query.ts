@@ -17,14 +17,18 @@ export const useTransactionList = (
 };
 
 /**
- * 커서 기반 무한 스크롤 list. 백엔드는 next_cursor 반환, mock 모드에선 한 페이지만.
+ * 커서 기반 무한 스크롤 list.
+ *
+ * queryKey 는 query-key-factory 의 `transaction.infinite` 를 통과해서
+ * mutation 의 `queryKeys.transaction._def` invalidate 에 자동으로 잡힌다.
  */
 export const useTransactionInfiniteList = (
   params: TransactionSearchRequestType,
   pageSize = 30,
 ) => {
+  const keyDef = queryKeys.transaction.infinite({ ...params, pageSize });
   return useInfiniteQuery({
-    queryKey: ["transaction", "infinite", params, pageSize],
+    queryKey: keyDef.queryKey,
     queryFn: ({ pageParam }) =>
       GetTransactionSearchApi({
         ...params,
@@ -33,12 +37,8 @@ export const useTransactionInfiniteList = (
       }),
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => {
-      const data = lastPage.body.data as typeof lastPage.body.data & {
-        nextCursor?: string | null;
-        hasNext?: boolean;
-      };
-      if (data.hasNext && data.nextCursor) return data.nextCursor;
-      return undefined;
+      const { nextCursor, hasNext } = lastPage.body.data;
+      return hasNext && nextCursor ? nextCursor : undefined;
     },
   });
 };

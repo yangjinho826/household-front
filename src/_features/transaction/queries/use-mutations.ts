@@ -15,7 +15,7 @@ import type {
 export function useTransactionMutations() {
   const queryClient = useQueryClient();
 
-  // 거래 변경 시 통장 잔액(account.list) 과 고정지출 월별 사용액(fixed.monthlySummary) 도 갱신
+  // 거래 변경 시 — transaction 자체 + 잔액 의존 + 월간 통계 모두 stale
   const invalidateRelated = () => {
     queryClient.invalidateQueries({
       queryKey: queryKeys.transaction._def,
@@ -31,6 +31,11 @@ export function useTransactionMutations() {
     });
     queryClient.invalidateQueries({
       queryKey: queryKeys.fixed.monthlySummary._def,
+      refetchType: "all",
+    });
+    // home 화면의 카테고리 통계 — 누락되어 거래 변경 후 stale 이었음
+    queryClient.invalidateQueries({
+      queryKey: queryKeys.stats._def,
       refetchType: "all",
     });
   };

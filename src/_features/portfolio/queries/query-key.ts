@@ -1,32 +1,38 @@
 import { createQueryKeys } from "@lukemorales/query-key-factory";
 
-import type { ApiPaginationProps } from "_libraries/fetch/response";
-
 import {
-  GetPortfolioDetailApi,
-  GetPortfolioSearchApi,
-  GetPortfolioTransactionsApi,
+  GetAccountOverviewApi,
+  GetPortfolioFormOptionsApi,
+  GetPortfolioItemApi,
+  GetPortfolioOverviewApi,
   GetPortfolioValueHistoryByAccountApi,
   GetPortfolioValueHistoryByItemApi,
 } from "../api";
 import type {
-  PortfolioSearchRequestType,
   PortfolioValueHistoryByAccountRequest,
   PortfolioValueHistoryByItemRequest,
 } from "../types";
 
 export const portfolios = createQueryKeys("portfolio", {
-  list: (params: PortfolioSearchRequestType & Partial<ApiPaginationProps>) => ({
-    queryKey: [params],
-    queryFn: () => GetPortfolioSearchApi(params),
+  overview: () => ({
+    queryKey: ["overview"],
+    queryFn: () => GetPortfolioOverviewApi(),
   }),
-  detail: (portfolioId: string) => ({
-    queryKey: [portfolioId],
-    queryFn: () => GetPortfolioDetailApi(portfolioId),
+  byAccount: (accountId: string) => ({
+    queryKey: [accountId],
+    queryFn: () => GetAccountOverviewApi(accountId),
   }),
-  transactions: (params: { accountId?: string }) => ({
+  formOptions: () => ({
+    queryKey: ["form-options"],
+    queryFn: () => GetPortfolioFormOptionsApi(),
+  }),
+  item: (itemId: string) => ({
+    queryKey: [itemId],
+    queryFn: () => GetPortfolioItemApi(itemId),
+  }),
+  // 무한 스크롤 거래 내역 — queryFn 은 useInfiniteQuery 헬퍼에서 cursor 주입
+  itemTransactionsInfinite: (params: { itemId: string; pageSize: number }) => ({
     queryKey: [params],
-    queryFn: () => GetPortfolioTransactionsApi(params),
   }),
   valueHistoryByAccount: (params: PortfolioValueHistoryByAccountRequest) => ({
     queryKey: [params],

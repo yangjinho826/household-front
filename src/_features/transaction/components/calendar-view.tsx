@@ -41,7 +41,7 @@ export default function TransactionCalendarView({ year, month }: CalendarViewPro
   const { data: txData } = useSuspenseQuery(
     queryKeys.transaction.list({ year, month, listSize: 500 }),
   );
-  const monthItems = txData.body.data.content;
+  const monthItems = txData.body.data.items;
 
   const dayStats = useMemo(() => {
     const map = new Map<
