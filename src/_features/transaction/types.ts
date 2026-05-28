@@ -50,22 +50,13 @@ export interface TransactionListItemType {
   categoryIcon?: string | null;
 }
 
-/** 달력 일별 합계 (백엔드 /transaction/calendar) */
+/** 달력 일별 합계 1건 — calendarFull 응답 안의 days[] */
 export interface TransactionCalendarDay {
   date: string; // YYYY-MM-DD
   income: number;
   expense: number;
   transfer: number;
   count: number;
-}
-
-export interface TransactionCalendarResponse {
-  year: number;
-  month: number;
-  monthlyIncome: number;
-  monthlyExpense: number;
-  monthlyTransfer: number;
-  days: TransactionCalendarDay[];
 }
 
 /** GET /transaction/calendar/{year}/{month}/full 응답 — 캘린더 페이지 1호출 묶음 */

@@ -1,35 +1,17 @@
 "use client";
 
-import {
-  Card,
-  Center,
-  Group,
-  Pagination,
-  Stack,
-  Text,
-  UnstyledButton,
-} from "@mantine/core";
+import { Card, Center, Group, Stack, Text, UnstyledButton } from "@mantine/core";
 import { useTranslations } from "next-intl";
 
 import type { HouseholdListItemType } from "../types";
 
 interface HouseholdTableProps {
   items: HouseholdListItemType[];
-  totalPages: number;
-  pageNo: number;
-  listSize: number;
   onClickRow: (householdId: string) => void;
-  onPageChange: (page: number, pageSize: number) => void;
 }
 
-export default function HouseholdTable({
-  items,
-  totalPages,
-  pageNo,
-  listSize,
-  onClickRow,
-  onPageChange,
-}: HouseholdTableProps) {
+// 한 user 의 가입 가계부 수가 작아 페이징 X. 클릭 가능한 카드 리스트만.
+export default function HouseholdTable({ items, onClickRow }: HouseholdTableProps) {
   const t = useTranslations("household");
   const tg = useTranslations("general.common");
 
@@ -65,15 +47,6 @@ export default function HouseholdTable({
           </Card>
         </UnstyledButton>
       ))}
-      {totalPages > 1 && (
-        <Group justify="center">
-          <Pagination
-            value={pageNo}
-            total={totalPages}
-            onChange={(p) => onPageChange(p, listSize)}
-          />
-        </Group>
-      )}
     </Stack>
   );
 }

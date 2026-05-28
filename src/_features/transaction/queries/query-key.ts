@@ -1,9 +1,6 @@
 import { createQueryKeys } from "@lukemorales/query-key-factory";
 
-import type { ApiPaginationProps } from "_libraries/fetch/response";
-
 import {
-  GetTransactionCalendarApi,
   GetTransactionCalendarFullApi,
   GetTransactionDetailApi,
   GetTransactionFormOptionsApi,
@@ -12,7 +9,12 @@ import {
 import type { TransactionSearchRequestType } from "../types";
 
 export const transactions = createQueryKeys("transaction", {
-  list: (params: TransactionSearchRequestType & Partial<ApiPaginationProps>) => ({
+  list: (
+    params: TransactionSearchRequestType & {
+      cursor?: string | null;
+      limit?: number;
+    },
+  ) => ({
     queryKey: [params],
     queryFn: () => GetTransactionSearchApi(params),
   }),
@@ -24,10 +26,6 @@ export const transactions = createQueryKeys("transaction", {
   detail: (transactionId: string) => ({
     queryKey: [transactionId],
     queryFn: () => GetTransactionDetailApi(transactionId),
-  }),
-  calendar: (params: { year: number; month: number }) => ({
-    queryKey: [params],
-    queryFn: () => GetTransactionCalendarApi(params),
   }),
   calendarFull: (params: { year: number; month: number }) => ({
     queryKey: [params],

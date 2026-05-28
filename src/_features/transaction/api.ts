@@ -2,7 +2,6 @@ import { apiFetch } from "_libraries/fetch/api-fetch";
 import { objectToParams } from "_libraries/fetch/object-to-params";
 import type {
   ApiCursorPage,
-  ApiPaginationProps,
   ApiResponse,
 } from "_libraries/fetch/response";
 
@@ -12,7 +11,6 @@ import type { FixedListItemType } from "_features/fixed/types";
 
 import type {
   TransactionCalendarFullType,
-  TransactionCalendarResponse,
   TransactionCreateRequest,
   TransactionDetailItemType,
   TransactionFormOptionsType,
@@ -47,13 +45,14 @@ function toDetail(b: BackendTransactionResponse): TransactionDetailItemType {
 }
 
 export async function GetTransactionSearchApi(
-  params: TransactionSearchRequestType &
-    Partial<ApiPaginationProps> & { cursor?: string | null; limit?: number },
+  params: TransactionSearchRequestType & {
+    cursor?: string | null;
+    limit?: number;
+  },
 ) {
-  const limit = params.limit ?? params.listSize;
   const queryParams: Record<string, unknown> = {};
   if (params.cursor) queryParams.cursor = params.cursor;
-  if (limit) queryParams.limit = limit;
+  if (params.limit) queryParams.limit = params.limit;
   if (params.txType) queryParams.txType = params.txType;
   if (params.accountId) queryParams.accountId = params.accountId;
   if (params.categoryId) queryParams.categoryId = params.categoryId;
@@ -116,17 +115,6 @@ export function DeleteTransactionDeleteApi(transactionId: string) {
   return apiFetch<ApiResponse<void>>(
     `/api/transaction/delete/${transactionId}`,
     { method: "DELETE", errorHandleMethod: "reject" },
-  );
-}
-
-/** 달력 — 일별/월별 합계 (백엔드 미리 계산) */
-export async function GetTransactionCalendarApi(params: {
-  year: number;
-  month: number;
-}) {
-  return apiFetch<ApiResponse<TransactionCalendarResponse>>(
-    `/api/transaction/calendar?year=${params.year}&month=${params.month}`,
-    { method: "GET" },
   );
 }
 

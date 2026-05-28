@@ -13,18 +13,9 @@ export default function HouseholdSection() {
   const t = useTranslations("household");
   const router = useRouter();
   const routeParams = useParams<{ locale: string }>();
-  const {
-    searchform,
-    onSearch,
-    onReset,
-    result,
-    params,
-    handlePageChange,
-  } = useHouseholdSearch();
+  const { searchform, onSearch, onReset, result } = useHouseholdSearch();
 
   const items = result?.items ?? [];
-  // PR 5 봉투 통일 — totalPages 는 호환 표시용. PR 6 에서 페이징 UI 자체 정리 예정.
-  const totalPages = 1;
 
   return (
     <Stack gap="md">
@@ -44,13 +35,9 @@ export default function HouseholdSection() {
 
       <HouseholdTable
         items={items}
-        totalPages={totalPages}
-        pageNo={params.pageNo}
-        listSize={params.listSize}
         onClickRow={(id) =>
           router.push(`/${routeParams.locale}/household/${id}`)
         }
-        onPageChange={handlePageChange}
       />
     </Stack>
   );

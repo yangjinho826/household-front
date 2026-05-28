@@ -1,20 +1,9 @@
-import {
-  useInfiniteQuery,
-  useQueryClient,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 
-import type { ApiPaginationProps } from "_libraries/fetch/response";
 import { queryKeys } from "_constants/queries";
 
 import { GetTransactionSearchApi } from "../api";
 import type { TransactionSearchRequestType } from "../types";
-
-export const useTransactionList = (
-  params: TransactionSearchRequestType & ApiPaginationProps,
-) => {
-  return useSuspenseQuery(queryKeys.transaction.list(params));
-};
 
 /**
  * 커서 기반 무한 스크롤 list.
