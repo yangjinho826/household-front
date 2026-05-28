@@ -16,11 +16,13 @@
 | `fdb3c38` | back | refactor: account/category/fixed list 무한 스크롤 (PR 2) |
 | `ff9c421` | back | refactor: home/wealth/settings overview endpoint 추가 (PR 3) |
 | `68e995b` | back | refactor: transaction calendar/full + form-options endpoint 추가 (PR 4) |
+| `24aad03` | back | refactor: household/members list 응답 CursorPage 봉투 통일 (PR 5) |
 | `6d63363` | front | refactor: CursorPage 봉투 통일 + portfolio overview 도입 (PR 0+1) |
 | `7f02c01` | front | chore(memory): activeContext PR 0+1 완료 반영 |
 | `0907892` | front | refactor: account/category/fixed 관리 페이지 무한 스크롤 (PR 2) |
 | `060f750` | front | refactor: home/wealth/settings overview 1호출 통합 (PR 3) |
 | `d1fce6e` | front | refactor: transaction 캘린더/폼 1호출 통합 (PR 4) |
+| `1eca7af` | front | refactor: household/members 프론트 봉투 매핑 CursorPage 통일 (PR 5) |
 
 #### PR 0 — 봉투 통일 인프라
 - 백엔드: `app/core/pagination.py` (`CursorPage[T]`), `TransactionListResponse` 를 alias 로
@@ -65,12 +67,20 @@
 - transaction._def invalidate 가 calendarFull/formOptions/list/calendar/detail 모두 잡아주므로 다른 mutation 의 invalidation 은 변경 X
 - `/transaction/calendar` 기존 endpoint 는 일단 유지 (deprecated 표시 X — PR 6 에서 데드코드 검토)
 
+#### PR 5 — household / members 봉투 통일
+- 백엔드: `/household/list`, `/household/{id}/members` 응답을 `list[T]` → `CursorPage[T]`
+  - `HouseholdListResponse = CursorPage[HouseholdResponse]`, `HouseholdMemberListResponse = CursorPage[HouseholdMemberResponse]` alias 추가
+  - 작은 list 라 cursor 페이징 의미 X — next_cursor=None, has_next=False, total_count=len 로 형식만 통일
+- 프론트: `_features/household/api.ts` 의 `ApiListResponse(content/totalElements)` 어댑터를 `ApiCursorPage(items/totalCount)` 로 정리
+- 프론트: `queryKeys.household.list({...})` → `queryKeys.household.list()` (인자 제거)
+- 프론트: 8개 호출처 (`settings/members/household section`, `layout/{app-header,sidebar-nav}`, `household/{household-switcher,use-search}`, `auth/onboarding-guard`) `.content` → `.items` / `.totalElements` → `.totalCount` 일괄 교체
+- household-section 의 totalPages/페이지 UI 는 호환 표시용으로 잔존 — PR 6 에서 함께 정리
+
 ### 남은 PR
 
 | PR | 작업 |
 |---|---|
-| 5 | household / members 봉투만 통일 |
-| 6 | 정리 (`pageNo/listSize` 매직 넘버, 클라 필터, `ApiListResponse` 삭제, 데드 코드) |
+| 6 | 정리 (`pageNo/listSize` 매직 넘버, 클라 필터, `ApiListResponse` 삭제, household 페이징 UI 데드 코드) |
 
 ## Context
 
@@ -104,10 +114,12 @@
 
 ## Next Step
 
-PR 5 진행 — household / members 봉투만 통일.
+PR 6 진행 — 마지막 정리.
 
-1. 백엔드 `/household/list` 응답을 `ApiListResponse`(content/totalCount 봉투) → `CursorPage[T]` (items/nextCursor/hasNext/totalCount) 로 교체
-2. 백엔드 members 도 동일 (가구 멤버 list)
-3. 프론트 household features `content` → `items` 정리, settings-section / household-section 의 임시 패치 제거
-4. typecheck + 커밋
-5. household 도메인은 PR 6 에서 매직 넘버/클라 필터 정리 함께
+1. 프론트 `_libraries/fetch/response.ts` 의 `ApiListResponse` / `ApiPaginationProps` 삭제
+2. `pageNo/listSize` 매직 넘버 잔재 (transaction/form 의 listSize 100 류) 검색해서 제거
+3. `_features/transaction/api.ts` 의 `params.listSize` fallback 등 deprecated 코드 정리
+4. 백엔드: deprecated `/transaction/calendar` (calendar/full 로 대체됨) 제거 검토 — 호출처 없으면 삭제
+5. household-section 의 totalPages/페이지 UI 잔재 정리 (`HouseholdTable` 의 pageNo/listSize/onPageChange prop 제거 또는 단순화)
+6. 클라 필터로 처리하던 곳 백엔드 쿼리로 위임 (PR 0~5 에서 이미 대부분 했지만 잔재 확인)
+7. typecheck + 커밋
