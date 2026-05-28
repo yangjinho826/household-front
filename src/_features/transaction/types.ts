@@ -68,6 +68,25 @@ export interface TransactionCalendarResponse {
   days: TransactionCalendarDay[];
 }
 
+/** GET /transaction/calendar/{year}/{month}/full 응답 — 캘린더 페이지 1호출 묶음 */
+export interface TransactionCalendarFullType {
+  year: number;
+  month: number;
+  monthlyIncome: number;
+  monthlyExpense: number;
+  monthlyTransfer: number;
+  days: TransactionCalendarDay[];
+  byCategory: import("_features/stats/types").CategoryStatsItemType[];
+  transactions: TransactionListItemType[];
+}
+
+/** GET /transaction/form-options 응답 — 거래 폼 옵션 묶음 */
+export interface TransactionFormOptionsType {
+  accounts: import("_features/account/types").AccountListItemType[];
+  categories: import("_features/category/types").CategoryListItemType[];
+  fixedExpenses: import("_features/fixed/types").FixedListItemType[];
+}
+
 export interface TransactionDetailItemType {
   transactionId: string;
   householdId: string;

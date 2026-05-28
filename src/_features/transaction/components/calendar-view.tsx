@@ -31,17 +31,12 @@ export default function TransactionCalendarView({ year, month }: CalendarViewPro
     today.startsWith(monthPrefix) ? today : `${monthPrefix}-01`,
   );
 
-  // 일별 합계 (백엔드 미리 계산)
-  const { data: calData } = useSuspenseQuery(
-    queryKeys.transaction.calendar({ year, month }),
+  // 캘린더 페이지 1호출 — 일별 합계 + 월간 합계 + by_category + 그달 거래 전부
+  const { data: fullData } = useSuspenseQuery(
+    queryKeys.transaction.calendarFull({ year, month }),
   );
-  const calendar = calData.body.data;
-
-  // 선택일 거래 — 그달 list (백엔드 year/month 필터 + 큰 limit)
-  const { data: txData } = useSuspenseQuery(
-    queryKeys.transaction.list({ year, month, listSize: 500 }),
-  );
-  const monthItems = txData.body.data.items;
+  const calendar = fullData.body.data;
+  const monthItems = calendar.transactions;
 
   const dayStats = useMemo(() => {
     const map = new Map<

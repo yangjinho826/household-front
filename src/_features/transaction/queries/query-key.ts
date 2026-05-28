@@ -4,7 +4,9 @@ import type { ApiPaginationProps } from "_libraries/fetch/response";
 
 import {
   GetTransactionCalendarApi,
+  GetTransactionCalendarFullApi,
   GetTransactionDetailApi,
+  GetTransactionFormOptionsApi,
   GetTransactionSearchApi,
 } from "../api";
 import type { TransactionSearchRequestType } from "../types";
@@ -26,5 +28,13 @@ export const transactions = createQueryKeys("transaction", {
   calendar: (params: { year: number; month: number }) => ({
     queryKey: [params],
     queryFn: () => GetTransactionCalendarApi(params),
+  }),
+  calendarFull: (params: { year: number; month: number }) => ({
+    queryKey: [params],
+    queryFn: () => GetTransactionCalendarFullApi(params),
+  }),
+  formOptions: () => ({
+    queryKey: ["form-options"],
+    queryFn: () => GetTransactionFormOptionsApi(),
   }),
 });
