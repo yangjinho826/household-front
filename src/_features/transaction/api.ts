@@ -93,10 +93,16 @@ export async function GetTransactionDetailApi(transactionId: string) {
 
 export async function PostTransactionCreateApi(
   params: TransactionCreateRequest,
+  idempotencyKey?: string,
 ) {
   const res = await apiFetch<ApiResponse<BackendTransactionResponse>>(
     `/api/transaction/create`,
-    { method: "POST", body: params, errorHandleMethod: "reject" },
+    {
+      method: "POST",
+      body: params,
+      idempotencyKey,
+      errorHandleMethod: "reject",
+    },
   );
   return { ...res, body: { ...res.body, data: toDetail(res.body.data) } };
 }

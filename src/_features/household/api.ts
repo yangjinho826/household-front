@@ -67,10 +67,18 @@ export async function GetHouseholdDetailApi(householdId: string) {
   return { ...res, body: { ...res.body, data: mapped } };
 }
 
-export async function PostHouseholdCreateApi(params: HouseholdCreateRequest) {
+export async function PostHouseholdCreateApi(
+  params: HouseholdCreateRequest,
+  idempotencyKey?: string,
+) {
   const res = await apiFetch<ApiResponse<BackendHouseholdResponse>>(
     `/api/household/create`,
-    { method: "POST", body: params, errorHandleMethod: "reject" },
+    {
+      method: "POST",
+      body: params,
+      idempotencyKey,
+      errorHandleMethod: "reject",
+    },
   );
   const { id, ...rest } = res.body.data;
   const mapped: HouseholdDetailItemType = { ...rest, householdId: id };
@@ -127,11 +135,17 @@ export async function GetHouseholdMembersApi(householdId: string) {
 
 export async function PostHouseholdMemberCreateApi(
   params: MemberCreateRequest,
+  idempotencyKey?: string,
 ) {
   const { householdId, ...body } = params;
   const res = await apiFetch<ApiResponse<BackendHouseholdMemberResponse>>(
     `/api/household/${householdId}/members`,
-    { method: "POST", body, errorHandleMethod: "reject" },
+    {
+      method: "POST",
+      body,
+      idempotencyKey,
+      errorHandleMethod: "reject",
+    },
   );
   const { id, ...rest } = res.body.data;
   const mapped: HouseholdMemberItemType = { ...rest, memberId: id };

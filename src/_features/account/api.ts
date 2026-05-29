@@ -76,10 +76,18 @@ export async function GetAccountDetailApi(accountId: string) {
   return { ...res, body: { ...res.body, data: mapped } };
 }
 
-export async function PostAccountCreateApi(params: AccountCreateRequest) {
+export async function PostAccountCreateApi(
+  params: AccountCreateRequest,
+  idempotencyKey?: string,
+) {
   const res = await apiFetch<ApiResponse<BackendAccountResponse>>(
     `/api/account/create`,
-    { method: "POST", body: params, errorHandleMethod: "reject" },
+    {
+      method: "POST",
+      body: params,
+      idempotencyKey,
+      errorHandleMethod: "reject",
+    },
   );
   const { id, ...rest } = res.body.data;
   const mapped: AccountDetailItemType = { ...rest, accountId: id };

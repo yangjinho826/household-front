@@ -4,12 +4,44 @@ import { useAuthStore } from "_features/auth/store";
 import { authLoginUrl } from "_constants/url";
 
 import { cookieFetch } from "./api-fetch";
+import {
+  listenAuthMessages,
+  postAuthMessage,
+} from "./broadcast-channel";
 
 let refreshPromise: Promise<Response> | null = null;
 // 한 번 실패하면 모든 후속 401 즉시 redirect — 무한 루프 차단
 let refreshFailed = false;
 // redirectToLogin 재진입 차단 (location.replace 가 즉시 unload 시키지 않음)
 let redirecting = false;
+
+// 다른 탭이 refresh 중이면 그 결과 대기 — 자기 refresh 안 호출
+let externalTokenWaiter: {
+  promise: Promise<string | null>;
+  resolve: (token: string | null) => void;
+} | null = null;
+
+if (typeof window !== "undefined") {
+  listenAuthMessages((msg) => {
+    if (msg.type === "REFRESH_STARTED") {
+      // 자기가 이미 refresh 시작했으면 무시 — 비효율은 발생하지만 양쪽 다 reusable refresh 라 OK
+      if (refreshPromise || externalTokenWaiter) return;
+      let resolveFn: (t: string | null) => void = () => {};
+      const promise = new Promise<string | null>((r) => {
+        resolveFn = r;
+      });
+      externalTokenWaiter = { promise, resolve: resolveFn };
+    } else if (msg.type === "TOKEN_UPDATED") {
+      useAuthStore.getState().setAccessToken(msg.accessToken);
+      externalTokenWaiter?.resolve(msg.accessToken);
+      externalTokenWaiter = null;
+    } else if (msg.type === "REFRESH_FAILED") {
+      refreshFailed = true;
+      externalTokenWaiter?.resolve(null);
+      externalTokenWaiter = null;
+    }
+  });
+}
 
 function redirectToLogin(): Promise<Response> {
   if (!redirecting) {
@@ -42,8 +74,16 @@ export const returnFetchRefresh = (args?: ReturnFetchDefaultOptions) =>
           return redirectToLogin();
         }
 
-        // 동시 401 들 끼리 단일 refresh 만 호출
+        // 다른 탭이 refresh 진행 중이면 그 결과로 retry
+        if (externalTokenWaiter) {
+          const newToken = await externalTokenWaiter.promise;
+          if (!newToken) return redirectToLogin();
+          return fetch(_url, _configs);
+        }
+
+        // 자기가 refresh 시작 — 다른 탭에 신호
         if (!refreshPromise) {
+          postAuthMessage({ type: "REFRESH_STARTED" });
           refreshPromise = cookieFetch(`/api/auth/refresh`, {
             method: "POST",
           });
@@ -54,6 +94,7 @@ export const returnFetchRefresh = (args?: ReturnFetchDefaultOptions) =>
         if (refreshResponse.status !== 200) {
           // 영구 실패 표시. refreshPromise 는 null 리셋 X — 후속 401 들도 같은 분기로
           refreshFailed = true;
+          postAuthMessage({ type: "REFRESH_FAILED" });
           return redirectToLogin();
         }
 
@@ -67,6 +108,7 @@ export const returnFetchRefresh = (args?: ReturnFetchDefaultOptions) =>
         }
         if (!newAccessToken) {
           refreshFailed = true;
+          postAuthMessage({ type: "REFRESH_FAILED" });
           return redirectToLogin();
         }
 
@@ -74,6 +116,7 @@ export const returnFetchRefresh = (args?: ReturnFetchDefaultOptions) =>
         refreshPromise = null;
 
         useAuthStore.getState().setAccessToken(newAccessToken);
+        postAuthMessage({ type: "TOKEN_UPDATED", accessToken: newAccessToken });
 
         // 원 요청 retry — returnFetchAuth 가 새 토큰을 헤더에 박음
         return fetch(_url, _configs);

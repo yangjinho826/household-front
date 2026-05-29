@@ -174,10 +174,18 @@ export async function GetPortfolioItemTransactionsApi(
 // =========================================================
 
 /** 종목 등록 — 메타만 (qty=0 시작) */
-export async function PostPortfolioCreateApi(params: PortfolioCreateRequest) {
+export async function PostPortfolioCreateApi(
+  params: PortfolioCreateRequest,
+  idempotencyKey?: string,
+) {
   const res = await apiFetch<ApiResponse<BackendPortfolioResponse>>(
     `/api/portfolio/create`,
-    { method: "POST", body: params, errorHandleMethod: "reject" },
+    {
+      method: "POST",
+      body: params,
+      idempotencyKey,
+      errorHandleMethod: "reject",
+    },
   );
   return { ...res, body: { ...res.body, data: toListItem(res.body.data, 1) } };
 }
@@ -192,21 +200,37 @@ export async function GetPortfolioLookupApi(market: Market, code: string) {
 }
 
 /** 매수 액션 — 기존 종목에 qty 누적 + avg_price 재계산 + 이력 기록 */
-export async function PostPortfolioBuyApi(params: PortfolioBuyRequest) {
+export async function PostPortfolioBuyApi(
+  params: PortfolioBuyRequest,
+  idempotencyKey?: string,
+) {
   const { portfolioId, ...body } = params;
   const res = await apiFetch<ApiResponse<BackendPortfolioResponse>>(
     `/api/portfolio/buy/${portfolioId}`,
-    { method: "POST", body, errorHandleMethod: "reject" },
+    {
+      method: "POST",
+      body,
+      idempotencyKey,
+      errorHandleMethod: "reject",
+    },
   );
   return { ...res, body: { ...res.body, data: toListItem(res.body.data, 1) } };
 }
 
 /** 매도 (부분/전량) */
-export async function PostPortfolioSellApi(params: PortfolioSellRequest) {
+export async function PostPortfolioSellApi(
+  params: PortfolioSellRequest,
+  idempotencyKey?: string,
+) {
   const { portfolioId, ...body } = params;
   const res = await apiFetch<ApiResponse<BackendPortfolioResponse | null>>(
     `/api/portfolio/sell/${portfolioId}`,
-    { method: "POST", body, errorHandleMethod: "reject" },
+    {
+      method: "POST",
+      body,
+      idempotencyKey,
+      errorHandleMethod: "reject",
+    },
   );
   const data = res.body.data ? toListItem(res.body.data, 1) : null;
   return { ...res, body: { ...res.body, data } };

@@ -31,10 +31,14 @@ export function PostAuthLoginApi(params: LoginRequest) {
   });
 }
 
-export function PostAuthRegisterApi(params: RegisterRequest) {
+export function PostAuthRegisterApi(
+  params: RegisterRequest,
+  idempotencyKey?: string,
+) {
   return apiFetch<ApiResponse<AuthUser>>(`/api/user`, {
     method: "POST",
     body: params,
+    idempotencyKey,
     errorHandleMethod: "reject",
   });
 }

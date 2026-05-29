@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { queryKeys } from "_constants/queries";
+import { useIdempotentMutation } from "_libraries/hooks/use-idempotent-mutation";
 
 import {
   DeletePortfolioTxApi,
@@ -53,18 +54,21 @@ export function usePortfolioMutations() {
     });
   };
 
-  const createMutation = useMutation({
-    mutationFn: (props: PortfolioCreateRequest) => PostPortfolioCreateApi(props),
+  const createMutation = useIdempotentMutation({
+    mutationFn: (props: PortfolioCreateRequest, idempotencyKey) =>
+      PostPortfolioCreateApi(props, idempotencyKey),
     onSuccess: invalidateAll,
   });
 
-  const buyMutation = useMutation({
-    mutationFn: (props: PortfolioBuyRequest) => PostPortfolioBuyApi(props),
+  const buyMutation = useIdempotentMutation({
+    mutationFn: (props: PortfolioBuyRequest, idempotencyKey) =>
+      PostPortfolioBuyApi(props, idempotencyKey),
     onSuccess: invalidateAll,
   });
 
-  const sellMutation = useMutation({
-    mutationFn: (props: PortfolioSellRequest) => PostPortfolioSellApi(props),
+  const sellMutation = useIdempotentMutation({
+    mutationFn: (props: PortfolioSellRequest, idempotencyKey) =>
+      PostPortfolioSellApi(props, idempotencyKey),
     onSuccess: invalidateAll,
   });
 

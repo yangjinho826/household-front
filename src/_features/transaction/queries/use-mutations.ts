@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { queryKeys } from "_constants/queries";
+import { useIdempotentMutation } from "_libraries/hooks/use-idempotent-mutation";
 
 import {
   DeleteTransactionDeleteApi,
@@ -54,9 +55,9 @@ export function useTransactionMutations() {
     });
   };
 
-  const createMutation = useMutation({
-    mutationFn: (props: TransactionCreateRequest) =>
-      PostTransactionCreateApi(props),
+  const createMutation = useIdempotentMutation({
+    mutationFn: (props: TransactionCreateRequest, idempotencyKey) =>
+      PostTransactionCreateApi(props, idempotencyKey),
     onSuccess: invalidateRelated,
   });
 
