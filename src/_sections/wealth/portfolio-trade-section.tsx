@@ -7,6 +7,8 @@ import {
   Center,
   Drawer,
   Group,
+  Loader,
+  SegmentedControl,
   SimpleGrid,
   Stack,
   Text,
@@ -15,7 +17,7 @@ import {
 import { useDisclosure } from "@mantine/hooks";
 import { IconPencil } from "@tabler/icons-react";
 import { useRouter, useParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 
 import SubHeader from "_features/layout/components/sub-header";
 import TradeForm from "_features/portfolio/components/trade-form";
@@ -23,6 +25,7 @@ import {
   usePortfolioItem,
   usePortfolioItemTransactionsInfinite,
 } from "_features/portfolio/queries/use-query";
+import RealizedPnlPanel from "_sections/wealth/components/realized-pnl-panel";
 import { InfiniteSentinel } from "_libraries/query/infinite-sentinel";
 import type {
   PortfolioTransactionItemType,
@@ -62,6 +65,7 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
   const [initialType, setInitialType] = useState<PortfolioTxType>("BUY");
   const [editingTx, setEditingTx] =
     useState<PortfolioTransactionItemType | null>(null);
+  const [tab, setTab] = useState<"history" | "realized">("history");
 
   const openTrade = (type: PortfolioTxType) => {
     setEditingTx(null);
@@ -199,14 +203,31 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
         </UnstyledButton>
       </SimpleGrid>
 
-      {/* 거래 내역 — 무한 스크롤 */}
-      <Group justify="space-between" align="center" px={4}>
-        <Text size="sm" fw={700}>
-          거래 내역 ({trades.length})
-        </Text>
-      </Group>
+      {/* 거래내역 / 매매손익 탭 */}
+      <SegmentedControl
+        fullWidth
+        value={tab}
+        onChange={(v) => setTab(v as "history" | "realized")}
+        data={[
+          { value: "history", label: "거래내역" },
+          { value: "realized", label: "매매손익" },
+        ]}
+      />
 
-      {trades.length === 0 ? (
+      {tab === "realized" && (
+        <Suspense
+          fallback={
+            <Center py="xl">
+              <Loader size="sm" />
+            </Center>
+          }
+        >
+          <RealizedPnlPanel portfolioId={portfolioId} />
+        </Suspense>
+      )}
+
+      {tab === "history" &&
+        (trades.length === 0 ? (
         <Card radius="lg" p="xl">
           <Center>
             <Text size="sm" c="dimmed">
@@ -274,7 +295,7 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
             onLoadMore={fetchNextPage}
           />
         </>
-      )}
+      ))}
 
       {/* 거래 추가 시트(quick-add-sheet) 와 동일 패턴 — 핸들바 + 바텀시트.
           모달 통일 (Image #1 케이스). */}

@@ -97,6 +97,32 @@ export interface PortfolioTransactionItemType {
   total: number;
   txDate: string;
   memo: string | null;
+  /** 매도 실현손익 — SELL 만 값, BUY/미집계는 null */
+  realizedPnl: number | null;
+}
+
+/** 매매손익 — 매도 1건 (증권사 '매매손익' 테이블 행) */
+export interface RealizedPnlRowType {
+  txId: string;
+  txDate: string;
+  quantity: number;
+  sellPrice: number;
+  realizedPnl: number;
+  realizedRate: number;
+}
+
+/** 매매손익 요약 — 기간 내 매도 전체 합산 */
+export interface RealizedPnlSummaryType {
+  totalRealized: number;
+  totalRate: number;
+  sellAmount: number;
+  buyAmount: number;
+}
+
+/** 종목 매매손익 응답 */
+export interface RealizedPnlResponseType {
+  summary: RealizedPnlSummaryType;
+  rows: RealizedPnlRowType[];
 }
 
 /** 매수/매도 거래 수정 — pt_type 변경 불가 (백엔드 제약) */

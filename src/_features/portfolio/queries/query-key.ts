@@ -4,6 +4,7 @@ import {
   GetAccountOverviewApi,
   GetPortfolioFormOptionsApi,
   GetPortfolioItemApi,
+  GetPortfolioItemRealizedPnlApi,
   GetPortfolioOverviewApi,
   GetPortfolioValueHistoryByAccountApi,
   GetPortfolioValueHistoryByItemApi,
@@ -33,6 +34,15 @@ export const portfolios = createQueryKeys("portfolio", {
   // 무한 스크롤 거래 내역 — queryFn 은 useInfiniteQuery 헬퍼에서 cursor 주입
   itemTransactionsInfinite: (params: { itemId: string; pageSize: number }) => ({
     queryKey: [params],
+  }),
+  itemRealizedPnl: (params: {
+    itemId: string;
+    fromDate?: string;
+    toDate?: string;
+  }) => ({
+    queryKey: [params],
+    queryFn: () =>
+      GetPortfolioItemRealizedPnlApi(params.itemId, params.fromDate, params.toDate),
   }),
   valueHistoryByAccount: (params: PortfolioValueHistoryByAccountRequest) => ({
     queryKey: [params],

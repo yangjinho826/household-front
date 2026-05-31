@@ -22,6 +22,7 @@ import type {
   PortfolioValueHistoryByAccountRequest,
   PortfolioValueHistoryByItem,
   PortfolioValueHistoryByItemRequest,
+  RealizedPnlResponseType,
 } from "./types";
 import type { AccountListItemType } from "_features/account/types";
 
@@ -167,6 +168,22 @@ export async function GetPortfolioItemTransactionsApi(
     },
   };
   return { ...res, body: wrapped };
+}
+
+/** 종목 매매손익 — 기간 내 매도 건별 실현손익 + 요약 (기본 최근 12개월) */
+export async function GetPortfolioItemRealizedPnlApi(
+  itemId: string,
+  fromDate?: string,
+  toDate?: string,
+) {
+  const queryParams: Record<string, unknown> = {};
+  if (fromDate) queryParams.fromDate = fromDate;
+  if (toDate) queryParams.toDate = toDate;
+  const queryString = objectToParams(queryParams).toString();
+  return apiFetch<ApiResponse<RealizedPnlResponseType>>(
+    `/api/portfolio/items/${itemId}/realized-pnl${queryString ? `?${queryString}` : ""}`,
+    { method: "GET" },
+  );
 }
 
 // =========================================================
