@@ -61,3 +61,19 @@ export interface AccountDetailItemType {
   portfolioProfitLoss: number | null;
   portfolioProfitLossRate: number | null;
 }
+
+export interface AccountMonthlyFlowType {
+  monthDate: string; // YYYY-MM-DD (그달 1일)
+  income: number;
+  expense: number;
+  fixedExpense: number;
+  balance: number; // 그달 잔액 (이번달은 현재 잔액)
+}
+
+export interface AccountReportType {
+  accountId: string;
+  accountName: string;
+  accountType: AccountType;
+  balance: number;
+  monthlyFlows: AccountMonthlyFlowType[];
+}

@@ -1,6 +1,10 @@
 import { createQueryKeys } from "@lukemorales/query-key-factory";
 
-import { GetAccountDetailApi, GetAccountSearchApi } from "../api";
+import {
+  GetAccountDetailApi,
+  GetAccountReportApi,
+  GetAccountSearchApi,
+} from "../api";
 import type { AccountSearchRequestType } from "../types";
 
 export const accounts = createQueryKeys("account", {
@@ -16,5 +20,9 @@ export const accounts = createQueryKeys("account", {
   detail: (accountId: string) => ({
     queryKey: [accountId],
     queryFn: () => GetAccountDetailApi(accountId),
+  }),
+  report: (accountId: string) => ({
+    queryKey: [accountId],
+    queryFn: () => GetAccountReportApi(accountId),
   }),
 });

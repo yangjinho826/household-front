@@ -11,15 +11,16 @@ import {
 } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
-import { IconCheck, IconPlus } from "@tabler/icons-react";
+import { IconRefresh } from "@tabler/icons-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useRouter, useParams } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   Area,
   AreaChart,
   ResponsiveContainer,
+  Tooltip,
   XAxis,
 } from "recharts";
 
@@ -30,8 +31,58 @@ import { queryKeys } from "_constants/queries";
 import { getErrorMessage } from "_libraries/fetch/error-message";
 import { fmt } from "_utilities/fmt";
 
+import SnapshotDrilldownPanel from "./components/snapshot-drilldown-panel";
+
 // 시각 색상 매핑은 _features/account/constants.ts 에서 중앙 관리
 const TYPE_COLOR = ACCOUNT_TYPE_MANTINE_COLOR;
+
+interface TrendPoint {
+  month: string;
+  value: number;
+  momPct: number | null; // 전월 대비 증감률
+}
+
+// 추이 차트 점을 탭하면 그달 총자산 + 전월대비 증감을 보여줌
+function TrendTooltip({
+  active,
+  payload,
+}: {
+  active?: boolean;
+  payload?: { payload: TrendPoint }[];
+}) {
+  if (!active || !payload?.length) return null;
+  const p = payload[0]?.payload;
+  if (!p) return null;
+  return (
+    <div
+      style={{
+        background: "var(--mantine-color-body)",
+        border: "1px solid var(--mantine-color-gray-2)",
+        borderRadius: 10,
+        padding: "8px 12px",
+        boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+      }}
+    >
+      <Text size="xs" c="dimmed" fw={600}>
+        {p.month}
+      </Text>
+      <Text size="sm" fw={800} style={{ fontVariantNumeric: "tabular-nums" }}>
+        {fmt(p.value)}원
+      </Text>
+      {p.momPct !== null && (
+        <Text
+          size="xs"
+          fw={700}
+          c={p.momPct >= 0 ? "linerGreen.6" : "danger.5"}
+          style={{ fontVariantNumeric: "tabular-nums" }}
+        >
+          전월 {p.momPct >= 0 ? "+" : "−"}
+          {Math.abs(p.momPct).toFixed(1)}%
+        </Text>
+      )}
+    </div>
+  );
+}
 
 export default function WealthSection() {
   const router = useRouter();
@@ -45,20 +96,40 @@ export default function WealthSection() {
 
   const { createMutation } = useAccountSnapshotMutations();
 
+  // 추이 차트에서 탭한 월 — 그달 계좌별 분해 패널 표시용
+  const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
+
   const overview = overviewRes.body.data;
   // 백엔드 account.balance 는 INVESTMENT 도 cash + 평가금 합산해서 내려옴
   const accounts: AccountListItemType[] = overview.accounts;
   const yearly = overview.yearlySnapshots;
   const total = overview.totalBalance;
 
-  const trendData = useMemo(
+  const selectedMonth =
+    selectedIdx !== null ? (yearly.months[selectedIdx] ?? null) : null;
+
+  const trendData = useMemo<TrendPoint[]>(
     () =>
-      yearly.months.map((m) => ({
-        month: `${Number(m.snapshotDate.slice(5, 7))}월`, // "5월"
-        value: m.totalBalance,
-      })),
+      yearly.months.map((m, i) => {
+        const prev = i > 0 ? (yearly.months[i - 1]?.totalBalance ?? null) : null;
+        const momPct =
+          prev && prev > 0 ? ((m.totalBalance - prev) / prev) * 100 : null;
+        return {
+          month: `${Number(m.snapshotDate.slice(5, 7))}월`, // "5월"
+          value: m.totalBalance,
+          momPct,
+        };
+      }),
     [yearly.months],
   );
+
+  // 추이 기간 전체 증감 — 첫 박제월 대비 현재 총자산
+  const periodPct = useMemo(() => {
+    const first = yearly.months[0]?.totalBalance;
+    if (!first || first <= 0 || yearly.months.length < 2) return null;
+    return ((total - first) / first) * 100;
+  }, [yearly.months, total]);
+  const periodMonths = trendData.length;
 
   const byType = useMemo(() => {
     const types: AccountType[] = ["LIVING", "SAVINGS", "INVESTMENT", "OTHER"];
@@ -84,18 +155,24 @@ export default function WealthSection() {
     ? `${Number(lastSnapshot.snapshotDate.slice(5, 7))}월`
     : "";
 
-  const hasTargetMonth = yearly.targetMonthSaved;
+  // 수동 박제 — 지난달(targetMonth) upsert. 이미 저장됐어도 다시 눌러 갱신 가능.
+  const isTargetSaved = yearly.targetMonthSaved;
   const targetMonthLabel = `${Number(yearly.targetMonthDate.slice(5, 7))}월`;
 
   const handleTakeSnapshot = () => {
-    if (hasTargetMonth || createMutation.isPending) return;
+    if (createMutation.isPending) return;
     modals.openConfirmModal({
       centered: true,
       title: `${targetMonthLabel} 자산 기록`,
-      labels: { confirm: "기록하기", cancel: "취소" },
+      labels: {
+        confirm: isTargetSaved ? "덮어쓰기" : "기록하기",
+        cancel: "취소",
+      },
       children: (
         <Text size="sm">
-          {targetMonthLabel} 자산 스냅샷을 저장할까요?
+          {isTargetSaved
+            ? `이미 저장된 ${targetMonthLabel} 자산을 현재 잔액으로 덮어쓸까요?`
+            : `${targetMonthLabel} 자산 스냅샷을 저장할까요?`}
           <br />
           모든 통장의 현재 잔액이 기록됩니다.
         </Text>
@@ -131,30 +208,20 @@ export default function WealthSection() {
             </Text>
             <UnstyledButton
               onClick={handleTakeSnapshot}
-              disabled={hasTargetMonth || createMutation.isPending}
+              disabled={createMutation.isPending}
               style={{
                 padding: "6px 12px",
                 borderRadius: 999,
-                background: hasTargetMonth
-                  ? "var(--mantine-color-gray-0)"
-                  : "var(--mantine-color-info-0)",
+                background: "var(--mantine-color-info-0)",
                 opacity: createMutation.isPending ? 0.5 : 1,
               }}
             >
               <Group gap={4} wrap="nowrap">
-                {hasTargetMonth ? (
-                  <IconCheck size={12} stroke={3} color="#8B95A1" />
-                ) : (
-                  <IconPlus size={12} stroke={3} color="#3B82F6" />
-                )}
-                <Text
-                  size="10px"
-                  fw={700}
-                  c={hasTargetMonth ? "dimmed" : "info.5"}
-                >
-                  {hasTargetMonth
-                    ? `${targetMonthLabel} 저장됨`
-                    : `${targetMonthLabel} 자산 기록`}
+                <IconRefresh size={12} stroke={3} color="#3B82F6" />
+                <Text size="10px" fw={700} c="info.5">
+                  {isTargetSaved
+                    ? `${targetMonthLabel} 갱신`
+                    : `${targetMonthLabel} 기록`}
                 </Text>
               </Group>
             </UnstyledButton>
@@ -182,11 +249,47 @@ export default function WealthSection() {
                 ` (${diff >= 0 ? "+" : "−"}${Math.abs(diffPct).toFixed(1)}%)`}
             </Text>
           )}
+          {periodPct !== null && (
+            <Group justify="space-between" align="center" mt={8} mb={-4}>
+              <Text size="xs" c="dimmed" fw={600}>
+                최근 {periodMonths}개월 추이
+              </Text>
+              <Text
+                size="xs"
+                fw={700}
+                c={periodPct >= 0 ? "linerGreen.6" : "danger.5"}
+                style={{ fontVariantNumeric: "tabular-nums" }}
+              >
+                {periodPct >= 0 ? "+" : "−"}
+                {Math.abs(periodPct).toFixed(1)}%
+              </Text>
+            </Group>
+          )}
           <div className="chart-trend-wrap">
             <ResponsiveContainer width="100%" height="100%" minWidth={0}>
               <AreaChart
                 data={trendData}
                 margin={{ top: 12, right: 0, bottom: 0, left: 0 }}
+                onClick={(state) => {
+                  // recharts v3: 클릭 위치는 activeIndex(문자열일 수 있음) / activeLabel 로 옴
+                  let idx: number | null = null;
+                  const ai = state?.activeIndex;
+                  if (ai != null && ai !== "") {
+                    const n = Number(ai);
+                    if (!Number.isNaN(n)) idx = n;
+                  }
+                  if (idx === null && state?.activeLabel) {
+                    const found = trendData.findIndex(
+                      (d) => d.month === state.activeLabel,
+                    );
+                    if (found >= 0) idx = found;
+                  }
+                  if (idx !== null) {
+                    const target = idx;
+                    setSelectedIdx((cur) => (cur === target ? null : target));
+                  }
+                }}
+                style={{ cursor: "pointer" }}
               >
                 <defs>
                   <linearGradient id="wealthTrend" x1="0" y1="0" x2="0" y2="1">
@@ -200,6 +303,21 @@ export default function WealthSection() {
                   stroke="#3B82F6"
                   strokeWidth={2.5}
                   fill="url(#wealthTrend)"
+                  dot={{ r: 2.5, fill: "#3B82F6", strokeWidth: 0 }}
+                  activeDot={{
+                    r: 5,
+                    fill: "#3B82F6",
+                    stroke: "var(--mantine-color-body)",
+                    strokeWidth: 2,
+                  }}
+                />
+                <Tooltip
+                  content={<TrendTooltip />}
+                  cursor={{
+                    stroke: "#3B82F6",
+                    strokeWidth: 1,
+                    strokeDasharray: "3 3",
+                  }}
                 />
                 <XAxis
                   dataKey="month"
@@ -213,6 +331,13 @@ export default function WealthSection() {
           </div>
         </Stack>
       </Card>
+
+      {selectedMonth && (
+        <SnapshotDrilldownPanel
+          month={selectedMonth}
+          onClose={() => setSelectedIdx(null)}
+        />
+      )}
 
       <Card radius="lg">
         <Stack gap="sm">

@@ -9,6 +9,7 @@ import type {
   AccountCreateRequest,
   AccountDetailItemType,
   AccountListItemType,
+  AccountReportType,
   AccountSearchRequestType,
   AccountUpdateRequest,
 } from "./types";
@@ -74,6 +75,14 @@ export async function GetAccountDetailApi(accountId: string) {
   const { id, ...rest } = res.body.data;
   const mapped: AccountDetailItemType = { ...rest, accountId: id };
   return { ...res, body: { ...res.body, data: mapped } };
+}
+
+// 백엔드가 accountId 그대로(camelCase) 내려줌 — 별도 매핑 불필요
+export async function GetAccountReportApi(accountId: string) {
+  return apiFetch<ApiResponse<AccountReportType>>(
+    `/api/account/report/${accountId}`,
+    { method: "GET" },
+  );
 }
 
 export async function PostAccountCreateApi(

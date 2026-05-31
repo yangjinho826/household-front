@@ -9,6 +9,10 @@ import { queryKeys } from "_constants/queries";
 import { GetAccountSearchApi } from "../api";
 import type { AccountSearchRequestType } from "../types";
 
+export const useAccountReport = (accountId: string) => {
+  return useSuspenseQuery(queryKeys.account.report(accountId));
+};
+
 export const useAccountList = (
   params: AccountSearchRequestType & { limit?: number },
 ) => {

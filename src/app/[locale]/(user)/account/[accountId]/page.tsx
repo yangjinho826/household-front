@@ -1,9 +1,9 @@
-import AccountFormSection from "_sections/account/account-form-section";
+import AccountReportSection from "_sections/account/account-report-section";
 
 export default function AccountDetailPage({
   params,
 }: {
   params: { accountId: string };
 }) {
-  return <AccountFormSection accountId={params.accountId} />;
+  return <AccountReportSection accountId={params.accountId} />;
 }
