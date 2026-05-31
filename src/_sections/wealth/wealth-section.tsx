@@ -72,6 +72,18 @@ export default function WealthSection() {
       .filter((t) => t.accs.length > 0);
   }, [accounts, total]);
 
+  // 전월 대비 증감 — 현재 총자산 vs 가장 최근 박제 스냅샷
+  const lastSnapshot =
+    yearly.months.length > 0 ? yearly.months[yearly.months.length - 1] : null;
+  const diff = lastSnapshot ? total - lastSnapshot.totalBalance : null;
+  const diffPct =
+    lastSnapshot && lastSnapshot.totalBalance > 0
+      ? ((total - lastSnapshot.totalBalance) / lastSnapshot.totalBalance) * 100
+      : null;
+  const lastSnapshotLabel = lastSnapshot
+    ? `${Number(lastSnapshot.snapshotDate.slice(5, 7))}월`
+    : "";
+
   const hasTargetMonth = yearly.targetMonthSaved;
   const targetMonthLabel = `${Number(yearly.targetMonthDate.slice(5, 7))}월`;
 
@@ -157,6 +169,19 @@ export default function WealthSection() {
               원
             </Text>
           </Text>
+          {diff !== null && (
+            <Text
+              size="sm"
+              fw={600}
+              c={diff >= 0 ? "linerGreen.6" : "danger.5"}
+              style={{ fontVariantNumeric: "tabular-nums" }}
+            >
+              {lastSnapshotLabel} 기록 대비 {diff >= 0 ? "+" : "−"}
+              {fmt(Math.abs(diff))}원
+              {diffPct !== null &&
+                ` (${diff >= 0 ? "+" : "−"}${Math.abs(diffPct).toFixed(1)}%)`}
+            </Text>
+          )}
           <div className="chart-trend-wrap">
             <ResponsiveContainer width="100%" height="100%" minWidth={0}>
               <AreaChart
