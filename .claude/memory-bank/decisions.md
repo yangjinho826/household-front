@@ -15,3 +15,8 @@
 2026-05-28: codex 외부 모델 교차 리뷰 도입 — High 1 + Med 4 fix 후 머지 결정 (PR 7) (`account.list._def` 만 잡고 `account.infinite` 누락한 invalidation 버그가 실 UI stale 로 이어지는 결정적 발견)
 2026-05-28: settings 의 household.list + settings.overview 2호출은 의식적 예외 — 묶지 않음 (의미/캐시 수명 다름, 백엔드 추가 변경 회피)
 2026-05-28: household list 페이징 정책 — cursor 봉투 형식 유지 + `HOUSEHOLD_LIST_LIMIT=200` unbounded (가계부는 사용자당 수십개 이내, switcher 는 한번에 표시 필요, infinite 는 over-engineering)
+
+2026-05-31: 가계부×자산 통합 범위 — 총자산만 (부채/순자산 안 함) — 복잡도 축소, 빚 따로 관리. 나중에 확장 시 스냅샷 스키마 재작업 필요
+2026-05-31: 평단 방식 — 이동평균 유지 (lot/cost basis 안 만듦) — codex 권고, MVP에 lot은 과함. 매도행에 실현손익 박제로 충분
+2026-05-31: MVP를 R1으로 축소 — 자동박제+전월대비증감만 1차 릴리스. 나머지(원인분해/실현손익/계좌별리포트/drill-down)는 R2~로 — codex "데이터모델 신뢰도 먼저, 기능 확장은 그 다음"
+2026-05-31: 디자인 audit는 R1 화면 확정 후 별도 트랙 — R1이 /wealth 화면을 바꾸므로 미리 audit하면 재작업

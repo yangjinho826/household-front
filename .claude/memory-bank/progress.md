@@ -1,6 +1,8 @@
 # 진행 상태
 
 ## 완료
+- [x] 2026-05-31: 가계부×자산 통합 MVP 기획 — 코드현황+한/해외 벤치마킹+codex 교차검토. 부채/순자산·lot 제외, 총자산 기준으로 축소
+- [x] 2026-05-31: R1 구현 — 매월 자동 박제 cron(back) + 전월대비 증감 표시(front). QA 통과(버그1 수정), 미커밋
 - [x] 2026-05-28: API 리팩토링 PR 0 — CursorPage 봉투 통일 인프라 + transaction 마이그레이션
 - [x] 2026-05-28: API 리팩토링 PR 1 — portfolio overview/item/form-options 도입 + 무한 스크롤 거래내역
 - [x] 2026-05-28: API 리팩토링 PR 2 — account / category / fixed 관리 페이지 무한 스크롤
@@ -11,7 +13,22 @@
 - [x] 2026-05-28: API 리팩토링 PR 7 — codex 외부 모델 교차 리뷰 반영 (High invalidation 버그 fix + Med 4건)
 
 ## 진행 중
+- [ ] R1 화면 확인(시드 데이터) → 커밋 (back/front, 브랜치부터) → (선택) 디자인 audit
 - [ ] `refactor/api-cursor-overview` → main 머지 (백/프 각각 PR)
+
+## 가계부×자산 통합 — MVP 로드맵 (R1 완료, R2~ 대기)
+
+목적: "매월 자산이 어떻게 변하는지 한눈에"(총자산 기준). 부채/순자산·lot 안 함.
+원칙(codex): 데이터모델→적재→표현, immutable 스냅샷, 이중계상 금지.
+
+- [x] R1: 자동 박제(월1일 cron) + 전월대비 증감 ← 완료(미커밋)
+- [ ] R2: 순자산 증감 원인분해(저축 vs 투자손익) + 계좌별 월간 리포트
+- [ ] R3: 실현손익 + 청산종목 내역 (매도행에 realized_pnl 박제, 이동평균 유지)
+- [ ] R4: 계좌→종목 drill-down + 종목 평가액 추이 차트 (데이터 이미 있음)
+- [ ] R5+: asset_class 배분 / goal / TWR / 부동산·연금 / 디자인 토큰화
+
+### R2+ 착수 전 확정할 결정
+- 카드 사용일 vs 결제일 / 잔액조정(RECONCILIATION) tx / 투자계좌 예수금 모델 / 배당·이자 tx_type
 
 ## Follow-up (Low 우선순위)
 - [ ] cursor page 마다 `rowNo` 가 1부터 재시작 — flatten 후 부여 OR 타입에서 제거
