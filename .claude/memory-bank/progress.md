@@ -1,6 +1,7 @@
 # 진행 상태
 
 ## 완료
+- [x] 2026-06-02: **R5b 트랙② 구조 트랙 — 자산중심 IA 전면 재편** (front). S1 portfolio→invest 라우트 이동 / S2 레거시 308 리다이렉트 / S3 4탭화(홈·거래·투자·내정보)+nav i18n / S4 /wealth 슬림화(hero·도넛·계좌타입 진행바 제거+SubHeader, sub-route화) / S5 홈=자산 대시보드(TotalAssetHero 추출+wealth/home/portfolio 3쿼리 조합). S6(카테고리 이관) 스킵(stats.monthly 미검증·UX 복잡도). 결정: 차트=Mantine Charts, 브랜드="모음", IA=자산중심 4탭. /browse 로그인 QA 통과(3 API 200·콘솔 에러 0). dev push(ba8da2a). 시각 트랙(V1 design-shotgun~V5 리브랜딩) 대기. 로드맵 optimized-singing-russell.md
 - [x] 2026-06-01: **R5a-3 (월별 배분추이) — 완료**. 설계 변경: 전용 테이블(원안) 폐기 → **방안 B 경량**(PortfolioValueHistory에 asset_class 컬럼 1개 + 조회시 AccountSnapshot 조합 on-the-fly 집계). 새 도메인/테이블 0개. 백: PVH 컬럼+마이그레이션 C(c9d4e7f21a36, 백필 UPDATE)+박제 기록+`build_allocation_trend`+schema(allocationTrend). 프론트: `allocation-trend-chart.tsx`(스택 AreaChart). 검증: 가역성·curl(trend==yearly·ratio100·cash 역산·이중계상0)·E2E 렌더 전부 통과. 핵심: 부동산/연금 과거 as-of = AccountSnapshot roll-up balance(평가이력 테이블 불필요). 상세 R5a-plan.md
 - [x] 2026-06-01: R5a-2 (ManualAsset 부동산·연금) — 신규 manual_asset 도메인 + AccountType REAL_ESTATE/PENSION + roll-up + account_type→asset_class 매핑(double-counting 구조적 불가) + 마이그레이션 3ef71953bb00. 프론트 7파일(폼 modal) + wealth-section 섹션. dev 커밋 94452dd
 - [x] 2026-06-01: R5a-1 (asset_class + 현재 배분 파이) — 2축 분리(market 유지+asset_class 신규). 백 8파일+마이그레이션 A(b8e4d1a09c37)+프론트 9파일. 배분 도넛(PortfolioDonut 재사용). codex 설계 검증. typecheck+9001 QA(allocation 합=totalBalance) 통과. dev 커밋 64d7571. 상세 R5a-plan.md
