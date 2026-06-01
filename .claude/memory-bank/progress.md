@@ -6,6 +6,7 @@
 - [x] 2026-05-31: R3 실현손익 — 매도 realized_pnl 박제 + 종목 상세 매매손익 탭. dev 커밋
 - [x] 2026-06-01: R2 구현+QA 통과 — 추이 drill-down·계좌별 리포트·추이 차트 직관화. 시드(4월 부트스트랩 + 역산 8개월) 채워 화면 검증. dev 커밋
 - [x] 2026-06-01: 설정파일 정리 커밋 — CLAUDE.md·.gitignore(.gstack/,시드)·settings (front dadb918 / back a3c9afb)
+- [x] 2026-06-01: R4 구현+헤드리스 QA 통과 — 종목/투자계좌/일반통장 3화면 추이 차트(공통 ValueTrendChart). QA 중 버그 2개 fix: ①realized_pnl 마이그레이션 미적용(거래내역·매매손익 500) → alembic upgrade head ②종목 deep-link SSR 500(recharts) → useSyncExternalStore 마운트 가드. **미커밋(프론트 7파일)**
 - [x] 2026-05-28: API 리팩토링 PR 0 — CursorPage 봉투 통일 인프라 + transaction 마이그레이션
 - [x] 2026-05-28: API 리팩토링 PR 1 — portfolio overview/item/form-options 도입 + 무한 스크롤 거래내역
 - [x] 2026-05-28: API 리팩토링 PR 2 — account / category / fixed 관리 페이지 무한 스크롤

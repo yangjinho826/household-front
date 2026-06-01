@@ -20,3 +20,8 @@
 2026-05-31: 평단 방식 — 이동평균 유지 (lot/cost basis 안 만듦) — codex 권고, MVP에 lot은 과함. 매도행에 실현손익 박제로 충분
 2026-05-31: MVP를 R1으로 축소 — 자동박제+전월대비증감만 1차 릴리스. 나머지(원인분해/실현손익/계좌별리포트/drill-down)는 R2~로 — codex "데이터모델 신뢰도 먼저, 기능 확장은 그 다음"
 2026-05-31: 디자인 audit는 R1 화면 확정 후 별도 트랙 — R1이 /wealth 화면을 바꾸므로 미리 audit하면 재작업
+
+2026-06-01: R4 계좌 추이 차트 데이터 소스 — 종목 합산(valueHistoryByAccount) 대신 통장 전체 자산(account_snapshot balance) (hero "통장 전체 자산"과 일치 + 현금 포함이 사용자 직관에 맞음. valueHistoryByAccount API는 남겨둠)
+2026-06-01: R4 차트 = drill-down/표 없이 라인차트만 — 계좌=통장 전체 추이 / 종목=평가액 추이로 역할 분리 (사용자: 깔끔하게 차트만. R2 월클릭 분해는 자산 메인에만)
+2026-06-01: 일반통장 상세도 R4 차트 적용 — account-report-section 월별 내역 표를 잔액 추이 차트로 교체 (모든 통장 상세에서 일관된 추이 UX)
+2026-06-01: recharts SSR 대응 — useSyncExternalStore 마운트 가드로 클라 전용 렌더 (dynamic ssr:false 대신. set-state-in-effect lint 회피 + hydration-safe)
