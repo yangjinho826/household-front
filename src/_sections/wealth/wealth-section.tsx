@@ -37,6 +37,7 @@ import { queryKeys } from "_constants/queries";
 import { getErrorMessage } from "_libraries/fetch/error-message";
 import { fmt } from "_utilities/fmt";
 
+import AllocationTrendChart from "./components/allocation-trend-chart";
 import SnapshotDrilldownPanel from "./components/snapshot-drilldown-panel";
 
 // 시각 색상 매핑은 _features/account/constants.ts 에서 중앙 관리
@@ -391,6 +392,17 @@ export default function WealthSection() {
               자산군 배분
             </Text>
             <PortfolioDonut items={allocationItems} />
+          </Stack>
+        </Card>
+      )}
+
+      {overview.allocation.allocationTrend.length > 1 && (
+        <Card radius="lg">
+          <Stack gap="sm">
+            <Text size="sm" fw={700}>
+              자산군 배분 추이
+            </Text>
+            <AllocationTrendChart data={overview.allocation.allocationTrend} />
           </Stack>
         </Card>
       )}
