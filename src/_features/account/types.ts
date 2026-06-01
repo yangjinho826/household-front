@@ -24,7 +24,6 @@ export interface AccountUpdateRequest extends AccountBaseRequestType {
 }
 
 export interface AccountListItemType {
-  rowNo: number;
   accountId: string;
   householdId: string;
   name: string;

@@ -13,12 +13,6 @@ export const useAccountReport = (accountId: string) => {
   return useSuspenseQuery(queryKeys.account.report(accountId));
 };
 
-export const useAccountList = (
-  params: AccountSearchRequestType & { limit?: number },
-) => {
-  return useSuspenseQuery(queryKeys.account.list(params));
-};
-
 /** 통장 무한 스크롤 — 관리 페이지용 */
 export const useAccountInfiniteList = (
   params: AccountSearchRequestType,

@@ -30,7 +30,6 @@ export interface TransactionUpdateRequest extends TransactionBaseRequestType {
 }
 
 export interface TransactionListItemType {
-  rowNo: number;
   transactionId: string;
   householdId: string;
   txType: TxType;

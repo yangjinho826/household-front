@@ -26,12 +26,9 @@ interface BackendCursorPage<T> {
   totalCount: number | null;
 }
 
-function toListItem(
-  b: BackendAccountResponse,
-  rowNo: number,
-): AccountListItemType {
+function toListItem(b: BackendAccountResponse): AccountListItemType {
   const { id, ...rest } = b;
-  return { ...rest, accountId: id, rowNo };
+  return { ...rest, accountId: id };
 }
 
 /** 통장 목록 — cursor 무한 스크롤. cursor=null 이면 첫 페이지. */
@@ -52,7 +49,7 @@ export async function GetAccountSearchApi(
   >(`/api/account/list${queryString ? `?${queryString}` : ""}`, {
     method: "GET",
   });
-  const items = res.body.data.items.map((b, i) => toListItem(b, i + 1));
+  const items = res.body.data.items.map((b) => toListItem(b));
   const wrapped: ApiCursorPage<AccountListItemType> = {
     code: res.body.code,
     message: res.body.message,

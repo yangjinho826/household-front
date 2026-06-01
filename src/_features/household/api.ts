@@ -37,10 +37,9 @@ export async function GetHouseholdSearchApi() {
     ApiResponse<BackendCursorPage<BackendHouseholdResponse>>
   >(`/api/household/list?limit=${HOUSEHOLD_LIST_LIMIT}`, { method: "GET" });
   const items = res.body.data.items.map(
-    ({ id, ...rest }, idx): HouseholdListItemType => ({
+    ({ id, ...rest }): HouseholdListItemType => ({
       ...rest,
       householdId: id,
-      rowNo: idx + 1,
     }),
   );
   const wrapped: ApiCursorPage<HouseholdListItemType> = {

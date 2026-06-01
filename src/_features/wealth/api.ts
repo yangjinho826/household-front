@@ -7,7 +7,7 @@ import type { AccountSnapshotYearly } from "_features/account-snapshot/types";
 
 import type { WealthOverviewRequest, WealthOverviewType } from "./types";
 
-type BackendAccount = Omit<AccountListItemType, "accountId" | "rowNo"> & {
+type BackendAccount = Omit<AccountListItemType, "accountId"> & {
   id: string;
 };
 
@@ -17,9 +17,9 @@ interface BackendWealthOverview {
   yearlySnapshots: AccountSnapshotYearly;
 }
 
-function toAccount(b: BackendAccount, rowNo: number): AccountListItemType {
+function toAccount(b: BackendAccount): AccountListItemType {
   const { id, ...rest } = b;
-  return { ...rest, accountId: id, rowNo };
+  return { ...rest, accountId: id };
 }
 
 export async function GetWealthOverviewApi(params: WealthOverviewRequest = {}) {
@@ -35,7 +35,7 @@ export async function GetWealthOverviewApi(params: WealthOverviewRequest = {}) {
 
   const mapped: WealthOverviewType = {
     totalBalance: res.body.data.totalBalance,
-    accounts: res.body.data.accounts.map((a, i) => toAccount(a, i + 1)),
+    accounts: res.body.data.accounts.map((a) => toAccount(a)),
     yearlySnapshots: res.body.data.yearlySnapshots,
   };
   return { ...res, body: { ...res.body, data: mapped } };

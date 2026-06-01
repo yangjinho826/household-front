@@ -9,13 +9,12 @@ import type { HomeOverviewRequest, HomeOverviewType } from "./types";
 
 // 백엔드 응답: account PK 는 `id`, transaction PK 도 `id`.
 // 프론트 타입은 각각 `accountId` / `transactionId` 로 통일.
-type BackendAccount = Omit<AccountListItemType, "accountId" | "rowNo"> & {
+type BackendAccount = Omit<AccountListItemType, "accountId"> & {
   id: string;
 };
-type BackendTransaction = Omit<
-  TransactionListItemType,
-  "transactionId" | "rowNo"
-> & { id: string };
+type BackendTransaction = Omit<TransactionListItemType, "transactionId"> & {
+  id: string;
+};
 
 interface BackendHomeOverview
   extends Omit<HomeOverviewType, "accounts" | "recentTransactions"> {
@@ -23,17 +22,14 @@ interface BackendHomeOverview
   recentTransactions: BackendTransaction[];
 }
 
-function toAccount(b: BackendAccount, rowNo: number): AccountListItemType {
+function toAccount(b: BackendAccount): AccountListItemType {
   const { id, ...rest } = b;
-  return { ...rest, accountId: id, rowNo };
+  return { ...rest, accountId: id };
 }
 
-function toTransaction(
-  b: BackendTransaction,
-  rowNo: number,
-): TransactionListItemType {
+function toTransaction(b: BackendTransaction): TransactionListItemType {
   const { id, ...rest } = b;
-  return { ...rest, transactionId: id, rowNo };
+  return { ...rest, transactionId: id };
 }
 
 export async function GetHomeOverviewApi(params: HomeOverviewRequest = {}) {
@@ -49,9 +45,9 @@ export async function GetHomeOverviewApi(params: HomeOverviewRequest = {}) {
 
   const mapped: HomeOverviewType = {
     totalBalance: res.body.data.totalBalance,
-    accounts: res.body.data.accounts.map((a, i) => toAccount(a, i + 1)),
-    recentTransactions: res.body.data.recentTransactions.map((t, i) =>
-      toTransaction(t, i + 1),
+    accounts: res.body.data.accounts.map((a) => toAccount(a)),
+    recentTransactions: res.body.data.recentTransactions.map((t) =>
+      toTransaction(t),
     ),
     stats: res.body.data.stats,
     year: res.body.data.year,

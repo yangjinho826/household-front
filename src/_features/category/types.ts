@@ -22,7 +22,6 @@ export interface CategoryUpdateRequest extends CategoryBaseRequestType {
 }
 
 export interface CategoryListItemType {
-  rowNo: number;
   categoryId: string;
   householdId: string;
   kind: CategoryKind;

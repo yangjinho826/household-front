@@ -58,7 +58,6 @@ export interface PortfolioLookupResponse {
 }
 
 export interface PortfolioListItemType {
-  rowNo: number;
   portfolioId: string;
   accountId: string;
   accountName: string;
@@ -84,7 +83,6 @@ export type PortfolioDetailItemType = PortfolioListItemType;
 export type PortfolioTxType = "BUY" | "SELL";
 
 export interface PortfolioTransactionItemType {
-  rowNo: number;
   txId: string;
   accountId: string;
   accountName: string;

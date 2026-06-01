@@ -19,7 +19,6 @@ export interface HouseholdUpdateRequest extends HouseholdBaseRequestType {
 }
 
 export interface HouseholdListItemType {
-  rowNo: number;
   householdId: string;
   name: string;
   description: string | null;

@@ -24,12 +24,9 @@ interface BackendCursorPage<T> {
   totalCount: number | null;
 }
 
-function toListItem(
-  b: BackendCategoryResponse,
-  rowNo: number,
-): CategoryListItemType {
+function toListItem(b: BackendCategoryResponse): CategoryListItemType {
   const { id, ...rest } = b;
-  return { ...rest, categoryId: id, rowNo };
+  return { ...rest, categoryId: id };
 }
 
 /** 카테고리 목록 — cursor 무한 스크롤 */
@@ -53,7 +50,7 @@ export async function GetCategorySearchApi(
   >(`/api/category/list${queryString ? `?${queryString}` : ""}`, {
     method: "GET",
   });
-  const items = res.body.data.items.map((b, i) => toListItem(b, i + 1));
+  const items = res.body.data.items.map((b) => toListItem(b));
   const wrapped: ApiCursorPage<CategoryListItemType> = {
     code: res.body.code,
     message: res.body.message,

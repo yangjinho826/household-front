@@ -31,12 +31,9 @@ interface BackendTransactionListPage {
   totalCount: number | null;
 }
 
-function toListItem(
-  b: BackendTransactionResponse,
-  rowNo: number,
-): TransactionListItemType {
+function toListItem(b: BackendTransactionResponse): TransactionListItemType {
   const { id, ...rest } = b;
-  return { ...rest, transactionId: id, rowNo };
+  return { ...rest, transactionId: id };
 }
 
 function toDetail(b: BackendTransactionResponse): TransactionDetailItemType {
@@ -66,9 +63,7 @@ export async function GetTransactionSearchApi(
     `/api/transaction/list${queryString ? `?${queryString}` : ""}`,
     { method: "GET" },
   );
-  const items = (res.body.data?.items ?? []).map((b, idx) =>
-    toListItem(b, idx + 1),
-  );
+  const items = (res.body.data?.items ?? []).map((b) => toListItem(b));
   const wrapped: ApiCursorPage<TransactionListItemType> = {
     code: res.body.code,
     message: res.body.message,
@@ -124,13 +119,13 @@ export function DeleteTransactionDeleteApi(transactionId: string) {
   );
 }
 
-type BackendAccount = Omit<AccountListItemType, "accountId" | "rowNo"> & {
+type BackendAccount = Omit<AccountListItemType, "accountId"> & {
   id: string;
 };
-type BackendCategory = Omit<CategoryListItemType, "categoryId" | "rowNo"> & {
+type BackendCategory = Omit<CategoryListItemType, "categoryId"> & {
   id: string;
 };
-type BackendFixed = Omit<FixedListItemType, "fixedId" | "rowNo"> & {
+type BackendFixed = Omit<FixedListItemType, "fixedId"> & {
   id: string;
 };
 
@@ -154,9 +149,7 @@ export async function GetTransactionCalendarFullApi(params: {
     `/api/transaction/calendar/${params.year}/${params.month}/full`,
     { method: "GET" },
   );
-  const transactions = res.body.data.transactions.map((b, i) =>
-    toListItem(b, i + 1),
-  );
+  const transactions = res.body.data.transactions.map((b) => toListItem(b));
   const mapped: TransactionCalendarFullType = {
     year: res.body.data.year,
     month: res.body.data.month,
@@ -177,13 +170,13 @@ export async function GetTransactionFormOptionsApi() {
     { method: "GET" },
   );
   const accounts: AccountListItemType[] = res.body.data.accounts.map(
-    ({ id, ...rest }, i) => ({ ...rest, accountId: id, rowNo: i + 1 }),
+    ({ id, ...rest }) => ({ ...rest, accountId: id }),
   );
   const categories: CategoryListItemType[] = res.body.data.categories.map(
-    ({ id, ...rest }, i) => ({ ...rest, categoryId: id, rowNo: i + 1 }),
+    ({ id, ...rest }) => ({ ...rest, categoryId: id }),
   );
   const fixedExpenses: FixedListItemType[] = res.body.data.fixedExpenses.map(
-    ({ id, ...rest }, i) => ({ ...rest, fixedId: id, rowNo: i + 1 }),
+    ({ id, ...rest }) => ({ ...rest, fixedId: id }),
   );
   const mapped: TransactionFormOptionsType = {
     accounts,
