@@ -117,8 +117,6 @@
     "account_required_message": "Please select an account.",
     "market": "Market",
     "market_help": "Markets auto-refreshed via Yahoo. Pick 'Other' for unsupported assets like commodities.",
-    "asset_class": "Asset Class",
-    "asset_class_help": "Allocation chart grouping. Independent of price refresh — for a gold ETF, keep the market and pick 'Commodity'.",
     "code": "Stock Code",
     "code_placeholder": "e.g. 005930",
     "code_required_message": "Please enter stock code.",
@@ -253,8 +251,7 @@
       "OTHER": "Other"
     },
     "asset-class": {
-      "STOCK": "Stock",
-      "BOND": "Bond",
+      "INVESTMENT": "Investment",
       "COMMODITY": "Commodity",
       "CASH": "Cash",
       "REAL_ESTATE": "Real Estate",

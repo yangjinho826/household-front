@@ -5,10 +5,10 @@ export type Market =
   | "NYSE"
   | "OTHER";
 
-/** 자산 성격 — market(거래소)과 직교하는 분류 축. 배분 파이 group by 키. */
+/** 자산군 배분 슬라이스 축 — 배분 파이/추이 group by 키.
+ *  종목은 전부 INVESTMENT, 실물·부동산·연금은 수동자산이 차지. */
 export type AssetClass =
-  | "STOCK"
-  | "BOND"
+  | "INVESTMENT"
   | "COMMODITY"
   | "CASH"
   | "REAL_ESTATE"
@@ -26,7 +26,6 @@ export interface PortfolioCreateRequest {
   name: string;
   code: string;
   market: Market;
-  assetClass: AssetClass;
   currentPrice: number;
   accountId: string;
 }
@@ -56,7 +55,6 @@ export interface PortfolioUpdateRequest {
   name?: string | null;
   code?: string | null;
   market?: Market | null;
-  assetClass?: AssetClass | null;
   isArchived?: boolean | null;
 }
 
@@ -76,7 +74,6 @@ export interface PortfolioListItemType {
   name: string;
   code: string;
   market: Market;
-  assetClass: AssetClass;
   quantity: number;
   avgPrice: number;
   currentPrice: number;

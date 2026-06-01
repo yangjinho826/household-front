@@ -9,6 +9,7 @@ export const ACCOUNT_TYPE_MANTINE_COLOR: Record<AccountType, string> = {
   INVESTMENT: "purple",
   REAL_ESTATE: "grape",
   PENSION: "pink",
+  COMMODITY: "yellow",
   OTHER: "gray",
 };
 
@@ -19,6 +20,7 @@ export const ACCOUNT_TYPE_HEX: Record<AccountType, string> = {
   INVESTMENT: TOKEN.purple,
   REAL_ESTATE: "#8B5CF6",
   PENSION: "#EC4899",
+  COMMODITY: "#F59E0B",
   OTHER: "#8B95A1",
 };
 

@@ -7,7 +7,7 @@ import { useEffect } from "react";
 import { z } from "zod";
 
 import { usePortfolioMutations } from "_features/portfolio/queries/use-mutations";
-import type { AssetClass, Market } from "_features/portfolio/types";
+import type { Market } from "_features/portfolio/types";
 import { getErrorMessage } from "_libraries/fetch/error-message";
 
 import { usePortfolioItemFetch } from "../../queries/use-query";
@@ -19,7 +19,6 @@ interface UsePortfolioFormOptions {
 interface FormValues {
   accountId: string;
   market: Market;
-  assetClass: AssetClass;
   code: string;
   name: string;
   currentPrice: number;
@@ -42,7 +41,6 @@ export function usePortfolioForm({ portfolioId }: UsePortfolioFormOptions) {
     initialValues: {
       accountId: "",
       market: "KRX_KOSPI",
-      assetClass: "STOCK",
       code: "",
       name: "",
       currentPrice: 0,
@@ -54,15 +52,6 @@ export function usePortfolioForm({ portfolioId }: UsePortfolioFormOptions) {
         .object({
           accountId: z.string().min(1, t("account_required_message")),
           market: z.enum(["KRX_KOSPI", "KRX_KOSDAQ", "NASDAQ", "NYSE", "OTHER"]),
-          assetClass: z.enum([
-            "STOCK",
-            "BOND",
-            "COMMODITY",
-            "CASH",
-            "REAL_ESTATE",
-            "PENSION",
-            "OTHER",
-          ]),
           code: z.string(),
           name: z.string().min(1, t("name_required_message")),
           currentPrice: z.number().positive(t("current_price_required_message")),
@@ -90,7 +79,6 @@ export function usePortfolioForm({ portfolioId }: UsePortfolioFormOptions) {
       form.setValues({
         accountId: d.accountId,
         market: d.market,
-        assetClass: d.assetClass,
         code: d.code,
         name: d.name,
         currentPrice: d.currentPrice,
@@ -136,7 +124,6 @@ export function usePortfolioForm({ portfolioId }: UsePortfolioFormOptions) {
           name: form.values.name,
           code: form.values.code,
           market: form.values.market,
-          assetClass: form.values.assetClass,
           isArchived: form.values.isArchived,
         });
         notifications.show({
@@ -150,7 +137,6 @@ export function usePortfolioForm({ portfolioId }: UsePortfolioFormOptions) {
           name: form.values.name,
           code: form.values.code,
           market: form.values.market,
-          assetClass: form.values.assetClass,
           currentPrice: form.values.currentPrice,
           accountId: form.values.accountId,
         });

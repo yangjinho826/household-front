@@ -120,9 +120,12 @@ export default function WealthSection() {
   const overview = overviewRes.body.data;
   // 백엔드 account.balance 는 INVESTMENT 도 cash + 평가금 합산해서 내려옴
   const accounts: AccountListItemType[] = overview.accounts;
-  // 부동산·연금 전용계좌는 통장 리스트에서 제외 — 별도 "부동산·연금" 섹션에서 관리
+  // 수동자산 전용계좌(부동산·연금·금)는 통장 리스트에서 제외 — 별도 수동자산 섹션에서 관리
   const visibleAccounts = accounts.filter(
-    (a) => a.accountType !== "REAL_ESTATE" && a.accountType !== "PENSION",
+    (a) =>
+      a.accountType !== "REAL_ESTATE" &&
+      a.accountType !== "PENSION" &&
+      a.accountType !== "COMMODITY",
   );
   const yearly = overview.yearlySnapshots;
   const total = overview.totalBalance;
@@ -160,6 +163,7 @@ export default function WealthSection() {
       "INVESTMENT",
       "REAL_ESTATE",
       "PENSION",
+      "COMMODITY",
       "OTHER",
     ];
     return types

@@ -35,6 +35,7 @@ export default function ManualAssetForm({
   const assetClassOptions = [
     { value: "REAL_ESTATE", label: tAssetClass("REAL_ESTATE") },
     { value: "PENSION", label: tAssetClass("PENSION") },
+    { value: "COMMODITY", label: tAssetClass("COMMODITY") },
   ];
 
   return (
