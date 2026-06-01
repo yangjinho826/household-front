@@ -31,3 +31,8 @@
 2026-06-01: 월별 배분추이 — asset_class_snapshots 전용 테이블 (account_snapshot은 계좌총액만 저장해 asset_class 슬라이스 재구성 불가. codex "aggregation loss")
 2026-06-01: R5a 전체 한 사이클 + 단계 커밋 — R5a-1/2/3 순차, 마이그레이션 A/B/C 독립 (사용자: 전체 한번에. 단 스냅샷 의미변경을 모델 마이그레이션에 묻지 말 것 — codex)
 2026-06-01: asset_class 백필 — 전부 STOCK 기본값 + UI에서 사용자 재분류 (금을 code/name LIKE로 SQL 추측 UPDATE 안 함)
+
+2026-06-01: R5b 트랙② 차트 라이브러리 — Mantine Charts(@mantine/charts) 채택 (Mantine v8 테마 자동 통합으로 "촌스러움" 근본 해결, escape hatch(tooltipProps/areaChartProps)로 Recharts 자유도 유지, h prop으로 SSR 마운트 가드 제거. 같은 Recharts 엔진이라 Recharts 직접 스타일링의 상위호환. Nivo/ECharts/visx는 엔진교체 공수·번들 과함으로 컷)
+2026-06-01: R5b 트랙② 브랜드명 — "모음" 한글 브랜드 (자산을 모은다는 직관적·동사적 의미. 가계부→자산추적 정체성 전환)
+2026-06-01: R5b 트랙② 레이아웃 — 자산중심 전면 재편 4탭(자산=홈 / 투자=/invest / 거래 / 내정보) (홈↔자산 hero 중복·투자 이원화·자산화면 과밀 해소. portfolio→invest 승격, wealth는 상세 sub-route 잔존)
+2026-06-01: R5b 트랙② 시각 결정 방식 — design-shotgun 시안 비교 후 DESIGN.md (사용자가 시안 보고 무드 선택. "해답 알고있다" 가정 없이 상의)
