@@ -7,9 +7,11 @@
 
 ## Status
 
-R1(자동박제+전월대비) · R2(추이 drill-down·계좌 리포트·차트 직관화) · R3(실현손익) · **R4(추이 차트) 전부 dev 작업 완료**.
+R1(자동박제+전월대비) · R2(추이 drill-down·계좌 리포트·차트 직관화) · R3(실현손익) · R4(추이 차트) 전부 **dev 커밋 완료** (front b5a083c / back a3c9afb 까지). dev→main 머지만 남음.
 
-이번 세션: **R4 구현 + 헤드리스 QA 통과 + 버그 2개 fix**. (아직 미커밋 — 프론트 7파일)
+이번 세션: **Follow-up Low 3건 전부 정리** — 데드코드 제거(미사용 rowNo 필드·List 훅 3개·list queryKey 3개) + enum `as AccountType[]` 캐스트를 `isAccountType` 런타임 guard 로 교체. typecheck 통과, 미커밋.
+
+직전 세션: R4 구현 + 헤드리스 QA 통과 + 버그 2개 fix (아래 Context).
 - R4 = 3개 화면에 월별 추이 라인차트 (공통 `ValueTrendChart` 1개 공유, drill-down/표 없이 차트만):
   - 종목 상세 → 평가액(valuation) 추이 (`usePortfolioValueHistoryByItem`)
   - 투자계좌 상세 → 통장 전체 자산(balance) 추이 (`useAccountSnapshotYearly` 재활용, hero와 일치)

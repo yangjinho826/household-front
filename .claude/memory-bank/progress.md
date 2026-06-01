@@ -1,6 +1,7 @@
 # 진행 상태
 
 ## 완료
+- [x] 2026-06-01: Follow-up 3건 정리 — 미사용 rowNo 필드(타입 7+api 매핑)·List 훅 3개·list queryKey 3개 데드코드 제거 + enum 응답 `as AccountType[]` 캐스트를 `isAccountType` 런타임 guard로 교체. typecheck 통과
 - [x] 2026-05-31: 가계부×자산 통합 MVP 기획 — 코드현황+한/해외 벤치마킹+codex 교차검토. 부채/순자산·lot 제외, 총자산 기준으로 축소
 - [x] 2026-05-31: R1 구현 — 매월 자동 박제 cron(back) + 전월대비 증감 표시(front). QA 통과, dev 커밋
 - [x] 2026-05-31: R3 실현손익 — 매도 realized_pnl 박제 + 종목 상세 매매손익 탭. dev 커밋
@@ -34,8 +35,8 @@
 - 카드 사용일 vs 결제일 / 잔액조정(RECONCILIATION) tx / 투자계좌 예수금 모델 / 배당·이자 tx_type
 
 ## Follow-up (Low 우선순위)
-- [ ] cursor page 마다 `rowNo` 가 1부터 재시작 — flatten 후 부여 OR 타입에서 제거
-- [ ] enum 응답 `as AccountType[]` / `as CategoryType[]` 캐스트 — 런타임 guard 또는 typed endpoint
-- [ ] `useAccountList/useCategoryList/useFixedList` 미사용 데드 코드 — 의도 확정 후 삭제 또는 명명 변경
+- [x] cursor page 마다 `rowNo` 가 1부터 재시작 → 화면 미사용이라 타입+api 매핑에서 완전 제거
+- [x] enum 응답 `as AccountType[]` 캐스트 → `isAccountType` 런타임 guard 로 교체 (CategoryType 캐스트는 코드에 없었음)
+- [x] `useAccountList/useCategoryList/useFixedList` 미사용 데드 코드 → 삭제 (연쇄로 list queryKey 3개도 제거)
 
 ## 막힘
