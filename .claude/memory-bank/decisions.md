@@ -25,3 +25,9 @@
 2026-06-01: R4 차트 = drill-down/표 없이 라인차트만 — 계좌=통장 전체 추이 / 종목=평가액 추이로 역할 분리 (사용자: 깔끔하게 차트만. R2 월클릭 분해는 자산 메인에만)
 2026-06-01: 일반통장 상세도 R4 차트 적용 — account-report-section 월별 내역 표를 잔액 추이 차트로 교체 (모든 통장 상세에서 일관된 추이 UX)
 2026-06-01: recharts SSR 대응 — useSyncExternalStore 마운트 가드로 클라 전용 렌더 (dynamic ssr:false 대신. set-state-in-effect lint 회피 + hydration-safe)
+
+2026-06-01: R5a asset_class 2축 분리 — market(거래소) 유지 + asset_class(자산성격) 신규 축 (1축이면 금ETF를 COMMODITY 분류 시 market을 OTHER로 바꿔 야후갱신 끊김 딜레마. 2축은 갱신=market·분류=asset_class 독립. codex 검증)
+2026-06-01: 부동산·연금 모델 — ManualAsset 신규 도메인 + 전용계좌(REAL_ESTATE/PENSION) roll-up (PortfolioItem은 market/qty/avg_price가 부동산에 안 맞음. 전용계좌 roll-up하면 총자산·추이 자동 반영. codex D1=B)
+2026-06-01: 월별 배분추이 — asset_class_snapshots 전용 테이블 (account_snapshot은 계좌총액만 저장해 asset_class 슬라이스 재구성 불가. codex "aggregation loss")
+2026-06-01: R5a 전체 한 사이클 + 단계 커밋 — R5a-1/2/3 순차, 마이그레이션 A/B/C 독립 (사용자: 전체 한번에. 단 스냅샷 의미변경을 모델 마이그레이션에 묻지 말 것 — codex)
+2026-06-01: asset_class 백필 — 전부 STOCK 기본값 + UI에서 사용자 재분류 (금을 code/name LIKE로 SQL 추측 UPDATE 안 함)

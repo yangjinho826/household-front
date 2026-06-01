@@ -1,6 +1,7 @@
 # 진행 상태
 
 ## 완료
+- [x] 2026-06-01: R5a-1 (asset_class + 현재 배분 파이) — 2축 분리(market 유지+asset_class 신규). 백 8파일+마이그레이션 A(b8e4d1a09c37)+프론트 9파일. 배분 도넛(PortfolioDonut 재사용). codex 설계 검증. typecheck+9001 QA(allocation 합=totalBalance) 통과. **미커밋 → 커밋 예정**. 상세 R5a-plan.md
 - [x] 2026-06-01: Follow-up 3건 정리 — 미사용 rowNo 필드(타입 7+api 매핑)·List 훅 3개·list queryKey 3개 데드코드 제거 + enum 응답 `as AccountType[]` 캐스트를 `isAccountType` 런타임 guard로 교체. typecheck 통과
 - [x] 2026-05-31: 가계부×자산 통합 MVP 기획 — 코드현황+한/해외 벤치마킹+codex 교차검토. 부채/순자산·lot 제외, 총자산 기준으로 축소
 - [x] 2026-05-31: R1 구현 — 매월 자동 박제 cron(back) + 전월대비 증감 표시(front). QA 통과, dev 커밋
@@ -28,8 +29,9 @@
 - [x] R1: 자동 박제(월1일 cron) + 전월대비 증감 ← 완료(dev 커밋)
 - [x] R2: 추이 drill-down + 계좌별 월간 리포트 + 추이 차트 직관화 ← 완료(dev 커밋, QA 통과)
 - [x] R3: 실현손익 박제 + 종목 매매손익 탭 ← 완료(dev 커밋). 청산종목 전용 화면은 R4+로
-- [ ] R4: 계좌→종목 drill-down + 종목 평가액 추이 차트 (데이터 이미 있음)
-- [ ] R5+: asset_class 배분 / goal / TWR / 부동산·연금 / 디자인 토큰화
+- [x] R4: 월별 추이 라인차트 3화면(공통 ValueTrendChart) ← 완료(dev 커밋 1c567b7)
+- [ ] R5a: asset_class 배분 + ManualAsset(부동산·연금) + 월별 배분추이 ← R5a-1 완료(미커밋), R5a-2/3 대기. 상세 R5a-plan.md
+- [ ] R5b+: TWR(시간가중수익률) / goal / 디자인 토큰화 ← TWR은 현금흐름 정의 필요, R5a 후
 
 ### R2+ 착수 전 확정할 결정
 - 카드 사용일 vs 결제일 / 잔액조정(RECONCILIATION) tx / 투자계좌 예수금 모델 / 배당·이자 tx_type

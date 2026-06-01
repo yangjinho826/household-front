@@ -5,30 +5,30 @@
 **가계부 × 자산 통합 — 월별 자산변동 추적**.
 "매월 내 자산이 어떻게 변하는지 한눈에" (총자산 기준, 부채/순자산 안 함).
 
+현재 사이클: **R5a — 자산성격(asset_class) 배분 + 부동산·연금(ManualAsset) + 월별 배분추이**.
+
 ## Status
 
-R1(자동박제+전월대비) · R2(추이 drill-down·계좌 리포트·차트 직관화) · R3(실현손익) · R4(추이 차트) 전부 **dev 커밋 완료** (front b5a083c / back a3c9afb 까지). dev→main 머지만 남음.
+R1~R4 전부 dev 커밋 완료(front b5a083c~78f66d6 / back a3c9afb). **dev→main 머지는 아직 안 함**.
 
-이번 세션: **Follow-up Low 3건 전부 정리** — 데드코드 제거(미사용 rowNo 필드·List 훅 3개·list queryKey 3개) + enum `as AccountType[]` 캐스트를 `isAccountType` 런타임 guard 로 교체. typecheck 통과, 미커밋.
-
-직전 세션: R4 구현 + 헤드리스 QA 통과 + 버그 2개 fix (아래 Context).
-- R4 = 3개 화면에 월별 추이 라인차트 (공통 `ValueTrendChart` 1개 공유, drill-down/표 없이 차트만):
-  - 종목 상세 → 평가액(valuation) 추이 (`usePortfolioValueHistoryByItem`)
-  - 투자계좌 상세 → 통장 전체 자산(balance) 추이 (`useAccountSnapshotYearly` 재활용, hero와 일치)
-  - 일반통장 상세 → 잔액 추이 (`account-report-section` 월별 내역 **표를 차트로 교체**)
-- QA 중 버그 2개 발견·수정 (아래 Context).
+**R5a 착수** — codex(gpt-5.5) 교차검증 + Plan agent 로 설계 확정. 상세 계획·실행가이드는 **`R5a-plan.md`** (이 디렉토리).
+- ✅ **R5a-1 (asset_class + 현재 배분 파이) 완료** — 백 8파일 + 프론트 9파일 + 마이그레이션 A(`b8e4d1a09c37`). **아직 미커밋.**
+  - 검증: 마이그레이션 가역성 OK · 프론트 typecheck 통과 · 9001 QA `wealth/overview.allocation` 정상(CASH 75.46%+STOCK 24.54%=totalBalance).
+- ⬜ R5a-2 (ManualAsset 부동산·연금 도메인) — 다음
+- ⬜ R5a-3 (스냅샷 통합 + 월별 배분추이)
 
 ## Context
 
-- **버그①: 거래내역 빈 표시 + 매매손익 예외** — R3 마이그레이션(`a3f7c9d2e1b8`, `portfolio_transactions.realized_pnl/realized_cost_basis`)이 **이 로컬 DB에 미적용**. `select(PortfolioTransaction)` 이 없는 컬럼 참조 → 500. 거래내역은 `useInfiniteQuery` 라 빈 상태로 삼키고, 매매손익은 `useSuspenseQuery` 라 예외로 터짐. → `uv run alembic upgrade head` 로 해결. (운영 배포는 deploy.yml 에서 alembic 돌아 무관)
-- **버그②: 종목 상세 deep-link/새로고침 500** — 내 추이 차트(recharts `ResponsiveContainer`)가 SSR prerender 에서 `useContext` null. 종목 페이지엔 `useInfiniteQuery` 가 같이 있어 트리거. → `ValueTrendChart` 에 `useSyncExternalStore` 마운트 가드(서버 false/클라 true)로 클라에서만 렌더. 일반통장은 원래 BarChart 가 있어 안 터졌음.
-- **종목 추이 시드**: `portfolio_value_history` 가 4월 1개월뿐이라 종목 차트가 숨김(2개월 미만) → 4월 박제 기준 2025-10~2026-05 톱니 우상향 역산 INSERT(88 row, 로컬 전용). account_snapshots 는 R2 시드로 이미 8개월.
-- **로컬 QA 인증**: 헤드리스 browse 가 DPAPI(브라우저 실행중 쿠키 잠금)로 쿠키 import 실패 → 로그인 폼 자동입력 또는 `POST /api/auth/login` 으로 토큰 받아 curl. 백엔드는 Bearer 헤더 + `X-Household-Id` 헤더 인증.
-- 환경: 백 9000(`uv run uvicorn app.main:app --reload --port 9000`), 프론트 3000, DB docker `household-postgres`(household/1234/HOUSEHOLD). 계정 yangjinho826@naver.com. KIWOOM household=`62cfbbe6`, ISA통장=`4a815cc7`, KIWOOM종목=`4d2fe152`.
-- recharts **3.8.1 (v3)**.
+- **2축 분리가 핵심**: 기존 `market`(거래소)은 그대로, 신규 `asset_class`(자산성격: STOCK/BOND/COMMODITY/CASH/REAL_ESTATE/PENSION/OTHER) 추가. 금을 KRX에 욱여넣던 문제 해소.
+- **가격 갱신은 market 축만** 사용 → asset_class 바꿔도 야후 갱신 안 깨짐(금ETF는 market 유지+asset_class만 COMMODITY).
+- 부동산/연금 = **ManualAsset 신규 도메인**(전용 계좌 roll-up). PortfolioItem 확장 X.
+- codex 경고 함정(R5a-2/3 필수 반영): carry-forward/as-of 평가, historical truth, double counting 방지 → `R5a-plan.md` 참조.
+- **로컬 DB는 항상 `alembic upgrade head`** 선행 (드리프트 시 배분/거래 조용히 500). 현재 head = `b8e4d1a09c37`.
+- 프론트 실제 스택 = Mantine + query-key-factory + tabler + 언더스코어 디렉토리 (personal-frontend 룰은 stale — 글로벌 메모리 `frontend-stack-reality` 참조).
+- 환경/계정/인증/household id 등 = `R5a-plan.md` "실행 가이드".
 
 ## Next Step
 
-1. **커밋** — R4 프론트 7파일 (한글 conventional). 마이그레이션은 코드변경 아님(DB만).
-2. **dev → main 머지** — R1~R4 전부 main 미반영.
-3. **R5+** — asset_class 배분 / goal / TWR / 부동산·연금 / 디자인 토큰화.
+1. **R5a-1 커밋** — back + front 각각 한글 conventional. (DB 마이그레이션은 코드, 커밋 포함)
+2. **R5a-2 착수** — ManualAsset 도메인 (`R5a-plan.md` R5a-2 섹션 그대로).
+3. R5a-3 → 그 후 dev→main 머지 검토.
