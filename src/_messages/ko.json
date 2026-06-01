@@ -208,11 +208,27 @@
       "role_member": "멤버"
     }
   },
+  "manual-asset": {
+    "section_title": "부동산·연금",
+    "asset_class": "자산 종류",
+    "name": "이름",
+    "name_placeholder": "예: 우리집, 국민연금",
+    "name_required_message": "이름을 입력하세요",
+    "valuation": "평가액",
+    "valuation_placeholder": "현재 가치",
+    "valuation_required_message": "평가액을 입력하세요",
+    "valued_at": "평가 기준일",
+    "valued_at_help": "이 평가액이 언제 기준인지",
+    "valued_at_required_message": "평가 기준일을 선택하세요",
+    "empty": "등록된 부동산·연금이 없어요"
+  },
   "enum": {
     "account-type": {
       "LIVING": "생활",
       "SAVINGS": "적립",
       "INVESTMENT": "투자",
+      "REAL_ESTATE": "부동산",
+      "PENSION": "연금",
       "OTHER": "기타"
     },
     "category-kind": {

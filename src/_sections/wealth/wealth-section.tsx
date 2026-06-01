@@ -3,6 +3,7 @@
 import {
   Card,
   Group,
+  Modal,
   Progress,
   Stack,
   Text,
@@ -27,6 +28,9 @@ import {
 import { useAccountSnapshotMutations } from "_features/account-snapshot/queries/use-mutations";
 import { ACCOUNT_TYPE_MANTINE_COLOR } from "_features/account/constants";
 import type { AccountListItemType, AccountType } from "_features/account/types";
+import ManualAssetForm from "_features/manual-asset/components/form";
+import { useManualAssetList } from "_features/manual-asset/queries/use-query";
+import type { ManualAssetListItemType } from "_features/manual-asset/types";
 import PortfolioDonut from "_features/portfolio/components/portfolio-donut";
 import { ASSET_CLASS_COLOR } from "_features/portfolio/constants";
 import { queryKeys } from "_constants/queries";
@@ -92,19 +96,33 @@ export default function WealthSection() {
   const te = useTranslations("error");
   const tType = useTranslations("enum.account-type");
   const tAssetClass = useTranslations("enum.asset-class");
+  const tManual = useTranslations("manual-asset");
 
   const { data: overviewRes } = useSuspenseQuery(
     queryKeys.wealth.overview({}),
   );
+  const { data: manualAssetRes } = useManualAssetList();
+  const manualAssetItems = manualAssetRes.body.data;
 
   const { createMutation } = useAccountSnapshotMutations();
 
   // 추이 차트에서 탭한 월 — 그달 계좌별 분해 패널 표시용
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
 
+  // 부동산·연금 폼 모달 — modals.open() portal 은 QueryClientProvider 밖이라
+  // 트리 안(<Modal>)에서 직접 렌더해야 useQuery/useMutation 컨텍스트가 잡힘
+  const [manualAssetFormOpen, setManualAssetFormOpen] = useState(false);
+  const [manualAssetEdit, setManualAssetEdit] = useState<
+    ManualAssetListItemType | undefined
+  >(undefined);
+
   const overview = overviewRes.body.data;
   // 백엔드 account.balance 는 INVESTMENT 도 cash + 평가금 합산해서 내려옴
   const accounts: AccountListItemType[] = overview.accounts;
+  // 부동산·연금 전용계좌는 통장 리스트에서 제외 — 별도 "부동산·연금" 섹션에서 관리
+  const visibleAccounts = accounts.filter(
+    (a) => a.accountType !== "REAL_ESTATE" && a.accountType !== "PENSION",
+  );
   const yearly = overview.yearlySnapshots;
   const total = overview.totalBalance;
 
@@ -135,7 +153,14 @@ export default function WealthSection() {
   const periodMonths = trendData.length;
 
   const byType = useMemo(() => {
-    const types: AccountType[] = ["LIVING", "SAVINGS", "INVESTMENT", "OTHER"];
+    const types: AccountType[] = [
+      "LIVING",
+      "SAVINGS",
+      "INVESTMENT",
+      "REAL_ESTATE",
+      "PENSION",
+      "OTHER",
+    ];
     return types
       .map((type) => {
         const accs = accounts.filter((a) => a.accountType === type);
@@ -209,6 +234,11 @@ export default function WealthSection() {
         }
       },
     });
+  };
+
+  const openManualAssetForm = (asset?: ManualAssetListItemType) => {
+    setManualAssetEdit(asset);
+    setManualAssetFormOpen(true);
   };
 
   return (
@@ -412,7 +442,74 @@ export default function WealthSection() {
 
       <Group justify="space-between" align="center" px={4}>
         <Text size="sm" fw={700}>
-          통장 ({accounts.length})
+          {tManual("section_title")}
+        </Text>
+        <UnstyledButton onClick={() => openManualAssetForm()}>
+          <Text size="xs" fw={700} c="info.5">
+            + 추가
+          </Text>
+        </UnstyledButton>
+      </Group>
+
+      <Card radius="lg" p="xs">
+        <Stack gap={0}>
+          {manualAssetItems.length === 0 ? (
+            <Text size="xs" c="dimmed" ta="center" py="md">
+              {tManual("empty")}
+            </Text>
+          ) : (
+            manualAssetItems.map((m) => (
+              <UnstyledButton
+                key={m.manualAssetId}
+                onClick={() => openManualAssetForm(m)}
+                style={{ padding: 12, borderRadius: 12 }}
+              >
+                <Group gap={12}>
+                  <div
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 12,
+                      background: `${ASSET_CLASS_COLOR[m.assetClass]}20`,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Text
+                      size="sm"
+                      fw={700}
+                      style={{ color: ASSET_CLASS_COLOR[m.assetClass] }}
+                    >
+                      {m.name.slice(0, 1)}
+                    </Text>
+                  </div>
+                  <Stack gap={0} style={{ flex: 1, minWidth: 0 }}>
+                    <Text size="sm" fw={600} truncate>
+                      {m.name}
+                    </Text>
+                    <Text size="xs" c="dimmed">
+                      {tAssetClass(m.assetClass)}
+                    </Text>
+                  </Stack>
+                  <Text
+                    size="sm"
+                    fw={700}
+                    style={{ fontVariantNumeric: "tabular-nums" }}
+                  >
+                    {fmt(m.currentValuation)}원
+                  </Text>
+                </Group>
+              </UnstyledButton>
+            ))
+          )}
+        </Stack>
+      </Card>
+
+      <Group justify="space-between" align="center" px={4}>
+        <Text size="sm" fw={700}>
+          통장 ({visibleAccounts.length})
         </Text>
         <UnstyledButton
           onClick={() => router.push(`/${routeParams.locale}/account/new`)}
@@ -425,7 +522,7 @@ export default function WealthSection() {
 
       <Card radius="lg" p="xs">
         <Stack gap={0}>
-          {accounts.map((a) => (
+          {visibleAccounts.map((a) => (
             <UnstyledButton
               key={a.accountId}
               onClick={() => {
@@ -483,6 +580,22 @@ export default function WealthSection() {
           ))}
         </Stack>
       </Card>
+
+      <Modal
+        opened={manualAssetFormOpen}
+        onClose={() => setManualAssetFormOpen(false)}
+        title={
+          manualAssetEdit
+            ? `${tManual("section_title")} 수정`
+            : `${tManual("section_title")} 추가`
+        }
+        centered
+      >
+        <ManualAssetForm
+          asset={manualAssetEdit}
+          onClose={() => setManualAssetFormOpen(false)}
+        />
+      </Modal>
     </Stack>
   );
 }

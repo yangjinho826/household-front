@@ -208,11 +208,27 @@
       "role_member": "Member"
     }
   },
+  "manual-asset": {
+    "section_title": "Real estate & Pension",
+    "asset_class": "Type",
+    "name": "Name",
+    "name_placeholder": "e.g. My home, Pension",
+    "name_required_message": "Enter a name",
+    "valuation": "Valuation",
+    "valuation_placeholder": "Current value",
+    "valuation_required_message": "Enter valuation",
+    "valued_at": "Valued at",
+    "valued_at_help": "When this valuation is based on",
+    "valued_at_required_message": "Select a date",
+    "empty": "No real estate or pension yet"
+  },
   "enum": {
     "account-type": {
       "LIVING": "Living",
       "SAVINGS": "Savings",
       "INVESTMENT": "Investment",
+      "REAL_ESTATE": "Real estate",
+      "PENSION": "Pension",
       "OTHER": "Other"
     },
     "category-kind": {
