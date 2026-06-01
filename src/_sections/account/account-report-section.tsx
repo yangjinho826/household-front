@@ -1,8 +1,9 @@
 "use client";
 
-import { ActionIcon, Card, Group, Stack, Text } from "@mantine/core";
+import { ActionIcon, Card, Center, Loader, Stack, Text } from "@mantine/core";
 import { IconPencil } from "@tabler/icons-react";
 import { useParams, useRouter } from "next/navigation";
+import { Suspense } from "react";
 import {
   Bar,
   BarChart,
@@ -13,6 +14,7 @@ import {
 
 import { useAccountReport } from "_features/account/queries/use-query";
 import SubHeader from "_features/layout/components/sub-header";
+import AccountBalanceTrend from "_sections/wealth/components/account-balance-trend";
 import { fmt } from "_utilities/fmt";
 
 interface Props {
@@ -161,55 +163,16 @@ export default function AccountReportSection({ accountId }: Props) {
         </Stack>
       </Card>
 
-      {/* 월별 상세 (최근 달부터) */}
-      {report.monthlyFlows.length > 0 && (
-        <Card radius="lg" p="md">
-          <Stack gap="sm">
-            <Text size="sm" fw={700}>
-              월별 내역
-            </Text>
-            {[...report.monthlyFlows].reverse().map((f) => (
-              <Group
-                key={f.monthDate}
-                justify="space-between"
-                wrap="nowrap"
-                align="flex-start"
-              >
-                <Text size="sm" fw={600}>
-                  {f.monthDate.slice(0, 7)}
-                </Text>
-                <Stack gap={2} align="flex-end">
-                  <Text
-                    size="sm"
-                    fw={700}
-                    style={{ fontVariantNumeric: "tabular-nums" }}
-                  >
-                    {fmt(f.balance)}원
-                  </Text>
-                  <Group gap={8}>
-                    <Text
-                      size="xs"
-                      fw={600}
-                      c="linerGreen.6"
-                      style={{ fontVariantNumeric: "tabular-nums" }}
-                    >
-                      +{fmt(f.income)}
-                    </Text>
-                    <Text
-                      size="xs"
-                      fw={600}
-                      c="danger.5"
-                      style={{ fontVariantNumeric: "tabular-nums" }}
-                    >
-                      −{fmt(f.expense + f.fixedExpense)}
-                    </Text>
-                  </Group>
-                </Stack>
-              </Group>
-            ))}
-          </Stack>
-        </Card>
-      )}
+      {/* 월별 잔액 추이 — 투자계좌/종목 상세와 동일한 라인차트 */}
+      <Suspense
+        fallback={
+          <Center py="md">
+            <Loader size="sm" />
+          </Center>
+        }
+      >
+        <AccountBalanceTrend accountId={accountId} title="잔액 추이" />
+      </Suspense>
     </Stack>
   );
 }

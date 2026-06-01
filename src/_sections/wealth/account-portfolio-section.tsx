@@ -2,7 +2,9 @@
 
 import {
   Card,
+  Center,
   Group,
+  Loader,
   Stack,
   Text,
   UnstyledButton,
@@ -10,10 +12,11 @@ import {
 import { IconChevronRight } from "@tabler/icons-react";
 import { useRouter, useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useMemo } from "react";
+import { Suspense, useMemo } from "react";
 
 import SubHeader from "_features/layout/components/sub-header";
 import PortfolioDonut from "_features/portfolio/components/portfolio-donut";
+import AccountBalanceTrend from "_sections/wealth/components/account-balance-trend";
 import { useAccountOverview } from "_features/portfolio/queries/use-query";
 import {
   formatProfitAmount,
@@ -137,6 +140,17 @@ export default function AccountPortfolioSection({ accountId }: Props) {
           </Group>
         </Stack>
       </Card>
+
+      {/* 통장 전체 자산 추이 차트 */}
+      <Suspense
+        fallback={
+          <Center py="md">
+            <Loader size="sm" />
+          </Center>
+        }
+      >
+        <AccountBalanceTrend accountId={accountId} />
+      </Suspense>
 
       {/* 종목별 비중 — 보유 종목이 1개 이상일 때만 */}
       {stockBreakdown.length > 0 && (

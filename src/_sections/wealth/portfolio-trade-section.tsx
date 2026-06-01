@@ -25,6 +25,7 @@ import {
   usePortfolioItem,
   usePortfolioItemTransactionsInfinite,
 } from "_features/portfolio/queries/use-query";
+import PortfolioValueTrend from "_sections/wealth/components/portfolio-value-trend";
 import RealizedPnlPanel from "_sections/wealth/components/realized-pnl-panel";
 import { InfiniteSentinel } from "_libraries/query/infinite-sentinel";
 import type {
@@ -172,6 +173,17 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
           </SimpleGrid>
         </Stack>
       </Card>
+
+      {/* 평가액 추이 차트 */}
+      <Suspense
+        fallback={
+          <Center py="md">
+            <Loader size="sm" />
+          </Center>
+        }
+      >
+        <PortfolioValueTrend portfolioId={portfolioId} />
+      </Suspense>
 
       {/* 매수/매도 버튼 */}
       <SimpleGrid cols={2} spacing="sm">
