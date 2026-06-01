@@ -48,6 +48,17 @@ export default function PortfolioForm({ portfolioId }: PortfolioFormProps) {
     [marketData, tMarket],
   );
 
+  const tAssetClass = useTranslations("enum.asset-class");
+  const { data: assetClassData } = useEnumOptions("asset-class");
+  const assetClassOptions = useMemo(
+    () =>
+      (assetClassData.body.data ?? []).map((v) => ({
+        value: v,
+        label: tAssetClass(v),
+      })),
+    [assetClassData, tAssetClass],
+  );
+
   const isOther = form.values.market === "OTHER";
   const codePlaceholder =
     form.values.market === "NASDAQ" || form.values.market === "NYSE"
@@ -93,6 +104,13 @@ export default function PortfolioForm({ portfolioId }: PortfolioFormProps) {
             label={t("market")}
             description={t("market_help")}
             data={marketOptions}
+            allowDeselect={false}
+          />
+          <Select
+            {...form.getInputProps("assetClass")}
+            label={t("asset_class")}
+            description={t("asset_class_help")}
+            data={assetClassOptions}
             allowDeselect={false}
           />
           {!isOther && (

@@ -27,6 +27,8 @@ import {
 import { useAccountSnapshotMutations } from "_features/account-snapshot/queries/use-mutations";
 import { ACCOUNT_TYPE_MANTINE_COLOR } from "_features/account/constants";
 import type { AccountListItemType, AccountType } from "_features/account/types";
+import PortfolioDonut from "_features/portfolio/components/portfolio-donut";
+import { ASSET_CLASS_COLOR } from "_features/portfolio/constants";
 import { queryKeys } from "_constants/queries";
 import { getErrorMessage } from "_libraries/fetch/error-message";
 import { fmt } from "_utilities/fmt";
@@ -89,6 +91,7 @@ export default function WealthSection() {
   const routeParams = useParams<{ locale: string }>();
   const te = useTranslations("error");
   const tType = useTranslations("enum.account-type");
+  const tAssetClass = useTranslations("enum.asset-class");
 
   const { data: overviewRes } = useSuspenseQuery(
     queryKeys.wealth.overview({}),
@@ -142,6 +145,18 @@ export default function WealthSection() {
       })
       .filter((t) => t.accs.length > 0);
   }, [accounts, total]);
+
+  // 자산군별 배분 — asset_class 축 (계좌타입 분포와 다른 의미: 자산의 성격)
+  const allocationItems = useMemo(
+    () =>
+      overview.allocation.currentAllocation.map((s) => ({
+        key: s.assetClass,
+        label: tAssetClass(s.assetClass),
+        value: s.valuation,
+        color: ASSET_CLASS_COLOR[s.assetClass],
+      })),
+    [overview.allocation, tAssetClass],
+  );
 
   // 전월 대비 증감 — 현재 총자산 vs 가장 최근 박제 스냅샷
   const lastSnapshot =
@@ -337,6 +352,17 @@ export default function WealthSection() {
           month={selectedMonth}
           onClose={() => setSelectedIdx(null)}
         />
+      )}
+
+      {allocationItems.length > 0 && (
+        <Card radius="lg">
+          <Stack gap="sm">
+            <Text size="sm" fw={700}>
+              자산군 배분
+            </Text>
+            <PortfolioDonut items={allocationItems} />
+          </Stack>
+        </Card>
       )}
 
       <Card radius="lg">

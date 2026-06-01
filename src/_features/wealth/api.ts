@@ -15,6 +15,7 @@ interface BackendWealthOverview {
   totalBalance: number;
   accounts: BackendAccount[];
   yearlySnapshots: AccountSnapshotYearly;
+  allocation: WealthOverviewType["allocation"];
 }
 
 function toAccount(b: BackendAccount): AccountListItemType {
@@ -37,6 +38,7 @@ export async function GetWealthOverviewApi(params: WealthOverviewRequest = {}) {
     totalBalance: res.body.data.totalBalance,
     accounts: res.body.data.accounts.map((a) => toAccount(a)),
     yearlySnapshots: res.body.data.yearlySnapshots,
+    allocation: res.body.data.allocation,
   };
   return { ...res, body: { ...res.body, data: mapped } };
 }

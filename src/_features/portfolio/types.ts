@@ -5,6 +5,16 @@ export type Market =
   | "NYSE"
   | "OTHER";
 
+/** 자산 성격 — market(거래소)과 직교하는 분류 축. 배분 파이 group by 키. */
+export type AssetClass =
+  | "STOCK"
+  | "BOND"
+  | "COMMODITY"
+  | "CASH"
+  | "REAL_ESTATE"
+  | "PENSION"
+  | "OTHER";
+
 export interface PortfolioSearchRequestType {
   searchTerm?: string;
   accountId?: string;
@@ -16,6 +26,7 @@ export interface PortfolioCreateRequest {
   name: string;
   code: string;
   market: Market;
+  assetClass: AssetClass;
   currentPrice: number;
   accountId: string;
 }
@@ -45,6 +56,7 @@ export interface PortfolioUpdateRequest {
   name?: string | null;
   code?: string | null;
   market?: Market | null;
+  assetClass?: AssetClass | null;
   isArchived?: boolean | null;
 }
 
@@ -64,6 +76,7 @@ export interface PortfolioListItemType {
   name: string;
   code: string;
   market: Market;
+  assetClass: AssetClass;
   quantity: number;
   avgPrice: number;
   currentPrice: number;
