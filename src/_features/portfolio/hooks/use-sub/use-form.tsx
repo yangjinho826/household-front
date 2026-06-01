@@ -146,7 +146,7 @@ export function usePortfolioForm({ portfolioId }: UsePortfolioFormOptions) {
           color: "green",
         });
       }
-      router.replace(`/${routeParams.locale}/portfolio`);
+      router.replace(`/${routeParams.locale}/invest`);
     } catch (error) {
       notifications.show({
         title: tg("notificationstitle"),
@@ -170,7 +170,7 @@ export function usePortfolioForm({ portfolioId }: UsePortfolioFormOptions) {
           message: tg("confirmyescontent"),
           color: "green",
         });
-        router.replace(`/${routeParams.locale}/portfolio`);
+        router.replace(`/${routeParams.locale}/invest`);
       },
     });
   };

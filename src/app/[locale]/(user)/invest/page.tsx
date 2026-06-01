@@ -1,7 +1,7 @@
 import { Center, Loader } from "@mantine/core";
 import { Suspense } from "react";
 
-import PortfolioSection from "_sections/portfolio/portfolio-section";
+import PortfolioSection from "_sections/invest/portfolio-section";
 
 export const dynamic = "force-dynamic";
 

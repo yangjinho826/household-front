@@ -545,7 +545,7 @@ export default function WealthSection() {
                 // INVESTMENT 는 포트폴리오 디테일로, 그 외는 일반 통장 디테일로
                 const path =
                   a.accountType === "INVESTMENT"
-                    ? `/wealth/account/${a.accountId}`
+                    ? `/invest/account/${a.accountId}`
                     : `/account/${a.accountId}`;
                 router.push(`/${routeParams.locale}${path}`);
               }}

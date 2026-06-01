@@ -170,7 +170,7 @@ export default function AccountPortfolioSection({ accountId }: Props) {
           보유 종목
         </Text>
         <UnstyledButton
-          onClick={() => router.push(`/${routeParams.locale}/portfolio/new`)}
+          onClick={() => router.push(`/${routeParams.locale}/invest/new`)}
         >
           <Text size="xs" fw={700} c="info.5">
             + 종목 추가
@@ -195,7 +195,7 @@ export default function AccountPortfolioSection({ accountId }: Props) {
                 key={p.portfolioId}
                 onClick={() =>
                   router.push(
-                    `/${routeParams.locale}/wealth/portfolio/${p.portfolioId}`,
+                    `/${routeParams.locale}/invest/portfolio/${p.portfolioId}`,
                   )
                 }
               >

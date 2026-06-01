@@ -31,7 +31,7 @@ export default function InvestmentAccountCard({ account, portfolios }: Props) {
   return (
     <UnstyledButton
       onClick={() =>
-        router.push(`/${routeParams.locale}/wealth/account/${account.accountId}`)
+        router.push(`/${routeParams.locale}/invest/account/${account.accountId}`)
       }
       style={{ width: "100%" }}
     >

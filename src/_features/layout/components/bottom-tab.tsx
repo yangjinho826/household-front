@@ -45,8 +45,8 @@ export const TABS: Tab[] = [
     id: "portfolio",
     label: "포트폴리오",
     icon: IconTrendingUp,
-    href: "/portfolio",
-    match: (p) => p.includes("/portfolio"),
+    href: "/invest",
+    match: (p) => p.includes("/invest"),
   },
   {
     id: "settings",

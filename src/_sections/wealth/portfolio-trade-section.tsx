@@ -75,7 +75,7 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
   };
 
   const handleEditPortfolio = () => {
-    router.push(`/${routeParams.locale}/portfolio/${portfolio.portfolioId}`);
+    router.push(`/${routeParams.locale}/invest/${portfolio.portfolioId}`);
   };
 
   const handleCloseModal = () => {
