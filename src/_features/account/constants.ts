@@ -25,3 +25,9 @@ export const ACCOUNT_TYPE_ORDER: AccountType[] = [
   "INVESTMENT",
   "OTHER",
 ];
+
+const ACCOUNT_TYPE_SET = new Set<string>(ACCOUNT_TYPE_ORDER);
+
+/** 백엔드 enum 응답(string[])에서 유효한 AccountType 만 좁히는 런타임 가드 */
+export const isAccountType = (value: string): value is AccountType =>
+  ACCOUNT_TYPE_SET.has(value);
