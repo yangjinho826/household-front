@@ -3,6 +3,12 @@
     "title": "Personal",
     "loading": "불러오는 중..."
   },
+  "nav": {
+    "home": "홈",
+    "transactions": "거래",
+    "invest": "투자",
+    "settings": "내정보"
+  },
   "auth": {
     "email": "이메일",
     "email_placeholder": "your@email.com",

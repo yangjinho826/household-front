@@ -11,6 +11,7 @@ import {
 import { useDisclosure } from "@mantine/hooks";
 import { IconChevronDown } from "@tabler/icons-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 
@@ -26,7 +27,7 @@ const WIDTH = 240;
  * SidebarNav — 데스크탑(>=lg=1200) 전용 좌측 세로 nav.
  *
  * - 상단: 가계부 스위처 trigger (HouseholdSwitcher Drawer 연결)
- * - 본문: 5개 탭 (BottomTab 의 TABS 재사용)
+ * - 본문: 4개 탭 (BottomTab 의 TABS 재사용)
  * - 휴대폰/패드(<lg) 에선 display: none (visibleFrom="lg")
  *
  * 데스크탑에선 BottomTab + AppHeader 가 hiddenFrom="lg" 로 숨겨지고
@@ -37,6 +38,7 @@ export function SidebarNav() {
   const params = useParams<{ locale: string }>();
   const theme = useMantineTheme();
   const [opened, switcher] = useDisclosure(false);
+  const t = useTranslations("nav");
 
   const currentId = useHouseholdStore((s) => s.currentHouseholdId);
   const { data: hData } = useSuspenseQuery(queryKeys.household.list());
@@ -88,9 +90,9 @@ export function SidebarNav() {
           </Stack>
         </UnstyledButton>
 
-        {/* 5개 탭 */}
+        {/* 4개 탭 */}
         <Stack gap={2}>
-          {TABS.map(({ id, label, icon: Icon, href, match }) => {
+          {TABS.map(({ id, icon: Icon, href, match }) => {
             const active = match(pathname);
             const color = active
               ? (theme.colors.info?.[5] ?? "#3B82F6")
@@ -112,7 +114,7 @@ export function SidebarNav() {
                 <Group gap={12} wrap="nowrap">
                   <Icon size={20} color={color} stroke={active ? 2.5 : 2} />
                   <Text size="sm" fw={active ? 700 : 600} c={color}>
-                    {label}
+                    {t(id)}
                   </Text>
                 </Group>
               </UnstyledButton>

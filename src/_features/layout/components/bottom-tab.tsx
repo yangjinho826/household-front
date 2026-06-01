@@ -2,55 +2,44 @@
 
 import { Box, UnstyledButton, useMantineTheme } from "@mantine/core";
 import {
-  IconChartBar,
-  IconHome,
+  IconChartPie,
   IconTrendingUp,
   IconUser,
   IconWallet,
 } from "@tabler/icons-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname, useParams } from "next/navigation";
 
 export interface Tab {
   id: string;
-  label: string;
-  icon: typeof IconHome;
+  icon: typeof IconChartPie;
   href: string;
   match: (pathname: string) => boolean;
 }
 
+// 자산중심 4탭. label 은 nav i18n 키(id) 로 해석.
 export const TABS: Tab[] = [
   {
     id: "home",
-    label: "홈",
-    icon: IconHome,
+    icon: IconChartPie,
     href: "/",
     match: (p) => p === "/" || /^\/[a-z]{2}\/?$/.test(p),
   },
   {
     id: "transactions",
-    label: "거래",
     icon: IconWallet,
     href: "/transactions",
     match: (p) => p.includes("/transactions"),
   },
   {
-    id: "wealth",
-    label: "자산",
-    icon: IconChartBar,
-    href: "/wealth",
-    match: (p) => p.includes("/wealth"),
-  },
-  {
-    id: "portfolio",
-    label: "포트폴리오",
+    id: "invest",
     icon: IconTrendingUp,
     href: "/invest",
     match: (p) => p.includes("/invest"),
   },
   {
     id: "settings",
-    label: "내정보",
     icon: IconUser,
     href: "/settings",
     match: (p) => p.includes("/settings"),
@@ -61,6 +50,7 @@ export function BottomTab() {
   const pathname = usePathname();
   const params = useParams<{ locale: string }>();
   const theme = useMantineTheme();
+  const t = useTranslations("nav");
 
   return (
     <Box
@@ -91,7 +81,7 @@ export function BottomTab() {
           height: "var(--bottom-tab-h)",
         }}
       >
-        {TABS.map(({ id, label, icon: Icon, href, match }) => {
+        {TABS.map(({ id, icon: Icon, href, match }) => {
           const active = match(pathname);
           const color = active
             ? (theme.colors.info?.[5] ?? "#3B82F6")
@@ -121,7 +111,7 @@ export function BottomTab() {
                   color,
                 }}
               >
-                {label}
+                {t(id)}
               </Box>
             </UnstyledButton>
           );

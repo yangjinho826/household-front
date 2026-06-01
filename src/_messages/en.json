@@ -3,6 +3,12 @@
     "title": "Personal",
     "loading": "Loading..."
   },
+  "nav": {
+    "home": "Home",
+    "transactions": "Transactions",
+    "invest": "Invest",
+    "settings": "Settings"
+  },
   "auth": {
     "email": "Email",
     "email_placeholder": "your@email.com",
