@@ -93,7 +93,15 @@ R1~R5a 전부 dev 커밋 완료. **dev→main 머지는 아직 안 함** — R5a
     - 검증: typecheck✅·lint✅·**browse 통합검증✅**(dev useContext null 500은 중복 next dev 프로세스 정리+.next 삭제+재시작으로 해소). 계좌상세(계좌총액·pill·도넛PALETTE·누적매매수익 API 200·**전량매도된 KIWOOM 실현손익이 계좌 누적에 반영 확인**), 종목상세(매매손익 탭 없음·거래내역만), 모바일390+데스크톱, 콘솔에러 0(recharts width warning만). 전량매도 직접 실행은 실데이터 변경이라 미실시(KIWOOM 사례로 동작 입증).
     - **디자인 후속(2026-06-02)**: 누적 매매수익을 풀 패널→**도넛 하단 "레일" + 바텀시트**(codex 옵션①, `realized-pnl-rail.tsx`). 기간은 프리셋(1·3개월/1년) 폐기→**날짜 자유 선택**(시작일/종료일 DateInput+달력). 카드 박스 구분 약함 → 배경 진하게(#ece2ce)+그림자 강화 시도했으나 **사용자가 색 원복 요청** → Card `withBorder`+웜그레이(gray.2) 테두리로 경계만(배경 #faf6ef 유지).
     - **커밋 완료(dev 미push)**: front 4커밋 `4ad6dd7`(데이터+i18n)·`35c734e`(UI 리워크)·`035f274`(카드 테두리)·`dec28ab`(작업기록) / back `3001c7e`(계좌 realized-pnl). commit-writer는 household-back이 cwd 밖이라 back은 메인이 직접 커밋.
-  - ▶ **다음 작업 = 트랙② 디자인 마무리** (화면별 리워크: 로그인✅·홈✅·거래✅·투자(메인+계좌상세+종목상세)✅ → **내정보 남음** + V5 리브랜딩 텍스트/메타 + dev push). 백로그: 전량매도 B(매매 화면 분리). **거래 백엔드(household-back) 커서정렬 + 이번 realized-pnl 미커밋분 커밋 필요(front+back 양 레포).**
+  - ✅ **내정보 화면 리워크 + V5 리브랜딩 + 토스 전멸 완료(2026-06-02)** — 계획 `~/.claude/plans/goofy-brewing-sky.md`, 목업 `~/.gstack/.../settings-rework-20260602/board.html`(A안). 트랙②의 마지막 화면.
+    - **내정보(settings-section A안)**: 토스풍 전면 제거 + Warm 리스킨. 프로필 **Hero**(sage 아바타+크림 그라데이션 카드)에 통계 3개(통장/거래/종목) 흡수 → 다른 4탭 hero-시작 패턴 일관. info.5(파랑)→sage, 하드코딩 #4E5968/#8B95A1→웜그레이 토큰, Card 기본 테두리(theme). **`settings` i18n 네임스페이스 신설**(ko/en, 하드코딩 한글 전멸).
+    - **셸 무드 리스킨**(sidebar-nav/bottom-tab/app-header): **활성탭 info.5(파랑)→sage**(DESIGN.md info=수입전용 원칙 준수), 흰배경→크림(gray.0), 토스그레이 테두리→웜그레이(gray.2). 셸 fallback "가계부"→i18n(household.list_title).
+    - **사이드바 브랜드 마크 신설**: 최상단 BrandLogo(sage box)+"모음" 세리프 워드마크(brand-wordmark). **앱(모음) vs 현재 가계부(우리 가족) 위계 분리**. 데스크톱만(모바일 헤더는 공간상 생략 — 사용자 선택).
+    - **household-switcher**: 파랑 info-0/5→sage-0/6(owner)·terracotta(member), 선택체크 info-5→sage-6, crown 하드코딩→warning-5. 텍스트 **i18n화**(switcher_title/count/managing/create_new + member.role 재사용).
+    - **V5 리브랜딩**: **앱명만 "모음"**(manifest name/short_name/description, layout title, base-layout apple-title, icon.svg #3B82F6→sage, auth.welcome_title). manifest theme_color/bg 토스잔재(#3B82F6/#f2f4f6)→sage/크림. **household 엔티티는 "가계부" 유지**(사용자: "모음 통일은 오바" → 앱=모음/장부=가계부 분리). onboarding/household/error i18n "가계부" 전부 유지.
+    - **토스 전멸**(사용자 "토스풍 다 지워"): 셸 외 잔여도 정리 — trade-form/account-report tick/error-fallback bg #8B95A1·#f2f4f6→토큰, "토스" 주석 6곳(globals.css/quick-add-sheet/sub-header/icon-box/filter-chip/color-picker) 제거. `grep "토스"`=0(토스증권/toast 제외). **데이터성 #8B95A1 2곳(color-picker 색선택지·account OTHER 타입색)은 카테고리/계좌 구분 팔레트라 의도적 유지**(무드색 아님).
+    - 검증: typecheck/lint✅ · **browse 시각확인**(모바일390+데스크톱1280, ko/en 토글, 전환 드로어, 활성탭 sage·브랜드마크·프로필 hero) 콘솔에러 0. ⚠️ **검증 중 3000 포트 중복 dev 프로세스 3개 발견**(useContext null 500 유발) → 정리+.next 삭제+단일 재기동(PID 48334). codex 디자인 리뷰는 hang으로 중단 → A안 자체 판단 채택.
+  - ▶ **다음 작업 = dev→main 머지** + 백로그: 전량매도 B(매매 화면 분리). **거래 백엔드(household-back) 커서정렬 + realized-pnl 미커밋분 커밋 필요(front+back 양 레포).** 트랙② 디자인(로그인·홈·거래·투자·내정보 전 화면 + 리브랜딩) 사실상 완료.
   - ⚠️ TaskList(V1~V5 5개)는 **세션 한정이라 휘발** — 이 activeContext 의 시각 트랙 줄 + 로드맵 `optimized-singing-russell.md` 가 정본. 다음 세션은 이 둘로 복원.
 
 > 교훈: R5a-3(월별 배분추이)까지가 사용자가 생각한 적정 스코프. TWR/goal은 과한 기능. 트랙①(자산성격 단순화)만 R5a 위에 얹음.
