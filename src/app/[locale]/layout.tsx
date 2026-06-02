@@ -7,8 +7,8 @@ import { BaseLayout } from "_features/layout/base-layout";
 import { routing } from "_libraries/i18n/routing";
 
 export const metadata: Metadata = {
-  title: "가계부",
-  description: "가계부",
+  title: "모음",
+  description: "내 자산을 한곳에 — 주식·가계부 관리",
   icons: {
     icon: "/icon.svg",
   },
