@@ -1,0 +1,13 @@
+<svg width="440" height="140" viewBox="0 0 440 140" xmlns="http://www.w3.org/2000/svg">
+  <!-- 어두운 배경용 워드마크 — 투명 배경, 크림 텍스트 -->
+  <g transform="translate(10,18)">
+    <g>
+      <circle cx="38" cy="42" r="30" fill="#A6B89A"/>
+      <circle cx="76" cy="42" r="30" fill="#C7D3BE"/>
+      <circle cx="57" cy="74" r="30" fill="#E0BC72"/>
+      <circle cx="57" cy="53" r="13.5" fill="#FAF6EF"/>
+    </g>
+  </g>
+  <text x="150" y="70" font-family="'Noto Serif KR',serif" font-size="74" font-weight="700"
+        fill="#FAF6EF" dominant-baseline="central">모음</text>
+</svg>

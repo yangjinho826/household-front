@@ -1,0 +1,21 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FAF6EF"/>
+      <stop offset="1" stop-color="#EFE7D6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 배경: 크림 둥근 사각 -->
+  <rect x="0" y="0" width="512" height="512" rx="116" fill="url(#bg)"/>
+
+  <!-- 여러 자산이 한곳으로 모이는 형상 — 겹치는 원 -->
+  <g>
+    <circle cx="194" cy="208" r="98" fill="#7C9473" opacity="0.88"/>
+    <circle cx="318" cy="208" r="98" fill="#A6B89A" opacity="0.88"/>
+    <circle cx="256" cy="312" r="98" fill="#D4A95F" opacity="0.88"/>
+  </g>
+
+  <!-- 중앙 수렴 핵 (한곳에 모임) -->
+  <circle cx="256" cy="244" r="44" fill="#566B4E"/>
+</svg>

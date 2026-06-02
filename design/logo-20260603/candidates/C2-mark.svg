@@ -1,0 +1,15 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- 배경: 세이지 둥근 사각 -->
+  <rect x="0" y="0" width="512" height="512" rx="116" fill="#7C9473"/>
+
+  <!-- 워드마크 "모" — 위로 올려 골드 포인트 공간 확보 -->
+  <text x="256" y="232" font-family="'Apple SD Gothic Neo','Noto Sans KR','Pretendard',sans-serif"
+        font-size="290" font-weight="800" fill="#FAF6EF"
+        text-anchor="middle" dominant-baseline="central">모</text>
+
+  <!-- 모이는 중심점 (codex 조언) — 자산이 한 점으로 수렴 -->
+  <g>
+    <circle cx="256" cy="412" r="26" fill="#D4A95F"/>
+    <circle cx="256" cy="412" r="26" fill="none" stroke="#F0D89E" stroke-width="3"/>
+  </g>
+</svg>

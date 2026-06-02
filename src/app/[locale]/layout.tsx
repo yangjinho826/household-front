@@ -10,7 +10,11 @@ export const metadata: Metadata = {
   title: "모음",
   description: "내 자산을 한곳에 — 주식·가계부 관리",
   icons: {
-    icon: "/icon.svg",
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
   },
 };
 
