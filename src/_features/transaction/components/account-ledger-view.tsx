@@ -56,32 +56,32 @@ export default function AccountLedgerView({
     return Array.from(map.entries()).sort((a, b) => b[0].localeCompare(a[0]));
   }, [items]);
 
-  if (items.length === 0) {
-    return (
-      <Center py="lg">
-        <Text c="dimmed" size="sm">
-          {tg("no_data")}
-        </Text>
-      </Center>
-    );
-  }
-
+  // 빈 결과여도 early return 하지 않는다 — 클라 필터(txType)로 현재 페이지에
+  // 해당 거래가 없을 뿐 다음 페이지엔 있을 수 있으므로 sentinel 을 살려 둔다.
   return (
     <Stack gap="md">
-      {grouped.map(([date, txns]) => (
-        <Stack key={date} gap="xs">
-          <Text size="sm" fw={700} c="dimmed" px={4}>
-            {formatDate(date)}
+      {items.length === 0 ? (
+        <Center py="lg">
+          <Text c="dimmed" size="sm">
+            {tg("no_data")}
           </Text>
-          <Card p="xs">
-            <Stack gap={0}>
-              {txns.map((tx) => (
-                <LedgerRow key={tx.transactionId} t={tx} />
-              ))}
-            </Stack>
-          </Card>
-        </Stack>
-      ))}
+        </Center>
+      ) : (
+        grouped.map(([date, txns]) => (
+          <Stack key={date} gap="xs">
+            <Text size="sm" fw={700} c="dimmed" px={4}>
+              {formatDate(date)}
+            </Text>
+            <Card p="xs">
+              <Stack gap={0}>
+                {txns.map((tx) => (
+                  <LedgerRow key={tx.transactionId} t={tx} accountId={accountId} />
+                ))}
+              </Stack>
+            </Card>
+          </Stack>
+        ))
+      )}
 
       <InfiniteSentinel
         hasNextPage={hasNextPage}
