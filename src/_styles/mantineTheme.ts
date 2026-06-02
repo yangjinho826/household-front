@@ -257,11 +257,14 @@ export const mantineTheme = createTheme({
         radius: "3xl",
         padding: "lg",
         shadow: "xs",
-        withBorder: false,
+        withBorder: true,
       },
       styles: {
         root: {
           letterSpacing: "-0.02em",
+          // 크림 배경(#faf6ef)과 카드(#fffdf9) 명도차가 작아 경계가 흐림 →
+          // 웜톤 옅은 테두리로 네모 박스 구분 (배경색은 유지)
+          borderColor: "var(--mantine-color-gray-2)",
         },
       },
     }),
