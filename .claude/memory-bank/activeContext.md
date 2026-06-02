@@ -49,8 +49,15 @@ R1~R5a 전부 dev 커밋 완료. **dev→main 머지는 아직 안 함** — R5a
   - 결정: 차트=**Mantine Charts**(@mantine/charts), 브랜드명=**모음**(한글), IA=**자산중심 4탭**, 시각=**design-shotgun 시안**.
   - ✅ **구조 트랙 S1~S5 완료·dev push(ba8da2a)**: S1 portfolio→invest 라우트 이동 / S2 레거시 308 리다이렉트(middleware.ts) / S3 4탭화(홈·거래·투자·내정보)+nav i18n / S4 /wealth 슬림화(hero·도넛·계좌타입 진행바 제거+SubHeader, sub-route화) / S5 홈=자산 대시보드(`TotalAssetHero` 추출 + wealth/home/portfolio 3쿼리 조합: 총자산 hero·자산군 도넛·투자손익·가계부 요약·최근거래). S6(카테고리 이관) 스킵(stats.monthly 엔드포인트 미검증).
   - QA: /browse 로그인 → 홈/자산/투자 전 화면 렌더 + 3 API(home/wealth/portfolio overview) 200 + 콘솔 에러 0(recharts width warning만 — V4서 h prop으로 해소).
-  - ⏳ **시각 트랙 대기**: V1 design-shotgun 시안(**사용자 선택 필요 — 여기서 멈춤**) → V2 DESIGN.md(design-consultation) → V3 토큰화(하드코딩 hex 10~15군데 정리) → V4 차트 Mantine Charts 교체 → V5 리브랜딩("가계부"→"모음": layout/manifest/i18n/brand-logo).
-  - ▶ **다음 세션 재개점 = V1 design-shotgun** (재편된 홈/자산/투자 화면 기준 시안 생성 → 사용자가 무드 선택). 구조 트랙은 끝났고 시각만 남음.
+  - 🔄 **시각 트랙 진행**: ✅V1 무드 선택 완료 → V2 DESIGN.md(design-consultation) → V3 토큰화(하드코딩 hex 10~15군데 정리) → V4 차트 Mantine Charts 교체 → V5 리브랜딩("가계부"→"모음": layout/manifest/i18n/brand-logo).
+  - ✅ **V1 완료(2026-06-02)**: design-shotgun이 OpenAI 키 없어 AI 이미지 불가 → **HTML 코드 목업 폴백**으로 홈 대시보드 3무드(A Clean Slate 토스풍 / B Midnight Vault 다크 / C Warm Ledger 따뜻) 비교보드 생성. **사용자 선택 = C · Warm Ledger**. 토큰: bg #FAF6EF / card #FFFDF9 / primary 세이지 #7C9473 / accent 테라코타 #D98E73 / text #3C3530 / 세리프 헤드라인 / 24px 라운드. 상세=`~/.gstack/projects/yangjinho826-household-front/designs/home-dashboard-20260602/approved.json` + board.html.
+  - ✅ **V2 완료(2026-06-02)**: `DESIGN.md`(프로젝트 루트) 작성 + **codex 교차 검토 반영**. Warm Ledger 디자인 시스템 명세. 최종 확정:
+    - **세리프 = 브랜드 로고("모음")만**(codex가 한글 세리프 이질감/로딩으로 축소 권고 — 섹션타이틀도 Pretendard). h1만 선택적.
+    - **의미색**: 수입 파랑·지출 빨강 유지 + **초록 역할 분리** → `sage`(브랜드/액션) vs **`positive` #2F855A(양수·수익)**. 기존 `linerGreen` #22C55E 폐기→positive 치환(7곳+: total-asset-hero·value/account/portfolio-trend·snapshot-drilldown·account-report·account constants SAVINGS).
+    - primary=세이지, **primaryShade light 5→6**(#647A5C — 대비 3.34→4.73 AA). accent=테라코타(shade4 #E5B197로 벌림). gray=웜그레이 교체, **textDim gray.5→6 #7A6F63**(대비). 카드 radius xl→3xl(이미 토큰 존재), defaultRadius는 유지(전역 영향 방지). 갈색톤 그림자.
+    - **8장 = V3 작업 명세서**(mantineTheme.ts 변경표 + 8-3 linerGreen→positive 치환 파일목록 + design-tokens.ts TOKEN). primary 사용규칙: "수입은 반드시 c=info 명시".
+    - 검토 경로: design-consultation 스킬은 프리뷰가 OpenAI 키 필요라 스킵→직접 작성, **codex exec로 교차 검토**(codex CLU 0.134 인증OK). 사용자: design 이미지용 OpenAI 키는 효용 낮은 단계라 안 만듦.
+  - ▶ **다음 재개점 = V3 토큰화** (DESIGN.md 8장대로 mantineTheme.ts + design-tokens.ts 교체 + 8-3 linerGreen 치환). primaryColor info→sage 회귀 확인 필수. 이후 V4 차트 Mantine Charts, V5 리브랜딩.
   - ⚠️ TaskList(V1~V5 5개)는 **세션 한정이라 휘발** — 이 activeContext 의 시각 트랙 줄 + 로드맵 `optimized-singing-russell.md` 가 정본. 다음 세션은 이 둘로 복원.
 
 > 교훈: R5a-3(월별 배분추이)까지가 사용자가 생각한 적정 스코프. TWR/goal은 과한 기능. 트랙①(자산성격 단순화)만 R5a 위에 얹음.
