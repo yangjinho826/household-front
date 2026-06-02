@@ -86,11 +86,13 @@ R1~R5a 전부 dev 커밋 완료. **dev→main 머지는 아직 안 함** — R5a
     - **전량매도 버그 fix(A 최소)**: 종목 전량매도 시 soft delete(data=null)되는데 portfolio-trade-section이 useSuspenseQuery로 재조회→404 throw로 화면깨짐. trade-form이 `res.body.data===null`→soldOut 신호, section이 cancelQueries+removeQueries(item) 후 계좌상세로 router.replace. **B(매매 화면 분리)는 다음 사이클**.
     - 검증: typecheck✅·lint✅. ⚠️ **browse 시각검증 미실시**(사용자가 커밋 먼저) — 전량매도 A fix 실동작·모바일/데스크톱 렌더 다음에 확인 권장.
     - ⚠️ codex 지적 중 **실현손익 진입점 보류**: overview summary에 누적 실현손익 필드/전체 매매손익 라우트 없음→거짓 진입점 우려로 미반영. 백엔드 필드 생기면 Hero 메타에 추가.
-  - ✅ **투자 계좌상세·종목상세 리워크 완료 + 매매손익 IA 이동(2026-06-02, 미커밋)** — 계획 `~/.claude/plans/browse-async-blanket.md`, 목업 `~/.gstack/.../invest-rework-20260602/board-detail.html`, codex 디자인 리뷰 반영.
+  - ✅ **투자 계좌상세·종목상세 리워크 완료 + 매매손익 IA 이동(2026-06-02, dev 커밋·미push)** — 계획 `~/.claude/plans/browse-async-blanket.md`, 목업 `~/.gstack/.../invest-rework-20260602/board-detail.html`, codex 디자인 리뷰 반영.
     - **핵심 IA 변경**: 종목상세 "매매손익(실현손익)" 탭은 전량매도 시 종목 soft delete로 조회 사각지대 → **종목 레벨→계좌 레벨로 이동**. 종목상세는 거래내역 단일(탭 제거), 계좌상세에 "누적 매매수익"(전량매도된 종목 매도까지 합산).
     - **백엔드(household-back, 미커밋)**: `/api/portfolio/accounts/{id}/realized-pnl` 신설(router/service `get_realized_pnl_by_account`/repository `find_sell_txs_by_account`(account+household 필터, ACTIVE SELL — 삭제 종목 매도 포함)/schema `RealizedPnlRow.name` 추가). **새 컬럼/마이그레이션 0** — `realized_pnl` 박제(`a3f7c9d2e1b8`) 재활용. (이전 "실현손익 진입점 보류"의 백엔드 부재가 이걸로 해소)
     - **프론트(미커밋)**: `RealizedPnlPanel` portfolioId|accountId 분기(내부 ItemRealizedPnl/AccountRealizedPnl + 공통 View — useSuspenseQuery 조건부 호출 불가라 컴포넌트 분리). account realized-pnl 쿼리/키/api/타입(name?) 추가. 계좌상세: hero 라벨 "계좌 총액"(codex #2 명확화)+평가손익 pill, 도넛 메인규칙(정렬후 PALETTE+기타/현금 회색), 누적 매매수익 패널, +종목추가 sage·chevron 토큰. 종목상세: 매매손익 탭 제거·전량매도 토스트 문구·i18n. portfolio 네임스페이스 키 다수 추가(ko/en).
     - 검증: typecheck✅·lint✅·**browse 통합검증✅**(dev useContext null 500은 중복 next dev 프로세스 정리+.next 삭제+재시작으로 해소). 계좌상세(계좌총액·pill·도넛PALETTE·누적매매수익 API 200·**전량매도된 KIWOOM 실현손익이 계좌 누적에 반영 확인**), 종목상세(매매손익 탭 없음·거래내역만), 모바일390+데스크톱, 콘솔에러 0(recharts width warning만). 전량매도 직접 실행은 실데이터 변경이라 미실시(KIWOOM 사례로 동작 입증).
+    - **디자인 후속(2026-06-02)**: 누적 매매수익을 풀 패널→**도넛 하단 "레일" + 바텀시트**(codex 옵션①, `realized-pnl-rail.tsx`). 기간은 프리셋(1·3개월/1년) 폐기→**날짜 자유 선택**(시작일/종료일 DateInput+달력). 카드 박스 구분 약함 → 배경 진하게(#ece2ce)+그림자 강화 시도했으나 **사용자가 색 원복 요청** → Card `withBorder`+웜그레이(gray.2) 테두리로 경계만(배경 #faf6ef 유지).
+    - **커밋 완료(dev 미push)**: front 4커밋 `4ad6dd7`(데이터+i18n)·`35c734e`(UI 리워크)·`035f274`(카드 테두리)·`dec28ab`(작업기록) / back `3001c7e`(계좌 realized-pnl). commit-writer는 household-back이 cwd 밖이라 back은 메인이 직접 커밋.
   - ▶ **다음 작업 = 트랙② 디자인 마무리** (화면별 리워크: 로그인✅·홈✅·거래✅·투자(메인+계좌상세+종목상세)✅ → **내정보 남음** + V5 리브랜딩 텍스트/메타 + dev push). 백로그: 전량매도 B(매매 화면 분리). **거래 백엔드(household-back) 커서정렬 + 이번 realized-pnl 미커밋분 커밋 필요(front+back 양 레포).**
   - ⚠️ TaskList(V1~V5 5개)는 **세션 한정이라 휘발** — 이 activeContext 의 시각 트랙 줄 + 로드맵 `optimized-singing-russell.md` 가 정본. 다음 세션은 이 둘로 복원.
 
