@@ -9,6 +9,23 @@
     "invest": "Invest",
     "settings": "Settings"
   },
+  "settings": {
+    "title": "My Info",
+    "current_household": "Current household",
+    "switch": "Switch",
+    "total_count": "{count} total",
+    "stat_accounts": "Accounts",
+    "stat_transactions": "Transactions",
+    "stat_portfolios": "Holdings",
+    "household_manage": "Manage household",
+    "member_manage": "Manage members",
+    "manage_section": "Manage",
+    "category_manage": "Categories",
+    "fixed_manage": "Fixed expenses",
+    "account_manage": "Accounts",
+    "count_suffix": "{count}",
+    "logout": "Log out"
+  },
   "home": {
     "total_asset": "Total assets",
     "show_amount": "Show amount",
@@ -71,7 +88,7 @@
     "register_link": "Sign up",
     "brand_name": "Moeum",
     "brand_tagline": "See how your wealth shifts, all in one place",
-    "welcome_title": "Hello!\nWelcome to your budget",
+    "welcome_title": "Hello!\nWelcome to Moeum",
     "welcome_subtitle": "Start with your email",
     "welcome_register_title": "Let's get started",
     "welcome_register_subtitle": "All you need is an email and password",
@@ -274,6 +291,10 @@
     "currency": "Currency",
     "started_at": "Started at",
     "member_count": "{count} members",
+    "switcher_title": "Select household",
+    "switcher_count": "Managing {count} households",
+    "managing": "Managing {count}",
+    "create_new": "New household",
     "member": {
       "title": "Members",
       "subtitle": "{name} · {count} members",

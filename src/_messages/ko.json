@@ -9,6 +9,23 @@
     "invest": "투자",
     "settings": "내정보"
   },
+  "settings": {
+    "title": "내정보",
+    "current_household": "현재 가계부",
+    "switch": "전환",
+    "total_count": "전체 {count}개",
+    "stat_accounts": "통장",
+    "stat_transactions": "거래",
+    "stat_portfolios": "종목",
+    "household_manage": "가계부 관리",
+    "member_manage": "멤버 관리",
+    "manage_section": "관리",
+    "category_manage": "카테고리 관리",
+    "fixed_manage": "고정지출 관리",
+    "account_manage": "통장 관리",
+    "count_suffix": "{count}개",
+    "logout": "로그아웃"
+  },
   "home": {
     "total_asset": "총 자산",
     "show_amount": "금액 보기",
@@ -71,7 +88,7 @@
     "register_link": "회원가입",
     "brand_name": "모음",
     "brand_tagline": "매달 내 자산이 어떻게 변하는지 한눈에 모아봐요",
-    "welcome_title": "안녕하세요!\n가계부에 오신 걸 환영해요",
+    "welcome_title": "안녕하세요!\n모음에 오신 걸 환영해요",
     "welcome_subtitle": "이메일로 시작하기",
     "welcome_register_title": "함께 시작해요",
     "welcome_register_subtitle": "이메일과 비밀번호만 있으면 돼요",
@@ -274,6 +291,10 @@
     "currency": "통화",
     "started_at": "시작일",
     "member_count": "{count}명",
+    "switcher_title": "가계부 선택",
+    "switcher_count": "관리 중인 가계부 {count}개",
+    "managing": "관리 중 {count}개",
+    "create_new": "새 가계부 만들기",
     "member": {
       "title": "멤버 관리",
       "subtitle": "{name} · 멤버 {count}명",
