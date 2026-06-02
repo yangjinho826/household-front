@@ -75,7 +75,8 @@ interface Props {
 }
 
 // 월별 추이 라인차트 — 표시 전용(drill-down 없음). 계좌/종목 화면에서 공용.
-export default function ValueTrendChart({ data, color = "#3B82F6" }: Props) {
+// 기본색 sage = 홈 총자산 hero(#7C9473)와 동일 — 추이 차트 전반 톤 통일.
+export default function ValueTrendChart({ data, color = "#7C9473" }: Props) {
   // recharts ResponsiveContainer 는 SSR prerender 에서 깨질 수 있어 클라 마운트 후에만 그림
   const mounted = useMounted();
 
@@ -115,7 +116,7 @@ export default function ValueTrendChart({ data, color = "#3B82F6" }: Props) {
           />
           <XAxis
             dataKey="month"
-            tick={{ fontSize: 9, fill: "#8B95A1" }}
+            tick={{ fontSize: 9, fill: "#9C8F82" }}
             axisLine={false}
             tickLine={false}
             interval={1}

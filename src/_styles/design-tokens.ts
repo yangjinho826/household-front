@@ -24,7 +24,31 @@ export const TOKEN = {
   gold: "#F59E0B", // 자산군 (금·원자재 등)
   yellow: "#FCD34D",
   orange: "#D97706",
+
+  // 차트 카테고리 팔레트 (Warm Ledger) — 자산군 배분·종목 구분 공용 단일 소스
+  brick: "#C2674A", // terracotta-deep (연금 등)
+  goldSoft: "#E0B84C", // 차분한 골드 (금·원자재 — gold #F59E0B 보다 톤다운)
+  warmGray: "#C3B9A9", // 웜그레이 (현금 등 중립)
+  warmGrayDeep: "#A99C8D", // 진한 웜그레이 (기타)
+  dustyBlue: "#8FA9B8", // 차분한 블루 (웜 팔레트의 cool accent)
+  caramel: "#B08968", // 캐러멜 브라운
+  dustyRose: "#A67C8C", // 더스티 로즈
 } as const;
+
+/**
+ * 종목 구분 팔레트 — Warm Ledger 무드 7색.
+ * 자산군 색(ASSET_CLASS_COLOR)과 같은 톤이되 채도·명도로 종목 간 구분 확보.
+ * 원색(blue/red/purple)을 쓰면 자산군 웜톤과 한 화면에서 충돌해 톤다운 버전 사용.
+ */
+export const PORTFOLIO_PALETTE = [
+  TOKEN.terracotta,
+  TOKEN.sage,
+  TOKEN.goldSoft,
+  TOKEN.brick,
+  TOKEN.dustyBlue,
+  TOKEN.caramel,
+  TOKEN.dustyRose,
+] as const;
 
 /** 색이 지정되지 않은 항목의 fallback — 브랜드 sage */
 export const DEFAULT_ACCENT = TOKEN.sage;

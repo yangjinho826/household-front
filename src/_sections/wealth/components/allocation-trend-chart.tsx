@@ -125,7 +125,7 @@ export default function AllocationTrendChart({ data }: Props) {
           />
           <XAxis
             dataKey="month"
-            tick={{ fontSize: 9, fill: "#8B95A1" }}
+            tick={{ fontSize: 9, fill: "#9C8F82" }}
             axisLine={false}
             tickLine={false}
             interval={1}

@@ -1,20 +1,12 @@
-import { TOKEN } from "_styles/design-tokens";
+import { PORTFOLIO_PALETTE } from "_styles/design-tokens";
 
 import type {
   PortfolioDetailItemType,
   PortfolioListItemType,
 } from "./types";
 
-const PORTFOLIO_PALETTE = [
-  TOKEN.blue,
-  TOKEN.purple,
-  TOKEN.positive,
-  TOKEN.gold,
-  TOKEN.red,
-] as const;
-
 /**
- * 종목명에 토스 5색 중 하나를 안정적으로 매핑.
+ * 종목명에 팔레트 색 하나를 안정적으로 매핑.
  * 같은 종목명은 항상 같은 색 (hash mod).
  */
 export function pickPortfolioColor(name: string): string {
