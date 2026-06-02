@@ -1,18 +1,30 @@
 /**
- * 디자인 시스템 시각 토큰 — hex 값 직접 참조용.
+ * 디자인 시스템 시각 토큰 — hex 값 직접 참조용 (인라인 style / 알파 합성).
  *
- * Mantine theme 색상 키와 1:1 매핑. 인라인 style 에서 hex (`${color}1A`
- * 같은 알파 합성 등) 가 필요할 때 사용. 모든 값 Tailwind 500 시리즈 일관.
+ * Warm Ledger 무드 (DESIGN.md). Mantine theme 색상 키와 매핑되지만,
+ * `${color}1A` 같은 알파 합성이나 비-Mantine 컨텍스트에서 hex 가 필요할 때 사용.
  */
 export const TOKEN = {
-  blue: "#3B82F6", // info.5 — Tailwind blue-500 (수입/안내)
-  red: "#EF4444", // danger.5 — Tailwind red-500 (지출/위험)
-  green: "#22C55E", // linerGreen.5 — Tailwind green-500 (primary/success)
-  purple: "#8B5CF6", // purple.5 — Tailwind violet-500 (TRANSFER/INVESTMENT 보조)
-  gold: "#F59E0B", // warning.5 — Tailwind amber-500 (주의)
-  yellow: "#FCD34D", // warning.3 — 앰버 밝은 톤
-  orange: "#D97706", // warning.6 — 앰버 진한 톤
+  // 브랜드 / 표면
+  sage: "#7C9473", // primary 브랜드
+  sageAction: "#647A5C", // filled 버튼 (primaryShade 6 — 흰 텍스트 대비 확보)
+  terracotta: "#D98E73", // accent
+  bg: "#FAF6EF", // 페이지 배경 (크림)
+  card: "#FFFDF9", // 카드 표면
+  text: "#3C3530", // 본문 텍스트
+  textDim: "#7A6F63", // 보조 텍스트 (gray.6 — 대비 확보)
+
+  // 의미색 (관습 유지)
+  blue: "#3B82F6", // info — 수입/생활/안내
+  red: "#EF4444", // danger — 지출/하락/위험
+  purple: "#8B5CF6", // 투자 보조
+  positive: "#2F855A", // 양수/수익/상승/적립 (구 green #22C55E 대체)
+
+  // 차트·팔레트 구분색
+  gold: "#F59E0B", // 자산군 (금·원자재 등)
+  yellow: "#FCD34D",
+  orange: "#D97706",
 } as const;
 
-/** 색이 지정되지 않은 항목의 fallback — primary blue */
-export const DEFAULT_ACCENT = TOKEN.blue;
+/** 색이 지정되지 않은 항목의 fallback — 브랜드 sage */
+export const DEFAULT_ACCENT = TOKEN.sage;

@@ -51,7 +51,7 @@ export default function SnapshotDrilldownPanel({ month, onClose }: Props) {
               <Text
                 size="xs"
                 fw={600}
-                c="linerGreen.6"
+                c="positive.6"
                 style={{ fontVariantNumeric: "tabular-nums" }}
               >
                 +{fmt(month.totalIncome)}원

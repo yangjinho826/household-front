@@ -50,7 +50,7 @@ function FlowTooltip({
       <Text
         size="xs"
         fw={700}
-        c="linerGreen.6"
+        c="positive.6"
         style={{ fontVariantNumeric: "tabular-nums" }}
       >
         수입 +{fmt(income)}원
@@ -138,7 +138,7 @@ export default function AccountReportSection({ accountId }: Props) {
                 >
                   <Bar
                     dataKey="income"
-                    fill="var(--mantine-color-linerGreen-6)"
+                    fill="var(--mantine-color-positive-6)"
                     radius={[3, 3, 0, 0]}
                   />
                   <Bar

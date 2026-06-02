@@ -76,7 +76,7 @@ export default function AccountBalanceTrend({
             <Text
               size="xs"
               fw={700}
-              c={periodPct >= 0 ? "linerGreen.6" : "danger.5"}
+              c={periodPct >= 0 ? "positive.6" : "danger.5"}
               style={{ fontVariantNumeric: "tabular-nums" }}
             >
               최근 {trend.length}개월 {periodPct >= 0 ? "+" : "−"}

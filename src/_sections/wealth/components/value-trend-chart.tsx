@@ -58,7 +58,7 @@ function TrendTooltip({
         <Text
           size="xs"
           fw={700}
-          c={p.momPct >= 0 ? "linerGreen.6" : "danger.5"}
+          c={p.momPct >= 0 ? "positive.6" : "danger.5"}
           style={{ fontVariantNumeric: "tabular-nums" }}
         >
           전월 {p.momPct >= 0 ? "+" : "−"}

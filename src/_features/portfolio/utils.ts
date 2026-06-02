@@ -8,7 +8,7 @@ import type {
 const PORTFOLIO_PALETTE = [
   TOKEN.blue,
   TOKEN.purple,
-  TOKEN.green,
+  TOKEN.positive,
   TOKEN.gold,
   TOKEN.red,
 ] as const;

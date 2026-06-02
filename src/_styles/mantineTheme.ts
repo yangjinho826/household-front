@@ -20,26 +20,51 @@ import {
 import { DateInput } from "@mantine/dates";
 
 // ============================================================
-// 색상 시스템 — Tailwind 500 시리즈 (채도 일관)
-// primary green #22C55E. 의미 색 = info(수입)/danger(지출)/warning(주의)/purple(투자).
-// 기존 toss* 키는 alias 재정렬 — 사용처 22곳 자동 반영.
+// 색상 시스템 — Warm Ledger (DESIGN.md)
+// 브랜드 = sage. 의미색 = info(수입)/danger(지출)/positive(양수·수익)/warning(주의)/purple(투자).
 // ============================================================
 
-// linerGreen — Tailwind green (primary, success)
-const linerGreen: MantineColorsTuple = [
-  "#F0FDF4",
-  "#DCFCE7",
-  "#BBF7D0",
-  "#86EFAC",
-  "#4ADE80",
-  "#22C55E",
-  "#16A34A",
-  "#15803D",
-  "#166534",
-  "#14532D",
+// sage — Warm Ledger 브랜드 (primary)
+const sage: MantineColorsTuple = [
+  "#F4F7F2",
+  "#E6EDE2",
+  "#CDDBC6",
+  "#AFC4A4",
+  "#93AC85",
+  "#7C9473",
+  "#647A5C",
+  "#4F6149",
+  "#3D4B39",
+  "#2C3629",
 ];
 
-const success: MantineColorsTuple = linerGreen;
+// terracotta — Warm Ledger accent
+const terracotta: MantineColorsTuple = [
+  "#FCF4EF",
+  "#F7E3D9",
+  "#EFCBB8",
+  "#E7B097",
+  "#E5B197",
+  "#D98E73",
+  "#C2674A",
+  "#A4543B",
+  "#83432F",
+  "#5F3122",
+];
+
+// positive — 양수/수익/상승/적립 (구 linerGreen #22C55E 대체)
+const positive: MantineColorsTuple = [
+  "#E7F3EC",
+  "#C6E3D2",
+  "#9FCFB2",
+  "#73B88E",
+  "#4E9F70",
+  "#2F855A",
+  "#266E4A",
+  "#1F5A3D",
+  "#184430",
+  "#102E20",
+];
 
 // danger — Tailwind red (지출/위험)
 const danger: MantineColorsTuple = [
@@ -97,24 +122,24 @@ const purple: MantineColorsTuple = [
   "#4C1D95",
 ];
 
-// 회색 9단계 — 페이지 bg / 텍스트 회색 톤. 토스 회색 유지.
+// 회색 9단계 — 웜그레이 (베이지끼, Warm Ledger)
 const grayScale: MantineColorsTuple = [
-  "#F2F4F6",
-  "#E5E8EB",
-  "#D1D6DB",
-  "#B0B8C1",
-  "#9DA3AE",
-  "#8B95A1",
-  "#6B7684",
-  "#4E5968",
-  "#333D4B",
-  "#191F28",
+  "#F7F4EF",
+  "#EDE8E0",
+  "#DDD5C9",
+  "#C3B9A9",
+  "#A99C8D",
+  "#9C8F82",
+  "#7A6F63",
+  "#5A5149",
+  "#423B34",
+  "#3C3530",
 ];
 
 export const mantineTheme = createTheme({
-  // primary = info (blue) — 시그니처 파랑. linerGreen 은 success/적립 의미로만 유지.
-  primaryColor: "info",
-  primaryShade: { light: 5, dark: 4 },
+  // primary = sage (브랜드). 수입 등 의미색은 c="info" 명시로 분리 (브랜드색 ≠ 의미색).
+  primaryColor: "sage",
+  primaryShade: { light: 6, dark: 4 },
   autoContrast: true,
 
   fontFamily:
@@ -124,8 +149,9 @@ export const mantineTheme = createTheme({
   defaultRadius: "xl",
 
   colors: {
-    linerGreen,
-    success,
+    sage,
+    terracotta,
+    positive,
     danger,
     warning,
     info,
@@ -155,12 +181,13 @@ export const mantineTheme = createTheme({
     full: rem(9999),
   },
 
+  // 갈색 톤 그림자 — 종이 질감 (Warm Ledger)
   shadows: {
-    xs: "0 1px 2px rgba(0, 0, 0, 0.02)",
-    sm: "0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02)",
-    md: "0 4px 6px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.02)",
-    lg: "0 10px 15px rgba(0, 0, 0, 0.04), 0 4px 6px rgba(0, 0, 0, 0.02)",
-    xl: "0 20px 25px rgba(0, 0, 0, 0.04), 0 10px 10px rgba(0, 0, 0, 0.02)",
+    xs: "0 1px 2px rgba(120, 100, 70, 0.04)",
+    sm: "0 2px 6px rgba(120, 100, 70, 0.06)",
+    md: "0 6px 16px rgba(120, 100, 70, 0.08)",
+    lg: "0 12px 28px rgba(120, 100, 70, 0.10)",
+    xl: "0 20px 40px rgba(120, 100, 70, 0.12)",
   },
 
   fontSizes: {
@@ -224,10 +251,10 @@ export const mantineTheme = createTheme({
       },
     }),
     Card: Card.extend({
-      // sub 카드 기본값 — 정보 밀도 ↑, 미니멀.
+      // sub 카드 기본값 — Warm Ledger 큰 라운드(3xl=24).
       // hero 카드 (페이지 주인공) 는 사용처에서 p="xl" shadow="md" 명시로 위계 분리.
       defaultProps: {
-        radius: "xl",
+        radius: "3xl",
         padding: "lg",
         shadow: "xs",
         withBorder: false,

@@ -5,9 +5,9 @@ import { Group, Stack, Text, UnstyledButton } from "@mantine/core";
 import { TOKEN } from "_styles/design-tokens";
 
 const COLORS = [
-  TOKEN.blue, // 토스 블루
-  TOKEN.green, // 토스 그린
-  TOKEN.red, // 토스 레드
+  TOKEN.blue, // 블루
+  TOKEN.positive, // 세이지 그린 (양수/적립)
+  TOKEN.red, // 레드
   TOKEN.purple, // 토스 퍼플
   TOKEN.yellow, // 옐로우
   TOKEN.orange, // 오렌지

@@ -66,7 +66,7 @@ function TrendTooltip({
         <Text
           size="xs"
           fw={700}
-          c={p.momPct >= 0 ? "linerGreen.6" : "danger.5"}
+          c={p.momPct >= 0 ? "positive.6" : "danger.5"}
           style={{ fontVariantNumeric: "tabular-nums" }}
         >
           전월 {p.momPct >= 0 ? "+" : "−"}
@@ -237,7 +237,7 @@ export default function TotalAssetHero() {
             <Text
               size="sm"
               fw={600}
-              c={diff >= 0 ? "linerGreen.6" : "danger.5"}
+              c={diff >= 0 ? "positive.6" : "danger.5"}
               style={{ fontVariantNumeric: "tabular-nums" }}
             >
               {lastSnapshotLabel} 기록 대비 {diff >= 0 ? "+" : "−"}
@@ -254,7 +254,7 @@ export default function TotalAssetHero() {
               <Text
                 size="xs"
                 fw={700}
-                c={periodPct >= 0 ? "linerGreen.6" : "danger.5"}
+                c={periodPct >= 0 ? "positive.6" : "danger.5"}
                 style={{ fontVariantNumeric: "tabular-nums" }}
               >
                 {periodPct >= 0 ? "+" : "−"}

@@ -22,7 +22,7 @@ export default function BrandLogo({ size = 56 }: BrandLogoProps) {
         width: size,
         height: size,
         borderRadius: Math.round(size * 0.3),
-        background: TOKEN.blue,
+        background: TOKEN.sage,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",

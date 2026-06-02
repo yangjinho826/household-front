@@ -5,7 +5,7 @@ import type { AccountType } from "./types";
 /** AccountType → Mantine 색상 키 (tossXxx) */
 export const ACCOUNT_TYPE_MANTINE_COLOR: Record<AccountType, string> = {
   LIVING: "info",
-  SAVINGS: "linerGreen",
+  SAVINGS: "positive",
   INVESTMENT: "purple",
   REAL_ESTATE: "grape",
   PENSION: "pink",
@@ -16,7 +16,7 @@ export const ACCOUNT_TYPE_MANTINE_COLOR: Record<AccountType, string> = {
 /** AccountType → hex (IconBox 등 직접 색이 필요한 곳) */
 export const ACCOUNT_TYPE_HEX: Record<AccountType, string> = {
   LIVING: TOKEN.blue,
-  SAVINGS: TOKEN.green,
+  SAVINGS: TOKEN.positive,
   INVESTMENT: TOKEN.purple,
   REAL_ESTATE: "#8B5CF6",
   PENSION: "#EC4899",
