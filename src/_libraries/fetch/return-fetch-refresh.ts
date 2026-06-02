@@ -43,6 +43,16 @@ if (typeof window !== "undefined") {
   });
 }
 
+// 인증 시도 자체의 401 — 세션 만료가 아니라 자격증명/요청 문제.
+// refresh 무의미하므로 그대로 통과시켜 api 인터셉터가 ApiResponseError 를 던지게 한다.
+// (로그인 실패가 redirectToLogin → location.replace 로 새로고침되던 버그 차단)
+const AUTH_ENDPOINTS = ["/api/auth/login", "/api/auth/logout", "/api/auth/refresh"];
+
+function isAuthEndpoint(url: unknown): boolean {
+  const path = typeof url === "string" ? url : String((url as Request)?.url ?? "");
+  return AUTH_ENDPOINTS.some((endpoint) => path.includes(endpoint));
+}
+
 function redirectToLogin(): Promise<Response> {
   if (!redirecting) {
     redirecting = true;
@@ -68,6 +78,9 @@ export const returnFetchRefresh = (args?: ReturnFetchDefaultOptions) =>
 
         // 401 이 아니면 그대로 반환
         if (response.status !== 401) return response;
+
+        // 로그인/로그아웃 시도 자체의 401 → refresh 스킵, api 인터셉터가 에러 throw
+        if (isAuthEndpoint(_url)) return response;
 
         // 이미 refresh 실패했거나 redirect 진행 중 → 즉시 pending (재시도 X)
         if (refreshFailed || redirecting) {
