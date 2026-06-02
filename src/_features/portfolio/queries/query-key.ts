@@ -2,6 +2,7 @@ import { createQueryKeys } from "@lukemorales/query-key-factory";
 
 import {
   GetAccountOverviewApi,
+  GetAccountRealizedPnlApi,
   GetPortfolioFormOptionsApi,
   GetPortfolioItemApi,
   GetPortfolioItemRealizedPnlApi,
@@ -43,6 +44,15 @@ export const portfolios = createQueryKeys("portfolio", {
     queryKey: [params],
     queryFn: () =>
       GetPortfolioItemRealizedPnlApi(params.itemId, params.fromDate, params.toDate),
+  }),
+  accountRealizedPnl: (params: {
+    accountId: string;
+    fromDate?: string;
+    toDate?: string;
+  }) => ({
+    queryKey: [params],
+    queryFn: () =>
+      GetAccountRealizedPnlApi(params.accountId, params.fromDate, params.toDate),
   }),
   valueHistoryByAccount: (params: PortfolioValueHistoryByAccountRequest) => ({
     queryKey: [params],

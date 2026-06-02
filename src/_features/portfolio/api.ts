@@ -177,6 +177,22 @@ export async function GetPortfolioItemRealizedPnlApi(
   );
 }
 
+/** 계좌 누적 매매손익 — 계좌 전체 매도 건별 실현손익 + 요약 (전량매도된 종목 포함, 기본 최근 12개월) */
+export async function GetAccountRealizedPnlApi(
+  accountId: string,
+  fromDate?: string,
+  toDate?: string,
+) {
+  const queryParams: Record<string, unknown> = {};
+  if (fromDate) queryParams.fromDate = fromDate;
+  if (toDate) queryParams.toDate = toDate;
+  const queryString = objectToParams(queryParams).toString();
+  return apiFetch<ApiResponse<RealizedPnlResponseType>>(
+    `/api/portfolio/accounts/${accountId}/realized-pnl${queryString ? `?${queryString}` : ""}`,
+    { method: "GET" },
+  );
+}
+
 // =========================================================
 // Mutations + utility
 // =========================================================

@@ -35,6 +35,17 @@ export const useItemRealizedPnl = (
   );
 };
 
+/** 계좌 누적 매매손익 — 계좌 전체 매도 건별 실현손익 + 요약 (전량매도된 종목 포함) */
+export const useAccountRealizedPnl = (
+  accountId: string,
+  fromDate?: string,
+  toDate?: string,
+) => {
+  return useSuspenseQuery(
+    queryKeys.portfolio.accountRealizedPnl({ accountId, fromDate, toDate }),
+  );
+};
+
 /** 종목 평가액 월별 추이 — 기본 최근 12개월 */
 export const usePortfolioValueHistoryByItem = (
   portfolioItemId: string,
