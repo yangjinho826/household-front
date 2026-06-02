@@ -4,6 +4,7 @@ import {
   ActionIcon,
   Card,
   Group,
+  Modal,
   Stack,
   Text,
   UnstyledButton,
@@ -43,6 +44,7 @@ function TrendTooltip({
   active?: boolean;
   payload?: { payload: TrendPoint }[];
 }) {
+  const t = useTranslations("home");
   if (!active || !payload?.length) return null;
   const p = payload[0]?.payload;
   if (!p) return null;
@@ -60,7 +62,8 @@ function TrendTooltip({
         {p.month}
       </Text>
       <Text size="sm" fw={800} style={{ fontVariantNumeric: "tabular-nums" }}>
-        {fmt(p.value)}원
+        {fmt(p.value)}
+        {t("won")}
       </Text>
       {p.momPct !== null && (
         <Text
@@ -69,7 +72,7 @@ function TrendTooltip({
           c={p.momPct >= 0 ? "positive.6" : "danger.5"}
           style={{ fontVariantNumeric: "tabular-nums" }}
         >
-          전월 {p.momPct >= 0 ? "+" : "−"}
+          {t("trend_prev")} {p.momPct >= 0 ? "+" : "−"}
           {Math.abs(p.momPct).toFixed(1)}%
         </Text>
       )}
@@ -84,7 +87,13 @@ function TrendTooltip({
  * wealth.overview 를 단독 소비(홈의 다른 쿼리와 캐시 공유).
  */
 export default function TotalAssetHero() {
+  const t = useTranslations("home");
+  const tCommon = useTranslations("general.common");
   const te = useTranslations("error");
+
+  // "YYYY-MM-DD" → 월 라벨 (i18n n_month 키)
+  const monthLabel = (dateStr: string) =>
+    t("n_month", { count: Number(dateStr.slice(5, 7)) });
 
   const { data: overviewRes } = useSuspenseQuery(queryKeys.wealth.overview({}));
   const { createMutation } = useAccountSnapshotMutations();
@@ -108,11 +117,12 @@ export default function TotalAssetHero() {
         const momPct =
           prev && prev > 0 ? ((m.totalBalance - prev) / prev) * 100 : null;
         return {
-          month: `${Number(m.snapshotDate.slice(5, 7))}월`, // "5월"
+          month: monthLabel(m.snapshotDate), // "5월"
           value: m.totalBalance,
           momPct,
         };
       }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [yearly.months],
   );
 
@@ -133,42 +143,42 @@ export default function TotalAssetHero() {
       ? ((total - lastSnapshot.totalBalance) / lastSnapshot.totalBalance) * 100
       : null;
   const lastSnapshotLabel = lastSnapshot
-    ? `${Number(lastSnapshot.snapshotDate.slice(5, 7))}월`
+    ? monthLabel(lastSnapshot.snapshotDate)
     : "";
 
   // 수동 박제 — 지난달(targetMonth) upsert. 이미 저장됐어도 다시 눌러 갱신 가능.
   const isTargetSaved = yearly.targetMonthSaved;
-  const targetMonthLabel = `${Number(yearly.targetMonthDate.slice(5, 7))}월`;
+  const targetMonthLabel = monthLabel(yearly.targetMonthDate);
 
   const handleTakeSnapshot = () => {
     if (createMutation.isPending) return;
     modals.openConfirmModal({
       centered: true,
-      title: `${targetMonthLabel} 자산 기록`,
+      title: t("snapshot_title", { month: targetMonthLabel }),
       labels: {
-        confirm: isTargetSaved ? "덮어쓰기" : "기록하기",
-        cancel: "취소",
+        confirm: isTargetSaved ? t("snapshot_overwrite") : t("snapshot_save"),
+        cancel: tCommon("cancel"),
       },
       children: (
         <Text size="sm">
           {isTargetSaved
-            ? `이미 저장된 ${targetMonthLabel} 자산을 현재 잔액으로 덮어쓸까요?`
-            : `${targetMonthLabel} 자산 스냅샷을 저장할까요?`}
+            ? t("snapshot_body_overwrite", { month: targetMonthLabel })
+            : t("snapshot_body_new", { month: targetMonthLabel })}
           <br />
-          모든 통장의 현재 잔액이 기록됩니다.
+          {t("snapshot_body_note")}
         </Text>
       ),
       onConfirm: async () => {
         try {
           await createMutation.mutateAsync();
           notifications.show({
-            title: "기록 완료",
-            message: `${targetMonthLabel} 자산이 기록되었습니다.`,
+            title: t("snapshot_done_title"),
+            message: t("snapshot_done", { month: targetMonthLabel }),
             color: "green",
           });
         } catch (error) {
           notifications.show({
-            title: "기록 실패",
+            title: t("snapshot_fail_title"),
             message: getErrorMessage(error, te),
             color: "red",
           });
@@ -184,14 +194,14 @@ export default function TotalAssetHero() {
           <Group justify="space-between" align="center">
             <Group gap={4}>
               <Text size="xs" fw={500} c="dimmed">
-                총 자산
+                {t("total_asset")}
               </Text>
               <ActionIcon
                 variant="subtle"
                 color="gray"
                 size="sm"
                 onClick={() => setHidden((v) => !v)}
-                aria-label={hidden ? "show amount" : "hide amount"}
+                aria-label={hidden ? t("show_amount") : t("hide_amount")}
               >
                 {hidden ? <IconEyeOff size={14} /> : <IconEye size={14} />}
               </ActionIcon>
@@ -202,16 +212,16 @@ export default function TotalAssetHero() {
               style={{
                 padding: "6px 12px",
                 borderRadius: 999,
-                background: "var(--mantine-color-info-0)",
+                background: "var(--mantine-color-sage-0)",
                 opacity: createMutation.isPending ? 0.5 : 1,
               }}
             >
               <Group gap={4} wrap="nowrap">
-                <IconRefresh size={12} stroke={3} color="#3B82F6" />
-                <Text size="10px" fw={700} c="info.5">
+                <IconRefresh size={12} stroke={3} color="#647A5C" />
+                <Text size="10px" fw={700} c="sage.6">
                   {isTargetSaved
-                    ? `${targetMonthLabel} 갱신`
-                    : `${targetMonthLabel} 기록`}
+                    ? t("update_month", { month: targetMonthLabel })
+                    : t("record_month", { month: targetMonthLabel })}
                 </Text>
               </Group>
             </UnstyledButton>
@@ -230,7 +240,7 @@ export default function TotalAssetHero() {
           >
             {fmt(total)}
             <Text span size="lg" c="dimmed" ml={4} fw={600}>
-              원
+              {t("won")}
             </Text>
           </Text>
           {diff !== null && (
@@ -240,8 +250,10 @@ export default function TotalAssetHero() {
               c={diff >= 0 ? "positive.6" : "danger.5"}
               style={{ fontVariantNumeric: "tabular-nums" }}
             >
-              {lastSnapshotLabel} 기록 대비 {diff >= 0 ? "+" : "−"}
-              {fmt(Math.abs(diff))}원
+              {t("diff_vs_record", { month: lastSnapshotLabel })}{" "}
+              {diff >= 0 ? "+" : "−"}
+              {fmt(Math.abs(diff))}
+              {t("won")}
               {diffPct !== null &&
                 ` (${diff >= 0 ? "+" : "−"}${Math.abs(diffPct).toFixed(1)}%)`}
             </Text>
@@ -249,7 +261,7 @@ export default function TotalAssetHero() {
           {periodPct !== null && (
             <Group justify="space-between" align="center" mt={8} mb={-4}>
               <Text size="xs" c="dimmed" fw={600}>
-                최근 {periodMonths}개월 추이
+                {t("trend_recent", { count: periodMonths })}
               </Text>
               <Text
                 size="xs"
@@ -290,20 +302,20 @@ export default function TotalAssetHero() {
               >
                 <defs>
                   <linearGradient id="wealthTrend" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#3B82F6" stopOpacity={0.3} />
-                    <stop offset="100%" stopColor="#3B82F6" stopOpacity={0} />
+                    <stop offset="0%" stopColor="#7C9473" stopOpacity={0.3} />
+                    <stop offset="100%" stopColor="#7C9473" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <Area
                   type="monotone"
                   dataKey="value"
-                  stroke="#3B82F6"
+                  stroke="#7C9473"
                   strokeWidth={2.5}
                   fill="url(#wealthTrend)"
-                  dot={{ r: 2.5, fill: "#3B82F6", strokeWidth: 0 }}
+                  dot={{ r: 2.5, fill: "#7C9473", strokeWidth: 0 }}
                   activeDot={{
                     r: 5,
-                    fill: "#3B82F6",
+                    fill: "#7C9473",
                     stroke: "var(--mantine-color-body)",
                     strokeWidth: 2,
                   }}
@@ -311,14 +323,14 @@ export default function TotalAssetHero() {
                 <Tooltip
                   content={<TrendTooltip />}
                   cursor={{
-                    stroke: "#3B82F6",
+                    stroke: "#7C9473",
                     strokeWidth: 1,
                     strokeDasharray: "3 3",
                   }}
                 />
                 <XAxis
                   dataKey="month"
-                  tick={{ fontSize: 9, fill: "#8B95A1" }}
+                  tick={{ fontSize: 9, fill: "#9C8F82" }}
                   axisLine={false}
                   tickLine={false}
                   interval={1}
@@ -329,12 +341,20 @@ export default function TotalAssetHero() {
         </Stack>
       </Card>
 
-      {selectedMonth && (
-        <SnapshotDrilldownPanel
-          month={selectedMonth}
-          onClose={() => setSelectedIdx(null)}
-        />
-      )}
+      <Modal
+        opened={selectedMonth !== null}
+        onClose={() => setSelectedIdx(null)}
+        centered
+        title={
+          selectedMonth
+            ? t("drilldown_title", {
+                month: monthLabel(selectedMonth.snapshotDate),
+              })
+            : ""
+        }
+      >
+        {selectedMonth && <SnapshotDrilldownPanel month={selectedMonth} />}
+      </Modal>
     </>
   );
 }

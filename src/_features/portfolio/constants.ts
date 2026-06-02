@@ -1,11 +1,15 @@
 import type { AssetClass } from "./types";
 
-/** 자산군별 배분 파이 색상 (hex — PortfolioDonut 용). */
+/**
+ * 자산군별 배분 파이 색상 (hex — PortfolioDonut 용).
+ * Warm Ledger 팔레트 (DESIGN.md). 카테고리 구분색이라 의미색(info/danger/positive)과 별개.
+ * 부동산=브랜드 sage, 투자=terracotta, 현금=웜그레이, 연금=벽돌, 금=골드.
+ */
 export const ASSET_CLASS_COLOR: Record<AssetClass, string> = {
-  INVESTMENT: "#3B82F6", // 파랑 (종목 전체)
-  COMMODITY: "#F59E0B", // 금색
-  CASH: "#6B7280", // 회색
-  REAL_ESTATE: "#8B5CF6", // 보라
-  PENSION: "#EC4899", // 핑크
-  OTHER: "#94A3B8", // 연회색
+  REAL_ESTATE: "#7C9473", // sage (보통 최대 비중 → 브랜드색)
+  INVESTMENT: "#D98E73", // terracotta
+  CASH: "#C3B9A9", // 웜그레이 (중립)
+  PENSION: "#C2674A", // terracotta-deep (벽돌)
+  COMMODITY: "#E0B84C", // 골드 (금·원자재)
+  OTHER: "#A99C8D", // 웜그레이 진한
 };

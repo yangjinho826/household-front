@@ -34,6 +34,7 @@
 @media (min-width: 1200px) {
   :root {
     --container-max: 1280px;
+    --bottom-tab-h: 0px; /* 데스크탑은 BottomTab 숨김 → 하단 여백/FAB 기준 0 */
   }
 }
 
@@ -95,6 +96,9 @@ html {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* 스크롤바 폭 항상 예약 — 모달/Drawer 열려 scroll lock 돼도 100vw 불변
+     → 고정 요소(FAB) 위치 점프·레이아웃 시프트 방지 */
+  scrollbar-gutter: stable;
 }
 
 /* 작은 글자(caption, small)는 자간 0 — 좁은 자간 가독성 저하 보정 */

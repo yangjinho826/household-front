@@ -30,6 +30,7 @@ import TotalAssetHero from "./components/total-asset-hero";
 
 export default function HomeSection() {
   const routeParams = useParams<{ locale: string }>();
+  const t = useTranslations("home");
   const tAssetClass = useTranslations("enum.asset-class");
 
   const now = new Date();
@@ -60,18 +61,142 @@ export default function HomeSection() {
   );
 
   const summary = portfolioRes.body.data.summary;
-  const hasInvestment = portfolioRes.body.data.investmentAccounts.length > 0;
+  const investAccounts = portfolioRes.body.data.investmentAccounts;
+  const hasInvestment = investAccounts.length > 0;
+
+  // B 레이아웃: hero 밑에 자산구성·투자를 2열로 묶어 첫 스크롤에 핵심을 모은다.
+  const hasAllocation = allocationItems.length > 0;
+
+  const assetCard = hasAllocation ? (
+    <Card h="100%">
+      <Group justify="space-between" align="center" mb="sm">
+        <Text size="sm" fw={700}>
+          {t("asset_allocation")}
+        </Text>
+        <Anchor
+          component={Link}
+          href={`/${routeParams.locale}/wealth`}
+          size="xs"
+          fw={600}
+          c="dimmed"
+        >
+          {t("go_wealth")}
+        </Anchor>
+      </Group>
+      <PortfolioDonut items={allocationItems} orientation="vertical" />
+    </Card>
+  ) : null;
+
+  const investCard = hasInvestment ? (
+    <Card h="100%">
+      <Group justify="space-between" align="center" mb="sm">
+        <Text size="sm" fw={700}>
+          {t("invest")}
+        </Text>
+        <Anchor
+          component={Link}
+          href={`/${routeParams.locale}/invest`}
+          size="xs"
+          fw={600}
+          c="dimmed"
+        >
+          {t("go_invest")}
+        </Anchor>
+      </Group>
+      <Stack gap="md">
+        <Stack gap={2}>
+          <Text size="xs" c="dimmed" fw={500}>
+            {t("valuation")}
+          </Text>
+          <Text
+            size="lg"
+            fw={700}
+            style={{ fontVariantNumeric: "tabular-nums" }}
+          >
+            {fmt(summary.totalValuation)}
+            {t("won")}
+          </Text>
+        </Stack>
+        <Stack gap={2}>
+          <Text size="xs" c="dimmed" fw={500}>
+            {t("profit_loss")}
+          </Text>
+          <Text
+            size="md"
+            fw={700}
+            c={profitColor(summary.totalProfit)}
+            style={{ fontVariantNumeric: "tabular-nums" }}
+          >
+            {formatProfitAmount(summary.totalProfit, fmt)}
+            {t("won")}
+          </Text>
+          <Text
+            size="xs"
+            fw={700}
+            c={profitColor(summary.totalProfit)}
+            style={{ fontVariantNumeric: "tabular-nums" }}
+          >
+            ({formatProfitRate(summary.totalRate)})
+          </Text>
+        </Stack>
+
+        {/* 보유 투자계좌별 평가액 — 빈공간 채움 + 투자 탭 미리보기 */}
+        <Stack
+          gap={8}
+          pt="sm"
+          style={{ borderTop: "1px solid var(--mantine-color-gray-2)" }}
+        >
+          {investAccounts.slice(0, 3).map(({ account }) => (
+            <Group
+              key={account.accountId}
+              justify="space-between"
+              wrap="nowrap"
+              gap={8}
+            >
+              <Text size="xs" fw={500} c="dimmed" truncate>
+                {account.name}
+              </Text>
+              <Text
+                size="xs"
+                fw={600}
+                style={{
+                  fontVariantNumeric: "tabular-nums",
+                  flexShrink: 0,
+                }}
+              >
+                {fmt(account.portfolioValuation ?? 0)}
+                {t("won")}
+              </Text>
+            </Group>
+          ))}
+        </Stack>
+      </Stack>
+    </Card>
+  ) : null;
 
   return (
     <Stack gap="md">
       {/* [1] 총자산 hero — 월별 추이 / 드릴다운 / 지난달 박제 */}
       <TotalAssetHero />
 
-      {/* [2] 이번 달 가계부 요약 — 상세는 거래 탭 */}
-      <Card radius="lg">
+      {/* [2] 자산구성 + 투자 2열 — 둘 다 있으면 그리드, 하나면 풀폭 */}
+      {assetCard && investCard ? (
+        <SimpleGrid cols={2} spacing="md">
+          {assetCard}
+          {investCard}
+        </SimpleGrid>
+      ) : (
+        <>
+          {assetCard}
+          {investCard}
+        </>
+      )}
+
+      {/* [3] 이번 달 가계부 요약 — 상세는 거래 탭 */}
+      <Card>
         <Group justify="space-between" align="center" mb="sm">
           <Text size="sm" fw={700}>
-            이번 달
+            {t("this_month")}
           </Text>
           <Anchor
             component={Link}
@@ -80,13 +205,13 @@ export default function HomeSection() {
             fw={600}
             c="dimmed"
           >
-            거래 전체 →
+            {t("go_transactions")}
           </Anchor>
         </Group>
         <SimpleGrid cols={3} spacing="sm">
           <Stack gap={2}>
             <Text size="xs" c="dimmed" fw={500}>
-              수입
+              {t("income")}
             </Text>
             <Text
               size="md"
@@ -99,7 +224,7 @@ export default function HomeSection() {
           </Stack>
           <Stack gap={2}>
             <Text size="xs" c="dimmed" fw={500}>
-              지출
+              {t("expense")}
             </Text>
             <Text
               size="md"
@@ -112,7 +237,7 @@ export default function HomeSection() {
           </Stack>
           <Stack gap={2}>
             <Text size="xs" c="dimmed" fw={500}>
-              저축률
+              {t("saving_rate")}
             </Text>
             <Text
               size="md"
@@ -125,80 +250,11 @@ export default function HomeSection() {
         </SimpleGrid>
       </Card>
 
-      {/* [3] 자산군 배분 도넛 */}
-      {allocationItems.length > 0 && (
-        <Card radius="lg">
-          <Group justify="space-between" align="center" mb="sm">
-            <Text size="sm" fw={700}>
-              자산 구성
-            </Text>
-            <Anchor
-              component={Link}
-              href={`/${routeParams.locale}/wealth`}
-              size="xs"
-              fw={600}
-              c="dimmed"
-            >
-              자산 상세 →
-            </Anchor>
-          </Group>
-          <PortfolioDonut items={allocationItems} />
-        </Card>
-      )}
-
-      {/* [4] 투자 요약 — 투자 계좌 있을 때만 */}
-      {hasInvestment && (
-        <Card radius="lg">
-          <Group justify="space-between" align="center" mb="sm">
-            <Text size="sm" fw={700}>
-              투자
-            </Text>
-            <Anchor
-              component={Link}
-              href={`/${routeParams.locale}/invest`}
-              size="xs"
-              fw={600}
-              c="dimmed"
-            >
-              투자 →
-            </Anchor>
-          </Group>
-          <Group justify="space-between" align="end">
-            <Stack gap={2}>
-              <Text size="xs" c="dimmed" fw={500}>
-                평가금액
-              </Text>
-              <Text
-                size="lg"
-                fw={700}
-                style={{ fontVariantNumeric: "tabular-nums" }}
-              >
-                {fmt(summary.totalValuation)}원
-              </Text>
-            </Stack>
-            <Stack gap={2} align="end">
-              <Text size="xs" c="dimmed" fw={500}>
-                평가손익
-              </Text>
-              <Text
-                size="md"
-                fw={700}
-                c={profitColor(summary.totalProfit)}
-                style={{ fontVariantNumeric: "tabular-nums" }}
-              >
-                {formatProfitAmount(summary.totalProfit, fmt)}원 (
-                {formatProfitRate(summary.totalRate)})
-              </Text>
-            </Stack>
-          </Group>
-        </Card>
-      )}
-
-      {/* [5] 최근 거래 */}
+      {/* [4] 최근 거래 */}
       <Stack gap="xs">
         <Group justify="space-between" align="center" px={4}>
           <Text size="sm" fw={700}>
-            최근 거래
+            {t("recent_transactions")}
           </Text>
           <Anchor
             component={Link}
@@ -207,20 +263,20 @@ export default function HomeSection() {
             fw={600}
             c="dimmed"
           >
-            전체 →
+            {t("go_all")}
           </Anchor>
         </Group>
-        <Card radius="lg" p="xs">
+        <Card p="xs">
           {txns.length === 0 ? (
             <Center py="lg">
               <Text c="dimmed" size="sm">
-                이번 달 거래 내역이 없어요
+                {t("no_transactions")}
               </Text>
             </Center>
           ) : (
             <Stack gap={0}>
-              {txns.slice(0, 5).map((t) => (
-                <TxRow key={t.transactionId} t={t} />
+              {txns.slice(0, 5).map((tx) => (
+                <TxRow key={tx.transactionId} t={tx} />
               ))}
             </Stack>
           )}

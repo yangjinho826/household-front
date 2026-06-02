@@ -33,13 +33,15 @@ export async function BaseLayout({
           rel="stylesheet"
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css"
         />
-        {/* 브랜드 워드마크 전용 세리프 (Noto Serif KR) — 로고/브랜드명에만 사용 */}
+        {/* 브랜드 워드마크 전용 세리프 (Noto Serif KR) — 로고/브랜드명에만 사용.
+            전역 1회 로드라 next/font 페이지 단위 권고는 해당 없음 → 룰 비활성화. */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
           href="https://fonts.gstatic.com"
           crossOrigin="anonymous"
         />
+        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
         <link
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600;700&display=swap"
@@ -48,7 +50,7 @@ export async function BaseLayout({
           name="viewport"
           content="minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no, viewport-fit=cover"
         />
-        <meta name="theme-color" content="#3B82F6" />
+        <meta name="theme-color" content="#7C9473" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />

@@ -18,6 +18,8 @@ interface Props {
   items: DonutBreakdownItem[];
   /** 좌측 리스트에 표시할 상위 항목 수 */
   topN?: number;
+  /** 도넛+레전드 배치. vertical = 좁은 카드용(도넛 위·레전드 아래) */
+  orientation?: "horizontal" | "vertical";
 }
 
 /**
@@ -29,7 +31,11 @@ interface Props {
  * 종목/계좌 등 어떤 그룹에도 사용. 색은 호출 측에서 결정.
  * 활성 항목 (value > 0) 만 포함. 없으면 null 반환.
  */
-export default function PortfolioDonut({ items, topN = 3 }: Props) {
+export default function PortfolioDonut({
+  items,
+  topN = 3,
+  orientation = "horizontal",
+}: Props) {
   const active = items.filter((i) => i.value > 0);
   if (active.length === 0) return null;
 
@@ -41,74 +47,85 @@ export default function PortfolioDonut({ items, topN = 3 }: Props) {
   const restSum = rest.reduce((s, i) => s + i.value, 0);
   const restPct = total > 0 ? (restSum / total) * 100 : 0;
 
-  return (
-    <Group gap="md" wrap="nowrap" align="center">
-      <div className="chart-donut-wrap">
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie
-              data={sorted}
-              dataKey="value"
-              nameKey="label"
-              cx="50%"
-              cy="50%"
-              innerRadius="64%"
-              outerRadius="96%"
-              paddingAngle={1}
-              stroke="none"
-              isAnimationActive={false}
-            >
-              {sorted.map((entry) => (
-                <Cell key={entry.key} fill={entry.color} />
-              ))}
-            </Pie>
-          </PieChart>
-        </ResponsiveContainer>
-      </div>
-      <Stack gap={4} style={{ flex: 1, minWidth: 0 }}>
-        {top.map((it) => {
-          const pct = total > 0 ? (it.value / total) * 100 : 0;
-          return (
-            <Group
-              key={it.key}
-              justify="space-between"
-              gap={6}
-              wrap="nowrap"
-            >
-              <Group gap={6} wrap="nowrap" style={{ minWidth: 0 }}>
-                <div
-                  style={{
-                    width: 6,
-                    height: 6,
-                    borderRadius: 999,
-                    background: it.color,
-                    flexShrink: 0,
-                  }}
-                />
-                <Text size="11px" fw={700} truncate>
-                  {it.label}
-                </Text>
-              </Group>
-              <Text
-                size="10px"
-                c="dimmed"
-                fw={700}
+  const isVertical = orientation === "vertical";
+
+  const donut = (
+    <div className="chart-donut-wrap">
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie
+            data={sorted}
+            dataKey="value"
+            nameKey="label"
+            cx="50%"
+            cy="50%"
+            innerRadius="64%"
+            outerRadius="96%"
+            paddingAngle={1}
+            stroke="none"
+            isAnimationActive={false}
+          >
+            {sorted.map((entry) => (
+              <Cell key={entry.key} fill={entry.color} />
+            ))}
+          </Pie>
+        </PieChart>
+      </ResponsiveContainer>
+    </div>
+  );
+
+  const legend = (
+    <Stack gap={4} style={{ flex: 1, minWidth: 0, width: "100%" }}>
+      {top.map((it) => {
+        const pct = total > 0 ? (it.value / total) * 100 : 0;
+        return (
+          <Group key={it.key} justify="space-between" gap={6} wrap="nowrap">
+            <Group gap={6} wrap="nowrap" style={{ minWidth: 0 }}>
+              <div
                 style={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: 999,
+                  background: it.color,
                   flexShrink: 0,
-                  fontVariantNumeric: "tabular-nums",
                 }}
-              >
-                {pct.toFixed(0)}%
+              />
+              <Text size="11px" fw={700} truncate>
+                {it.label}
               </Text>
             </Group>
-          );
-        })}
-        {rest.length > 0 && (
-          <Text size="10px" c="dimmed" fw={600}>
-            외 {rest.length}개 ({restPct.toFixed(0)}%)
-          </Text>
-        )}
+            <Text
+              size="10px"
+              c="dimmed"
+              fw={700}
+              style={{ flexShrink: 0, fontVariantNumeric: "tabular-nums" }}
+            >
+              {pct.toFixed(0)}%
+            </Text>
+          </Group>
+        );
+      })}
+      {rest.length > 0 && (
+        <Text size="10px" c="dimmed" fw={600}>
+          외 {rest.length}개 ({restPct.toFixed(0)}%)
+        </Text>
+      )}
+    </Stack>
+  );
+
+  if (isVertical) {
+    return (
+      <Stack gap="sm" align="center">
+        {donut}
+        {legend}
       </Stack>
+    );
+  }
+
+  return (
+    <Group gap="md" wrap="nowrap" align="center">
+      {donut}
+      {legend}
     </Group>
   );
 }
