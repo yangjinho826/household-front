@@ -380,6 +380,9 @@ export const mantineTheme = createTheme({
         variant: "filled",
         size: "md",
         radius: "lg",
+        // 바텀시트(Drawer) 안에서 달력 popover 가 컨테이너에 잘리던 문제 →
+        // 포털로 body 직속 렌더 + Drawer(zIndex 200) 위로 올림 (거래 추가/매매 폼 공통)
+        popoverProps: { withinPortal: true, zIndex: 1100 },
       },
     }),
     Modal: Modal.extend({

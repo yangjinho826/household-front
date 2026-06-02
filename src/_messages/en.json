@@ -206,7 +206,13 @@
     "view_list": "List",
     "view_calendar": "Calendar",
     "filter_all": "All",
-    "load_more": "Load more"
+    "filter_all_accounts": "All accounts",
+    "load_more": "Load more",
+    "summary_income": "Income",
+    "summary_expense": "Expense",
+    "summary_saving_rate": "Saving rate",
+    "summary_top_expense": "Top 5 expense categories",
+    "summary_no_expense": "No expenses"
   },
   "onboarding": {
     "welcome_title": "Welcome to your household",

@@ -206,7 +206,13 @@
     "view_list": "목록",
     "view_calendar": "달력",
     "filter_all": "전체",
-    "load_more": "더 보기"
+    "filter_all_accounts": "전체 계좌",
+    "load_more": "더 보기",
+    "summary_income": "수입",
+    "summary_expense": "지출",
+    "summary_saving_rate": "저축률",
+    "summary_top_expense": "지출 카테고리 Top 5",
+    "summary_no_expense": "지출 0원"
   },
   "onboarding": {
     "welcome_title": "가계부에 오신 걸 환영해요",

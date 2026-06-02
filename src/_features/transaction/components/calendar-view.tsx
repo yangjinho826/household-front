@@ -4,12 +4,16 @@ import { Card, Grid, SimpleGrid, Stack, Text, UnstyledButton } from "@mantine/co
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 
+import { TOKEN } from "_styles/design-tokens";
 import { queryKeys } from "_constants/queries";
 import { todayIso } from "_utilities/fmt";
 
 import TxRow from "./tx-row";
 
 const DAY_LABELS = ["일", "월", "화", "수", "목", "금", "토"];
+// 선택일 = 진한 세이지(흰 텍스트 대비), 오늘 = 연한 세이지 배경
+const SELECTED_BG = TOKEN.sageAction;
+const TODAY_BG = "#EEF1EA";
 
 interface CalendarViewProps {
   year: number;
@@ -74,35 +78,8 @@ export default function TransactionCalendarView({ year, month }: CalendarViewPro
     <Grid gutter="md" align="stretch">
       {/* 캘린더 — 모바일/패드 풀폭, 데스크탑(>=lg) 절반 */}
       <Grid.Col span={{ base: 12, lg: 6 }}>
-      <Card radius="lg" p="md" h="100%">
+      <Card p="md" h="100%">
         <Stack gap="sm">
-          <SimpleGrid cols={3} spacing="xs">
-            <Stack gap={2} align="center">
-              <Text size="10px" c="dimmed" fw={600}>
-                수입
-              </Text>
-              <Text size="xs" fw={700} c="info.5" style={{ fontVariantNumeric: "tabular-nums" }}>
-                +{calendar.monthlyIncome.toLocaleString("ko-KR")}
-              </Text>
-            </Stack>
-            <Stack gap={2} align="center">
-              <Text size="10px" c="dimmed" fw={600}>
-                지출
-              </Text>
-              <Text size="xs" fw={700} c="danger.5" style={{ fontVariantNumeric: "tabular-nums" }}>
-                -{calendar.monthlyExpense.toLocaleString("ko-KR")}
-              </Text>
-            </Stack>
-            <Stack gap={2} align="center">
-              <Text size="10px" c="dimmed" fw={600}>
-                이체
-              </Text>
-              <Text size="xs" fw={700} c="purple.5" style={{ fontVariantNumeric: "tabular-nums" }}>
-                {calendar.monthlyTransfer.toLocaleString("ko-KR")}
-              </Text>
-            </Stack>
-          </SimpleGrid>
-
           <SimpleGrid cols={7} spacing={4}>
             {DAY_LABELS.map((d, i) => (
               <Text
@@ -142,9 +119,9 @@ export default function TransactionCalendarView({ year, month }: CalendarViewPro
                     justifyContent: "center",
                     gap: 2,
                     background: isSelected
-                      ? "var(--mantine-color-info-5)"
+                      ? SELECTED_BG
                       : isToday
-                        ? "var(--mantine-color-info-0)"
+                        ? TODAY_BG
                         : "transparent",
                   }}
                 >
@@ -185,26 +162,28 @@ export default function TransactionCalendarView({ year, month }: CalendarViewPro
       </Card>
       </Grid.Col>
 
-      {/* 선택일 거래 — 모바일/패드 캘린더 아래, 데스크탑 캘린더 오른쪽 (높이 일치) */}
+      {/* 선택일 거래 — 라벨을 카드 내부 헤더로 두어 좌측 달력 카드와 박스 크기 일치 */}
       <Grid.Col span={{ base: 12, lg: 6 }}>
-        <Stack gap="xs" h="100%">
-          <Text size="sm" fw={700} px={4}>
-            {selectedDate.slice(5).replace("-", "월 ")}일 거래
-          </Text>
-          <Card radius="lg" p="xs" style={{ flex: 1, overflow: "auto" }}>
-            {selectedTx.length === 0 ? (
-              <Text size="sm" c="dimmed" ta="center" py="lg">
-                거래가 없습니다
-              </Text>
-            ) : (
-              <Stack gap={0}>
-                {selectedTx.map((tx) => (
-                  <TxRow key={tx.transactionId} t={tx} />
-                ))}
-              </Stack>
-            )}
-          </Card>
-        </Stack>
+        <Card p="md" h="100%">
+          <Stack gap="sm" h="100%">
+            <Text size="sm" fw={700}>
+              {selectedDate.slice(5).replace("-", "월 ")}일 거래
+            </Text>
+            <div style={{ flex: 1, overflow: "auto" }}>
+              {selectedTx.length === 0 ? (
+                <Text size="sm" c="dimmed" ta="center" py="lg">
+                  거래가 없습니다
+                </Text>
+              ) : (
+                <Stack gap={0}>
+                  {selectedTx.map((tx) => (
+                    <TxRow key={tx.transactionId} t={tx} />
+                  ))}
+                </Stack>
+              )}
+            </div>
+          </Stack>
+        </Card>
       </Grid.Col>
     </Grid>
   );

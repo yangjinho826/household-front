@@ -60,7 +60,7 @@ export default function TransactionListView({ searchParams }: ListViewProps) {
           <Text size="sm" fw={700} c="dimmed" px={4}>
             {formatDate(date)}
           </Text>
-          <Card radius="lg" p="xs">
+          <Card p="xs">
             <Stack gap={0}>
               {txns.map((tx) => (
                 <TxRow key={tx.transactionId} t={tx} />
