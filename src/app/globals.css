@@ -102,3 +102,9 @@ small,
 .text-caption {
   letter-spacing: 0;
 }
+
+/* 브랜드 워드마크 — 세리프(Noto Serif KR). DESIGN.md: 세리프는 브랜드명/로고에만. */
+.brand-wordmark {
+  font-family: "Noto Serif KR", Georgia, serif;
+  letter-spacing: 0;
+}

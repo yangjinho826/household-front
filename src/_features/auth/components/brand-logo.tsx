@@ -28,7 +28,7 @@ export default function BrandLogo({ size = 56 }: BrandLogoProps) {
         justifyContent: "center",
         flexShrink: 0,
       }}
-      aria-label="가계부 로고"
+      aria-label="모음 로고"
     >
       <IconWallet size={Math.round(size * 0.5)} color="#FFFFFF" stroke={2.4} />
     </div>

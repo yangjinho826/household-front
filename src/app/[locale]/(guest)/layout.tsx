@@ -18,11 +18,15 @@ export default async function GuestLayout({
   return (
     <Container
       size={448}
-      px="md"
-      py="xl"
-      bg="white"
+      px={0}
       mih="100dvh"
-      style={{ marginLeft: "auto", marginRight: "auto" }}
+      style={{
+        marginInline: "auto",
+        display: "flex",
+        flexDirection: "column",
+        // 개선 B — 상단 따뜻한 그라데이션 → 본문 크림으로 페이드. hero/카드는 자체 패딩.
+        background: "linear-gradient(180deg, #F3E6DA 0%, #FAF6EF 38%)",
+      }}
     >
       {children}
     </Container>
