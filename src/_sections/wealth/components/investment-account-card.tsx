@@ -61,7 +61,7 @@ export default function InvestmentAccountCard({ account, portfolios }: Props) {
                 {account.name}
               </Text>
             </Group>
-            <IconChevronRight size={14} color="#8B95A1" />
+            <IconChevronRight size={14} color="var(--mantine-color-gray-5)" />
           </Group>
 
           <Stack gap={2}>

@@ -1,85 +1,134 @@
 "use client";
 
-import {
-  Card,
-  Divider,
-  Group,
-  SimpleGrid,
-  Stack,
-  Text,
-  Title,
-} from "@mantine/core";
+import { ActionIcon, Card, Divider, Group, Stack, Text, Title } from "@mantine/core";
+import { IconPlus } from "@tabler/icons-react";
+import { useTranslations } from "next-intl";
+import { useParams, useRouter } from "next/navigation";
 import { useMemo } from "react";
 
-import PortfolioDonut from "_features/portfolio/components/portfolio-donut";
+import PortfolioDonut, {
+  type DonutBreakdownItem,
+} from "_features/portfolio/components/portfolio-donut";
 import { usePortfolioOverview } from "_features/portfolio/queries/use-query";
 import {
   formatProfitAmount,
   formatProfitRate,
-  pickPortfolioColor,
   profitColor,
 } from "_features/portfolio/utils";
 import InvestmentAccountCard from "_sections/wealth/components/investment-account-card";
+import { PORTFOLIO_PALETTE, TOKEN } from "_styles/design-tokens";
 import { fmt } from "_utilities/fmt";
 
+/** 종목 비중 도넛: 상위 N개만 고유색, 나머지는 "기타"·현금으로 회색 묶음 (색 순환 혼동 방지) */
+const TOP_STOCKS = 5;
+
 export default function PortfolioSection() {
+  const t = useTranslations("portfolio");
+  const router = useRouter();
+  const { locale } = useParams<{ locale: string }>();
+
   const { data } = usePortfolioOverview();
   const { summary, investmentAccounts } = data.body.data;
 
-  // 계좌별 도넛 — 전체 자산 안에서 각 투자 계좌의 비중
-  const accountBreakdown = useMemo(
-    () =>
-      investmentAccounts
-        .map((g) => g.account)
-        .filter((a) => a.balance > 0)
-        .map((a) => ({
-          key: a.accountId,
-          label: a.name,
-          value: a.balance,
-          color: a.color ?? pickPortfolioColor(a.accountId),
-        })),
-    [investmentAccounts],
-  );
+  // 종목별 비중 — 전체 투자 평가액 안에서 각 종목이 차지하는 %. 상위 5 + 기타 + 현금.
+  const stockBreakdown = useMemo<DonutBreakdownItem[]>(() => {
+    const stocks = investmentAccounts
+      .flatMap((g) => g.portfolios)
+      .filter((p) => !p.isArchived && p.currentValue > 0)
+      .sort((a, b) => b.currentValue - a.currentValue);
+
+    const items: DonutBreakdownItem[] = stocks
+      .slice(0, TOP_STOCKS)
+      .map((p, i) => ({
+        key: p.portfolioId,
+        label: p.name,
+        value: p.currentValue,
+        color: PORTFOLIO_PALETTE[i % PORTFOLIO_PALETTE.length]!,
+      }));
+
+    const rest = stocks.slice(TOP_STOCKS);
+    const restSum = rest.reduce((s, p) => s + p.currentValue, 0);
+    if (restSum > 0) {
+      items.push({
+        key: "__rest",
+        label: t("etc_count", { count: rest.length }),
+        value: restSum,
+        color: TOKEN.warmGrayDeep,
+      });
+    }
+    if (summary.totalCash > 0) {
+      items.push({
+        key: "__cash",
+        label: t("cash_slice"),
+        value: summary.totalCash,
+        color: TOKEN.warmGray,
+      });
+    }
+    return items;
+  }, [investmentAccounts, summary.totalCash, t]);
+
+  const profit = summary.totalProfit;
+  // 손익 부호별 pill 배경 (텍스트색은 한국 주식 관습 profitColor: 양수 빨강·음수 파랑)
+  const profitBg =
+    profit > 0 ? "danger.0" : profit < 0 ? "info.0" : "gray.1";
 
   return (
     <Stack gap="md">
-      <Title order={3}>포트폴리오</Title>
+      <Group justify="space-between" align="center">
+        <Title order={3}>{t("title")}</Title>
+        <ActionIcon
+          radius="xl"
+          size="lg"
+          onClick={() => router.push(`/${locale}/invest/new`)}
+          aria-label={t("add_stock")}
+        >
+          <IconPlus size={18} />
+        </ActionIcon>
+      </Group>
 
-      {/* 전체 계좌 hero — 계좌 0개면 숨김 (아래 "투자 계좌 없습니다" 카드가 대신 안내) */}
+      {/* 투자 손익 hero — 대표값=평가액, pill=손익, 메타=매입·현금 (계좌 0개면 숨김) */}
       {investmentAccounts.length > 0 && (
         <>
           <Card radius="xl" p="xl" shadow="md">
-            <Stack gap={8}>
-              <Stack gap={2}>
+            <Stack gap={10}>
+              <Stack gap={4}>
                 <Text size="xs" fw={500} c="dimmed">
-                  전체 계좌
+                  {t("valuation_label")}
                 </Text>
                 <Text
-                  size="1.75rem"
+                  size="1.9rem"
                   fw={800}
-                  style={{
-                    fontVariantNumeric: "tabular-nums",
-                    lineHeight: 1.1,
-                  }}
+                  style={{ fontVariantNumeric: "tabular-nums", lineHeight: 1.1 }}
                 >
-                  {fmt(summary.totalBalance)}
-                  <Text span size="md" c="dimmed" ml={4} fw={600}>
+                  {fmt(summary.totalValuation)}
+                  <Text span size="lg" c="dimmed" ml={4} fw={600}>
                     원
                   </Text>
                 </Text>
-                <Group gap={4} mt={2}>
+                <Group
+                  gap={6}
+                  mt={4}
+                  wrap="nowrap"
+                  style={{
+                    alignSelf: "flex-start",
+                    background: `var(--mantine-color-${profitBg.replace(".", "-")})`,
+                    borderRadius: 999,
+                    padding: "4px 12px",
+                    whiteSpace: "nowrap",
+                  }}
+                >
                   <Text
                     size="sm"
                     fw={700}
-                    c={profitColor(summary.totalProfit)}
+                    c={profitColor(profit)}
                     style={{ fontVariantNumeric: "tabular-nums" }}
                   >
-                    {formatProfitAmount(summary.totalProfit, fmt)}원
+                    {formatProfitAmount(profit, fmt)}원
                   </Text>
                   <Text
                     size="sm"
                     fw={700}
-                    c={profitColor(summary.totalProfit)}
+                    c={profitColor(profit)}
                     style={{ fontVariantNumeric: "tabular-nums" }}
                   >
                     ({formatProfitRate(summary.totalRate)})
@@ -87,38 +136,48 @@ export default function PortfolioSection() {
                 </Group>
               </Stack>
 
-              <Divider my={4} />
+              <Divider />
 
-              <SimpleGrid cols={2} spacing="md" verticalSpacing={6}>
-                <SummaryRow
-                  label="총평가손익"
-                  value={`${formatProfitAmount(summary.totalProfit, fmt)}원`}
-                  color={profitColor(summary.totalProfit)}
-                />
-                <SummaryRow
-                  label="총평가금액"
-                  value={`${fmt(summary.totalValuation)}원`}
-                />
-                <SummaryRow
-                  label="현금"
-                  value={`${fmt(summary.totalCash)}원`}
-                />
-                <SummaryRow
-                  label="총매입금액"
-                  value={`${fmt(summary.totalCost)}원`}
-                />
-              </SimpleGrid>
+              <Group gap={40}>
+                <Stack gap={2}>
+                  <Text size="11px" c="dimmed" fw={500}>
+                    {t("buy_cost")}
+                  </Text>
+                  <Text
+                    size="sm"
+                    fw={700}
+                    style={{ fontVariantNumeric: "tabular-nums" }}
+                  >
+                    {fmt(summary.totalCost)}원
+                  </Text>
+                </Stack>
+                <Stack gap={2}>
+                  <Text size="11px" c="dimmed" fw={500}>
+                    {t("cash_label")}
+                  </Text>
+                  <Text
+                    size="sm"
+                    fw={700}
+                    style={{ fontVariantNumeric: "tabular-nums" }}
+                  >
+                    {fmt(summary.totalCash)}원
+                  </Text>
+                </Stack>
+              </Group>
             </Stack>
           </Card>
 
-          {/* 계좌별 비중 — 전체 자산 안에서 각 투자 계좌가 차지하는 % */}
-          {accountBreakdown.length > 0 && (
+          {/* 종목 비중 도넛 */}
+          {stockBreakdown.length > 0 && (
             <Card radius="xl" p="md">
-              <Stack gap={6}>
-                <Text size="xs" fw={500} c="dimmed" px={4}>
-                  계좌별 비중
+              <Stack gap={10}>
+                <Text size="sm" fw={700} px={4}>
+                  {t("stock_allocation")}
                 </Text>
-                <PortfolioDonut items={accountBreakdown} />
+                <PortfolioDonut
+                  items={stockBreakdown}
+                  topN={stockBreakdown.length}
+                />
               </Stack>
             </Card>
           )}
@@ -128,14 +187,14 @@ export default function PortfolioSection() {
       {/* 투자 계좌 리스트 */}
       <Group justify="space-between" align="center" px={4}>
         <Text size="sm" fw={700}>
-          투자 계좌 ({investmentAccounts.length})
+          {t("accounts_label")} ({investmentAccounts.length})
         </Text>
       </Group>
 
       {investmentAccounts.length === 0 ? (
         <Card radius="lg" p="xl">
           <Text size="sm" c="dimmed" ta="center">
-            등록된 투자 계좌가 없습니다
+            {t("empty_accounts")}
           </Text>
         </Card>
       ) : (
@@ -150,31 +209,5 @@ export default function PortfolioSection() {
         </Stack>
       )}
     </Stack>
-  );
-}
-
-function SummaryRow({
-  label,
-  value,
-  color,
-}: {
-  label: string;
-  value: string;
-  color?: string;
-}) {
-  return (
-    <Group justify="space-between" wrap="nowrap" gap={8}>
-      <Text size="xs" c="dimmed" fw={500}>
-        {label}
-      </Text>
-      <Text
-        size="sm"
-        fw={700}
-        c={color}
-        style={{ fontVariantNumeric: "tabular-nums" }}
-      >
-        {value}
-      </Text>
-    </Group>
   );
 }
