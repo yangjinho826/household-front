@@ -10,6 +10,21 @@
 
 ## Status
 
+### R5c — running balance 머지 전 리뷰·핫픽스 (2026-06-03)
+4소스 교차 리뷰(fastapi-reviewer·code-reviewer·codex 양레포 **소스 전체** 스캔) 후 **5개 즉시 fix → typecheck/lint/py_compile 통과, 커밋 진행 중**:
+- [back] 포트폴리오 평단 replay 통합(`portfolio/service.py`) — 매도후재매수 평단 왜곡(133.33 vs 정답150) 수정. `_recompute_realized_pnl`이 최종 보유 반환→avg_price 재사용
+- [front] 거래필터 0건 시 무한스크롤 영구정지(`account-ledger-view.tsx`) — early return 제거, sentinel 유지
+- [front] 0원 이체 방향 판정 견고화(`ledger-row.tsx`) — signedAmount 부호 대신 accountId 매칭
+- [back] access token DEBUG 로그 제거(`deps.py`) + unused logger/logging 정리
+- [back] GET /user/{id} 인증 가드(`user/router.py`) — 이메일 무인증 노출 차단
+
+**미수정 백로그** (머지 후/별도 — 대부분 멀티테넌시·single-user면 위험 낮음. codex 전체 스캔 발견):
+- 🟡 [back] `sum_for_account` household 필터 누락(repository.py) · 매매손익 `to_date` 무시하고 today()(portfolio:502) · 거래수정 검증이 생성보다 약함 · fixed_expense_id·수동자산 계좌타입 소유검증 누락
+- 🟡 [front] X-Household-Id 경쟁조건(onboarding-guard effect 보정이 children 쿼리보다 늦어 stale id 요청)
+- 🟢 자기이체 부호검증 · carry_balance 평문커서(HMAC) · Money float 직렬화 · home-section KST 미적용 · 보유종목 행 cost 재계산 · paid_by_user_id 멤버검증
+
+---
+
 R1~R5a 전부 dev 커밋 완료. **dev→main 머지는 아직 안 함** — R5a 사이클 끝났으니 머지 검토 시점.
 - ✅ **R5a-1 (asset_class + 현재 배분 파이)** — front `64d7571`.
 - ✅ **R5a-2 (ManualAsset 부동산·연금)** — `94452dd`. manual_asset 도메인 + REAL_ESTATE/PENSION roll-up + double-counting 구조적 불가.
