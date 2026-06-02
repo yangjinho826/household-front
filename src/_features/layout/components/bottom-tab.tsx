@@ -63,8 +63,8 @@ export function BottomTab() {
         transform: "translateX(-50%)",
         width: "100%",
         maxWidth: "var(--container-max)",
-        background: "white",
-        borderTop: `1px solid ${theme.colors.gray?.[1] ?? "#E5E8EB"}`,
+        background: theme.colors.gray?.[0] ?? "#F7F4EF",
+        borderTop: `1px solid ${theme.colors.gray?.[2] ?? "#DDD5C9"}`,
         // iOS 홈 인디케이터 / Android 제스처 영역 보호
         paddingBottom: "var(--safe-bottom)",
         paddingLeft: "var(--safe-left)",
@@ -84,8 +84,8 @@ export function BottomTab() {
         {TABS.map(({ id, icon: Icon, href, match }) => {
           const active = match(pathname);
           const color = active
-            ? (theme.colors.info?.[5] ?? "#3B82F6")
-            : (theme.colors.gray?.[5] ?? "#8B95A1");
+            ? (theme.colors.sage?.[6] ?? "#647A5C")
+            : (theme.colors.gray?.[5] ?? "#9C8F82");
           return (
             <UnstyledButton
               key={id}

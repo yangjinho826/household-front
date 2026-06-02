@@ -16,6 +16,7 @@ import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 
 import { queryKeys } from "_constants/queries";
+import BrandLogo from "_features/auth/components/brand-logo";
 import { HouseholdSwitcher } from "_features/household/components/household-switcher";
 import { useHouseholdStore } from "_features/household/store";
 
@@ -39,6 +40,8 @@ export function SidebarNav() {
   const theme = useMantineTheme();
   const [opened, switcher] = useDisclosure(false);
   const t = useTranslations("nav");
+  const th = useTranslations("household");
+  const ta = useTranslations("auth");
 
   const currentId = useHouseholdStore((s) => s.currentHouseholdId);
   const { data: hData } = useSuspenseQuery(queryKeys.household.list());
@@ -58,14 +61,22 @@ export function SidebarNav() {
           top: 0,
           alignSelf: "flex-start",
           height: "100dvh",
-          borderRight: `1px solid ${theme.colors.gray?.[1] ?? "#E5E8EB"}`,
+          borderRight: `1px solid ${theme.colors.gray?.[2] ?? "#DDD5C9"}`,
           padding: "var(--mantine-spacing-md) var(--mantine-spacing-sm)",
           display: "flex",
           flexDirection: "column",
           gap: 4,
-          background: "white",
+          background: theme.colors.gray?.[0] ?? "#F7F4EF",
         }}
       >
+        {/* 앱 브랜드 마크 */}
+        <Group gap={9} px={8} pt={2} pb={20} wrap="nowrap">
+          <BrandLogo size={30} />
+          <Text className="brand-wordmark" fw={700} style={{ fontSize: 20 }}>
+            {ta("brand_name")}
+          </Text>
+        </Group>
+
         {/* 가계부 스위처 trigger */}
         <UnstyledButton
           onClick={switcher.open}
@@ -78,13 +89,13 @@ export function SidebarNav() {
           <Stack gap={2}>
             <Group gap={6} wrap="nowrap">
               <Text size="md" fw={800} truncate>
-                {currentHousehold?.name ?? "가계부"}
+                {currentHousehold?.name ?? th("list_title")}
               </Text>
-              <IconChevronDown size={14} color="#8B95A1" />
+              <IconChevronDown size={14} color={theme.colors.gray?.[5] ?? "#9C8F82"} />
             </Group>
             {households.length > 1 && (
               <Text size="xs" fw={500} c="dimmed">
-                관리 중 {households.length}개
+                {th("managing", { count: households.length })}
               </Text>
             )}
           </Stack>
@@ -95,8 +106,8 @@ export function SidebarNav() {
           {TABS.map(({ id, icon: Icon, href, match }) => {
             const active = match(pathname);
             const color = active
-              ? (theme.colors.info?.[5] ?? "#3B82F6")
-              : (theme.colors.gray?.[7] ?? "#4E5968");
+              ? (theme.colors.sage?.[6] ?? "#647A5C")
+              : (theme.colors.gray?.[6] ?? "#7A6F63");
             return (
               <UnstyledButton
                 key={id}
@@ -107,7 +118,7 @@ export function SidebarNav() {
                   padding: "10px 12px",
                   borderRadius: 10,
                   background: active
-                    ? (theme.colors.info?.[0] ?? "#E8F3FF")
+                    ? (theme.colors.sage?.[1] ?? "#E6EDE2")
                     : "transparent",
                 }}
               >
