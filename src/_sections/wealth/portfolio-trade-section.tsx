@@ -16,9 +16,11 @@ import {
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconPencil } from "@tabler/icons-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter, useParams } from "next/navigation";
 import { Suspense, useMemo, useState } from "react";
 
+import { queryKeys } from "_constants/queries";
 import SubHeader from "_features/layout/components/sub-header";
 import TradeForm from "_features/portfolio/components/trade-form";
 import {
@@ -46,6 +48,7 @@ interface Props {
 export default function PortfolioTradeSection({ portfolioId }: Props) {
   const router = useRouter();
   const routeParams = useParams<{ locale: string }>();
+  const queryClient = useQueryClient();
 
   const { data: itemData } = usePortfolioItem(portfolioId);
   const portfolio = itemData.body.data;
@@ -81,6 +84,23 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
   const handleCloseModal = () => {
     setEditingTx(null);
     close();
+  };
+
+  // 전량 매도면 이 종목은 soft delete 됨 → detail 쿼리 정리(404 refetch 화면깨짐 방지) 후 계좌로 복귀
+  const handleTradeSuccess = async (soldOut?: boolean) => {
+    if (soldOut) {
+      await queryClient.cancelQueries({
+        queryKey: queryKeys.portfolio.item(portfolioId).queryKey,
+      });
+      queryClient.removeQueries({
+        queryKey: queryKeys.portfolio.item(portfolioId).queryKey,
+      });
+      router.replace(
+        `/${routeParams.locale}/invest/account/${portfolio.accountId}`,
+      );
+      return;
+    }
+    handleCloseModal();
   };
 
   return (
@@ -356,7 +376,7 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
           portfolioId={portfolio.portfolioId}
           initialType={editingTx?.ptType ?? initialType}
           editingTx={editingTx ?? undefined}
-          onSuccess={handleCloseModal}
+          onSuccess={handleTradeSuccess}
           onCancel={handleCloseModal}
         />
       </Drawer>

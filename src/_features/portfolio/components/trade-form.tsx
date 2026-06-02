@@ -32,7 +32,8 @@ interface TradeFormProps {
   initialType?: PortfolioTxType;
   /** 있으면 수정 모드 — initialValues 채움 + tradeType 잠금 + 삭제 버튼 노출 */
   editingTx?: PortfolioTransactionItemType;
-  onSuccess?: () => void;
+  /** soldOut=true → 전량 매도로 종목이 사라짐 (호출 측이 화면 이탈 처리) */
+  onSuccess?: (soldOut?: boolean) => void;
   /** 시트/모달에서 사용할 때 — 취소 버튼 노출 + 닫기 콜백 */
   onCancel?: () => void;
 }
@@ -82,6 +83,7 @@ export default function TradeForm({
 
   const handleSubmit = async (values: FormValues) => {
     setSubmitting(true);
+    let soldOut = false;
     try {
       if (editingTx) {
         await updateTxMutation.mutateAsync({
@@ -110,20 +112,24 @@ export default function TradeForm({
           color: "red",
         });
       } else {
-        await sellMutation.mutateAsync({
+        // 전량 매도 시 백엔드가 종목을 soft delete 하고 data=null 반환 → soldOut 신호
+        const res = await sellMutation.mutateAsync({
           portfolioId,
           quantity: values.quantity,
           sellPrice: values.price,
           txDate: values.txDate,
           memo: values.memo.trim() || null,
         });
+        soldOut = res.body.data === null;
         notifications.show({
           title: "매도 기록 완료",
-          message: "매도 거래가 추가되었습니다.",
+          message: soldOut
+            ? "전량 매도되어 종목이 정리되었습니다."
+            : "매도 거래가 추가되었습니다.",
           color: "blue",
         });
       }
-      onSuccess?.();
+      onSuccess?.(soldOut);
     } catch (error) {
       notifications.show({
         title: isEdit ? "거래 수정 실패" : "거래 기록 실패",
