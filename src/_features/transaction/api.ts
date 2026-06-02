@@ -10,12 +10,12 @@ import type { CategoryListItemType } from "_features/category/types";
 import type { FixedListItemType } from "_features/fixed/types";
 
 import type {
+  AccountLedgerItemType,
   TransactionCalendarFullType,
   TransactionCreateRequest,
   TransactionDetailItemType,
   TransactionFormOptionsType,
   TransactionListItemType,
-  TransactionSearchRequestType,
   TransactionUpdateRequest,
 } from "./types";
 
@@ -23,13 +23,6 @@ type BackendTransactionResponse = Omit<
   TransactionDetailItemType,
   "transactionId"
 > & { id: string };
-
-interface BackendTransactionListPage {
-  items: BackendTransactionResponse[];
-  nextCursor: string | null;
-  hasNext: boolean;
-  totalCount: number | null;
-}
 
 function toListItem(b: BackendTransactionResponse): TransactionListItemType {
   const { id, ...rest } = b;
@@ -41,30 +34,45 @@ function toDetail(b: BackendTransactionResponse): TransactionDetailItemType {
   return { ...rest, transactionId: id };
 }
 
-export async function GetTransactionSearchApi(
-  params: TransactionSearchRequestType & {
+type BackendLedgerItem = BackendTransactionResponse & {
+  signedAmount: number;
+  balanceAfter: number;
+};
+
+interface BackendLedgerPage {
+  items: BackendLedgerItem[];
+  nextCursor: string | null;
+  hasNext: boolean;
+  totalCount: number | null;
+}
+
+function toLedgerItem(b: BackendLedgerItem): AccountLedgerItemType {
+  const { id, ...rest } = b;
+  return { ...rest, transactionId: id };
+}
+
+export async function GetAccountLedgerApi(
+  accountId: string,
+  params: {
     cursor?: string | null;
     limit?: number;
+    year?: number;
+    month?: number;
   },
 ) {
   const queryParams: Record<string, unknown> = {};
   if (params.cursor) queryParams.cursor = params.cursor;
   if (params.limit) queryParams.limit = params.limit;
-  if (params.txType) queryParams.txType = params.txType;
-  if (params.accountId) queryParams.accountId = params.accountId;
-  if (params.categoryId) queryParams.categoryId = params.categoryId;
   if (params.year !== undefined) queryParams.year = params.year;
   if (params.month !== undefined) queryParams.month = params.month;
-  if (params.fromDate) queryParams.fromDate = params.fromDate;
-  if (params.toDate) queryParams.toDate = params.toDate;
 
   const queryString = objectToParams(queryParams).toString();
-  const res = await apiFetch<ApiResponse<BackendTransactionListPage>>(
-    `/api/transaction/list${queryString ? `?${queryString}` : ""}`,
+  const res = await apiFetch<ApiResponse<BackendLedgerPage>>(
+    `/api/transaction/account/${accountId}/ledger${queryString ? `?${queryString}` : ""}`,
     { method: "GET" },
   );
-  const items = (res.body.data?.items ?? []).map((b) => toListItem(b));
-  const wrapped: ApiCursorPage<TransactionListItemType> = {
+  const items = (res.body.data?.items ?? []).map((b) => toLedgerItem(b));
+  const wrapped: ApiCursorPage<AccountLedgerItemType> = {
     code: res.body.code,
     message: res.body.message,
     status: res.body.status,

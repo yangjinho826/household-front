@@ -12,8 +12,12 @@ import {
   XAxis,
 } from "recharts";
 
+import { useTranslations } from "next-intl";
+
+import { LEDGER_ACCOUNT_TYPES } from "_features/account/constants";
 import { useAccountReport } from "_features/account/queries/use-query";
 import SubHeader from "_features/layout/components/sub-header";
+import AccountLedgerView from "_features/transaction/components/account-ledger-view";
 import AccountBalanceTrend from "_sections/wealth/components/account-balance-trend";
 import { fmt } from "_utilities/fmt";
 
@@ -70,8 +74,10 @@ function FlowTooltip({
 export default function AccountReportSection({ accountId }: Props) {
   const router = useRouter();
   const { locale } = useParams<{ locale: string }>();
+  const t = useTranslations("transaction");
   const { data } = useAccountReport(accountId);
   const report = data.body.data;
+  const showLedger = LEDGER_ACCOUNT_TYPES.has(report.accountType);
 
   // 지출 = 일반지출 + 고정지출 합산 (막대 하나로)
   const chartData = report.monthlyFlows.map((f) => ({
@@ -173,6 +179,16 @@ export default function AccountReportSection({ accountId }: Props) {
       >
         <AccountBalanceTrend accountId={accountId} title="잔액 추이" />
       </Suspense>
+
+      {/* 거래 이력 — 각 행에 running balance. 거래계좌만 노출 */}
+      {showLedger && (
+        <Stack gap="sm">
+          <Text size="sm" fw={700} px={4}>
+            {t("ledger_title")}
+          </Text>
+          <AccountLedgerView accountId={accountId} />
+        </Stack>
+      )}
     </Stack>
   );
 }

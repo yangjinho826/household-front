@@ -37,3 +37,9 @@ const ACCOUNT_TYPE_SET = new Set<string>(ACCOUNT_TYPE_ORDER);
 /** 백엔드 enum 응답(string[])에서 유효한 AccountType 만 좁히는 런타임 가드 */
 export const isAccountType = (value: string): value is AccountType =>
   ACCOUNT_TYPE_SET.has(value);
+
+/**
+ * running balance(거래 이력) 를 지원하는 거래계좌 — 현금흐름 잔액이 곧 balance.
+ * 투자(평가액 섞임)·부동산/연금/금(거래 없음)은 제외.
+ */
+export const LEDGER_ACCOUNT_TYPES = new Set<string>(["LIVING", "SAVINGS", "OTHER"]);

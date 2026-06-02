@@ -4,24 +4,19 @@ import {
   GetTransactionCalendarFullApi,
   GetTransactionDetailApi,
   GetTransactionFormOptionsApi,
-  GetTransactionSearchApi,
 } from "../api";
-import type { TransactionSearchRequestType } from "../types";
 
 export const transactions = createQueryKeys("transaction", {
-  list: (
-    params: TransactionSearchRequestType & {
-      cursor?: string | null;
-      limit?: number;
-    },
+  // 계좌별 거래 이력(running balance) 무한 스크롤 — queryKey 만 등록
+  // (queryFn 은 useAccountLedgerInfinite 헬퍼에서 cursor 주입해서 호출.
+  //  transaction._def invalidate 에 자동으로 잡힌다)
+  accountLedger: (
+    accountId: string,
+    pageSize: number,
+    year?: number,
+    month?: number,
   ) => ({
-    queryKey: [params],
-    queryFn: () => GetTransactionSearchApi(params),
-  }),
-  // 무한 스크롤 — queryFn 은 useInfiniteList 헬퍼에서 cursor 주입해서 호출
-  // queryKey 만 등록해서 transaction._def invalidate 에 자동으로 잡히게 함
-  infinite: (params: TransactionSearchRequestType & { pageSize: number }) => ({
-    queryKey: [params],
+    queryKey: [accountId, pageSize, year, month],
   }),
   detail: (transactionId: string) => ({
     queryKey: [transactionId],

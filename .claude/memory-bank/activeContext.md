@@ -101,12 +101,20 @@ R1~R5a 전부 dev 커밋 완료. **dev→main 머지는 아직 안 함** — R5a
     - **V5 리브랜딩**: **앱명만 "모음"**(manifest name/short_name/description, layout title, base-layout apple-title, icon.svg #3B82F6→sage, auth.welcome_title). manifest theme_color/bg 토스잔재(#3B82F6/#f2f4f6)→sage/크림. **household 엔티티는 "가계부" 유지**(사용자: "모음 통일은 오바" → 앱=모음/장부=가계부 분리). onboarding/household/error i18n "가계부" 전부 유지.
     - **토스 전멸**(사용자 "토스풍 다 지워"): 셸 외 잔여도 정리 — trade-form/account-report tick/error-fallback bg #8B95A1·#f2f4f6→토큰, "토스" 주석 6곳(globals.css/quick-add-sheet/sub-header/icon-box/filter-chip/color-picker) 제거. `grep "토스"`=0(토스증권/toast 제외). **데이터성 #8B95A1 2곳(color-picker 색선택지·account OTHER 타입색)은 카테고리/계좌 구분 팔레트라 의도적 유지**(무드색 아님).
     - 검증: typecheck/lint✅ · **browse 시각확인**(모바일390+데스크톱1280, ko/en 토글, 전환 드로어, 활성탭 sage·브랜드마크·프로필 hero) 콘솔에러 0. ⚠️ **검증 중 3000 포트 중복 dev 프로세스 3개 발견**(useContext null 500 유발) → 정리+.next 삭제+단일 재기동(PID 48334). codex 디자인 리뷰는 hang으로 중단 → A안 자체 판단 채택.
-  - ▶ **다음 작업 = dev→main 머지** + 백로그: 전량매도 B(매매 화면 분리). **거래 백엔드(household-back) 커서정렬 + realized-pnl 미커밋분 커밋 필요(front+back 양 레포).** 트랙② 디자인(로그인·홈·거래·투자·내정보 전 화면 + 리브랜딩) 사실상 완료.
+  - ▶ **다음 작업 = dev push(front+back 2커밋씩) → dev→main 머지(양 레포 15커밋씩)**. 미커밋분은 전부 커밋 완료. 트랙② 디자인(로그인·홈·거래·투자·내정보 전 화면 + 리브랜딩) 완료. **백로그 정리(2026-06-02, 사용자 확인): 전량매도 B(매매 화면 분리)는 이미 구현됨(trade-form+portfolio-trade-section 별도 존재) / 금·채권ETF asset_class 재분류는 안 함**. → R5b 사실상 종료, 남은 건 머지뿐.
   - ⚠️ TaskList(V1~V5 5개)는 **세션 한정이라 휘발** — 이 activeContext 의 시각 트랙 줄 + 로드맵 `optimized-singing-russell.md` 가 정본. 다음 세션은 이 둘로 복원.
 
 > 교훈: R5a-3(월별 배분추이)까지가 사용자가 생각한 적정 스코프. TWR/goal은 과한 기능. 트랙①(자산성격 단순화)만 R5a 위에 얹음.
 
+## R5c — 거래 후 잔액(running balance) (2026-06-03, 양 레포 미커밋)
+- **입력폼 거래후잔액 미리보기**: `transaction/components/form.tsx` — 계좌 선택 시 "잔액 X → 거래후 Y". 수입 가산/지출 차감/이체 양쪽. 신규 입력만(수정모드는 balance에 이미 반영). balance는 formOptions accounts에 이미 옴(백엔드 X).
+- **백엔드 ledger 엔드포인트**(household-back, 미커밋): `GET /transaction/account/{id}/ledger?cursor&limit&year&month`. 핵심=**현재(또는 그달말) 현금흐름 잔액에서 desc 역산**(첫행=기준잔액, 한칸 옛거래로 `running -= signed`). 페이지경계는 cursor에 carry 잔액 실어 이어붙임(`{date}|{reg}|{id}|{carry}`, `_split_ledger_cursor`). 이체=그 계좌 관점 부호(`_signed_amount`: to_account면 +, 아니면 INCOME +/나머지 −). **거래계좌(LIVING/SAVINGS/OTHER) 전용**(INVESTMENT는 평가액 섞임·나머진 거래없음 → 400). year+month면 그 달 거래+그달말 누적 기준. `sum_for_account`에 `to_date` 파라미터 추가. **새 컬럼/마이그레이션 0**. schema `AccountLedgerItem`(TransactionResponse+signed_amount+balance_after)/`AccountLedgerPage`.
+- **프론트**: 거래 탭 list뷰 → **계좌별 ledger 전환**(`transactions-section`+`transaction-toolbar`): "전체 계좌" 제거→거래계좌만+계좌 선택 필수(첫 거래계좌 자동선택 useEffect, `allowDeselect=false`), txType filter chip은 **클라 필터**(잔액은 백엔드가 박아줌). MonthPicker 유지=그 달 거래+running balance. **계좌 상세**(`account-report-section`)에도 거래이력 섹션(전체, 월필터 없음). 신규 `account-ledger-view`/`ledger-row`. `account/constants` `LEDGER_ACCOUNT_TYPES` 공통화. ledger api/query year/month.
+- **검증**: curl(역산 연속성 0위반·첫행=현재잔액 317969·마지막직전=start 517789·signed합=balance-start·이체 양방향 ±700000·월필터 5월 11건·페이지네이션 고유11/반복0) + front typecheck/lint✅ + 사용자 화면 확인✅.
+- **cursor "+" 함정**: cursor에 `frst_reg_dt.isoformat()`의 `+00:00` 포함 → raw URL이면 `+`가 공백 디코딩돼 커서 깨짐. 프론트 `objectToParams`는 URLSearchParams라 `%2B` 자동인코딩=정상. curl 검증 시 `urllib.parse.quote` 필요.
+- **데드코드 정리**: list-view.tsx/useTransactionInfiniteList/transaction.list·infinite/GetTransactionSearchApi/BackendTransactionListPage/filter_all_accounts(i18n) 제거.
+
 ## 병행 미결
 - **dev→main 머지** — R1~R5b①(front+back) + R5b② 구조 트랙(front) 전부 dev push, main 미반영. front/back 두 레포.
 
-> 금/채권ETF asset_class 재분류는 데이터 라벨링(SQL 추측 금지)이라 사용자가 폼에서 직접. 재분류하면 추이 STOCK→COMMODITY/BOND 분리가 다음 박제부터 반영(PVH는 박제 시점값 동결).
+> 금/채권ETF asset_class 재분류 = **안 함**(사용자 결정 2026-06-02). 트랙①에서 종목 전체 INVESTMENT 단일화·금은 COMMODITY 수동자산으로 편입했으므로 종목 재분류 자체가 무의미.

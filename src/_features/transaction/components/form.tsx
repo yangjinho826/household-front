@@ -7,6 +7,7 @@ import {
   NumberInput,
   Select,
   Stack,
+  Text,
   Textarea,
 } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
@@ -16,6 +17,7 @@ import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 
 import { queryKeys } from "_constants/queries";
+import { fmt } from "_utilities/fmt";
 
 import { useTransactionForm } from "../hooks/use-sub/use-form";
 
@@ -101,6 +103,42 @@ export default function TransactionForm({
     [categories, txType],
   );
 
+  // 거래 후 예상 잔액 — 선택한 계좌 balance ± 입력 금액.
+  // 수정 모드는 기존 거래가 이미 balance 에 반영돼 "거래 후"가 부정확하므로 생략.
+  const amountNum = Number(form.values.amount) || 0;
+
+  const selectedAccount = useMemo(
+    () => accounts.find((a) => a.accountId === form.values.accountId),
+    [accounts, form.values.accountId],
+  );
+  const selectedToAccount = useMemo(
+    () => accounts.find((a) => a.accountId === form.values.toAccountId),
+    [accounts, form.values.toAccountId],
+  );
+
+  const renderBalanceHint = (
+    account: (typeof accounts)[number] | undefined,
+    delta: number,
+  ) => {
+    if (isUpdate || !account) return null;
+    const after = account.balance + delta;
+    return (
+      <Text size="xs" c="dimmed" mt={-6} ml={2}>
+        {t("balance_current")} {fmt(account.balance)}
+        {t("won")}
+        {amountNum > 0 && (
+          <>
+            {" → "}
+            <Text span fw={700} {...(after < 0 ? { c: "red" } : {})}>
+              {fmt(after)}
+              {t("won")}
+            </Text>
+          </>
+        )}
+      </Text>
+    );
+  };
+
   const formContent = (
     <form onSubmit={form.onSubmit(handleSubmit)}>
       <Stack gap="sm">
@@ -139,6 +177,7 @@ export default function TransactionForm({
                 data={accountOptions}
                 searchable
               />
+              {renderBalanceHint(selectedAccount, -amountNum)}
               <Select
                 {...form.getInputProps("toAccountId")}
                 label={t("to_account")}
@@ -146,6 +185,7 @@ export default function TransactionForm({
                 data={toAccountOptions}
                 searchable
               />
+              {renderBalanceHint(selectedToAccount, amountNum)}
             </>
           ) : (
             <>
@@ -156,6 +196,10 @@ export default function TransactionForm({
                 data={accountOptions}
                 searchable
               />
+              {renderBalanceHint(
+                selectedAccount,
+                txType === "INCOME" ? amountNum : -amountNum,
+              )}
               <Select
                 {...form.getInputProps("categoryId")}
                 label={t("category")}

@@ -5,8 +5,8 @@ import { IconPlus } from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
 
 import MonthPicker from "_features/common/components/month-picker";
+import AccountLedgerView from "_features/transaction/components/account-ledger-view";
 import TransactionCalendarView from "_features/transaction/components/calendar-view";
-import TransactionListView from "_features/transaction/components/list-view";
 import { useTransactionSearch } from "_features/transaction/hooks/use-sub/use-search";
 import { useQuickAddStore } from "_features/transaction/store";
 
@@ -61,14 +61,14 @@ export default function TransactionsSection() {
       />
 
       {view === "list" ? (
-        <TransactionListView
-          searchParams={{
-            year,
-            month: monthNum,
-            ...(filter !== "all" && { txType: filter }),
-            ...(accountId && { accountId }),
-          }}
-        />
+        accountId ? (
+          <AccountLedgerView
+            accountId={accountId}
+            year={year}
+            month={monthNum}
+            filter={filter}
+          />
+        ) : null // 첫 거래계좌 자동 선택 직전 — toolbar useEffect 가 즉시 채움
       ) : (
         <TransactionCalendarView key={month} year={year} month={monthNum} />
       )}

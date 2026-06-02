@@ -259,13 +259,16 @@
     "view_list": "List",
     "view_calendar": "Calendar",
     "filter_all": "All",
-    "filter_all_accounts": "All accounts",
     "load_more": "Load more",
     "summary_income": "Income",
     "summary_expense": "Expense",
     "summary_saving_rate": "Saving rate",
     "summary_top_expense": "Top 5 expense categories",
-    "summary_no_expense": "No expenses"
+    "summary_no_expense": "No expenses",
+    "balance_current": "Balance",
+    "won": "KRW",
+    "ledger_title": "Transaction history",
+    "tx_default_label": "Transaction"
   },
   "onboarding": {
     "welcome_title": "Welcome to your household",

@@ -4,7 +4,9 @@ import { Card, Group, SegmentedControl, Select, Stack } from "@mantine/core";
 import { IconBuildingBank, IconCalendar, IconList } from "@tabler/icons-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
+import { useEffect, useMemo } from "react";
 
+import { LEDGER_ACCOUNT_TYPES } from "_features/account/constants";
 import FilterChip from "_features/common/components/filter-chip";
 import { useEnumOptions } from "_features/enum/queries/use-query";
 import type {
@@ -46,7 +48,21 @@ export default function TransactionToolbar({
   const { data: formOptions } = useSuspenseQuery(
     queryKeys.transaction.formOptions(),
   );
-  const accounts = formOptions.body.data.accounts;
+  // 거래 탭은 계좌별 running balance 라 거래계좌(LIVING/SAVINGS/OTHER)만 선택 대상.
+  const ledgerAccounts = useMemo(
+    () =>
+      formOptions.body.data.accounts.filter((a) =>
+        LEDGER_ACCOUNT_TYPES.has(a.accountType),
+      ),
+    [formOptions],
+  );
+
+  // "전체 계좌" 없이 계좌 선택 필수 — 선택 안 됐으면 첫 거래계좌 자동 선택.
+  useEffect(() => {
+    if (!accountId && ledgerAccounts.length > 0) {
+      onAccountChange(ledgerAccounts[0]!.accountId);
+    }
+  }, [accountId, ledgerAccounts, onAccountChange]);
 
   return (
     <Card p="sm">
@@ -97,13 +113,12 @@ export default function TransactionToolbar({
 
             <Select
               value={accountId ?? null}
-              onChange={(v) => onAccountChange(v ?? undefined)}
-              data={accounts.map((a) => ({
+              onChange={(v) => v && onAccountChange(v)}
+              data={ledgerAccounts.map((a) => ({
                 value: a.accountId,
                 label: a.name,
               }))}
-              placeholder={t("filter_all_accounts")}
-              clearable
+              allowDeselect={false}
               leftSection={<IconBuildingBank size={15} />}
               size="xs"
               radius="md"
