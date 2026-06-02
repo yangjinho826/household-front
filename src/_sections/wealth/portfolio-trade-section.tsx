@@ -8,7 +8,6 @@ import {
   Drawer,
   Group,
   Loader,
-  SegmentedControl,
   SimpleGrid,
   Stack,
   Text,
@@ -17,6 +16,7 @@ import {
 import { useDisclosure } from "@mantine/hooks";
 import { IconPencil } from "@tabler/icons-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { useRouter, useParams } from "next/navigation";
 import { Suspense, useMemo, useState } from "react";
 
@@ -28,7 +28,6 @@ import {
   usePortfolioItemTransactionsInfinite,
 } from "_features/portfolio/queries/use-query";
 import PortfolioValueTrend from "_sections/wealth/components/portfolio-value-trend";
-import RealizedPnlPanel from "_sections/wealth/components/realized-pnl-panel";
 import { InfiniteSentinel } from "_libraries/query/infinite-sentinel";
 import type {
   PortfolioTransactionItemType,
@@ -46,6 +45,7 @@ interface Props {
 }
 
 export default function PortfolioTradeSection({ portfolioId }: Props) {
+  const t = useTranslations("portfolio");
   const router = useRouter();
   const routeParams = useParams<{ locale: string }>();
   const queryClient = useQueryClient();
@@ -69,7 +69,6 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
   const [initialType, setInitialType] = useState<PortfolioTxType>("BUY");
   const [editingTx, setEditingTx] =
     useState<PortfolioTransactionItemType | null>(null);
-  const [tab, setTab] = useState<"history" | "realized">("history");
 
   const openTrade = (type: PortfolioTxType) => {
     setEditingTx(null);
@@ -122,7 +121,7 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
       <Card radius="xl" p="xl" shadow="md">
         <Stack gap={4}>
           <Text size="xs" fw={500} c="dimmed">
-            평가금액
+            {t("valuation_amount")}
           </Text>
           <Text
             size="2rem"
@@ -156,7 +155,7 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
           <SimpleGrid cols={3} spacing="xs" mt="sm">
             <Stack gap={2}>
               <Text size="10px" c="dimmed" fw={600}>
-                보유수량
+                {t("holding_qty")}
               </Text>
               <Text
                 size="xs"
@@ -168,7 +167,7 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
             </Stack>
             <Stack gap={2}>
               <Text size="10px" c="dimmed" fw={600}>
-                평균단가
+                {t("avg_unit_price")}
               </Text>
               <Text
                 size="xs"
@@ -180,7 +179,7 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
             </Stack>
             <Stack gap={2}>
               <Text size="10px" c="dimmed" fw={600}>
-                현재가
+                {t("current_price")}
               </Text>
               <Text
                 size="xs"
@@ -217,7 +216,7 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
           }}
         >
           <Text size="sm" fw={700} c="danger.5">
-            매수
+            {t("trade_buy")}
           </Text>
         </UnstyledButton>
         <UnstyledButton
@@ -230,40 +229,23 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
           }}
         >
           <Text size="sm" fw={700} c="info.5">
-            매도
+            {t("trade_sell")}
           </Text>
         </UnstyledButton>
       </SimpleGrid>
 
-      {/* 거래내역 / 매매손익 탭 */}
-      <SegmentedControl
-        fullWidth
-        value={tab}
-        onChange={(v) => setTab(v as "history" | "realized")}
-        data={[
-          { value: "history", label: "거래내역" },
-          { value: "realized", label: "매매손익" },
-        ]}
-      />
+      {/* 거래내역 (매매손익은 계좌 상세로 이동 — 전량매도 시 종목이 사라져도 추적 가능) */}
+      <Group justify="space-between" align="center" px={4}>
+        <Text size="sm" fw={700}>
+          {t("transactions")}
+        </Text>
+      </Group>
 
-      {tab === "realized" && (
-        <Suspense
-          fallback={
-            <Center py="xl">
-              <Loader size="sm" />
-            </Center>
-          }
-        >
-          <RealizedPnlPanel portfolioId={portfolioId} />
-        </Suspense>
-      )}
-
-      {tab === "history" &&
-        (trades.length === 0 ? (
+      {trades.length === 0 ? (
         <Card radius="lg" p="xl">
           <Center>
             <Text size="sm" c="dimmed">
-              거래 내역이 없습니다
+              {t("no_transactions")}
             </Text>
           </Center>
         </Card>
@@ -271,11 +253,11 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
         <>
           <Card radius="lg" p="xs">
             <Stack gap={0}>
-              {trades.map((t) => (
+              {trades.map((tx) => (
                 <UnstyledButton
-                  key={t.txId}
+                  key={tx.txId}
                   onClick={() => {
-                    setEditingTx(t);
+                    setEditingTx(tx);
                     open();
                   }}
                   style={{ width: "100%" }}
@@ -284,14 +266,14 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
                     <Group justify="space-between" align="center">
                       <Group gap={6}>
                         <Badge
-                          color={t.ptType === "BUY" ? "danger" : "info"}
+                          color={tx.ptType === "BUY" ? "danger" : "info"}
                           variant="light"
                           size="sm"
                         >
-                          {t.ptType === "BUY" ? "매수" : "매도"}
+                          {tx.ptType === "BUY" ? t("trade_buy") : t("trade_sell")}
                         </Badge>
                         <Text size="xs" fw={600} c="dimmed">
-                          {t.txDate}
+                          {tx.txDate}
                         </Text>
                       </Group>
                       <Text
@@ -299,20 +281,20 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
                         fw={700}
                         style={{ fontVariantNumeric: "tabular-nums" }}
                       >
-                        {fmt(t.total)}원
+                        {fmt(tx.total)}원
                       </Text>
                     </Group>
                     <Group gap={8}>
                       <Text size="11px" c="dimmed">
-                        {t.quantity}주
+                        {tx.quantity}주
                       </Text>
                       <Text size="11px" c="dimmed">
-                        × {fmt(t.price)}원
+                        × {fmt(tx.price)}원
                       </Text>
                     </Group>
-                    {t.memo && (
+                    {tx.memo && (
                       <Text size="11px" c="dimmed">
-                        {t.memo}
+                        {tx.memo}
                       </Text>
                     )}
                   </Stack>
@@ -327,7 +309,7 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
             onLoadMore={fetchNextPage}
           />
         </>
-      ))}
+      )}
 
       {/* 거래 추가 시트(quick-add-sheet) 와 동일 패턴 — 핸들바 + 바텀시트.
           모달 통일 (Image #1 케이스). */}
@@ -364,10 +346,10 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
         <Stack gap={4} px="md" pb="xs">
           <Text size="md" fw={800}>
             {editingTx
-              ? "거래 수정"
+              ? t("edit_trade")
               : initialType === "BUY"
-                ? "매수 기록"
-                : "매도 기록"}
+                ? t("buy_record")
+                : t("sell_record")}
           </Text>
         </Stack>
 

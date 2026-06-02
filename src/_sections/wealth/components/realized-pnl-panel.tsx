@@ -1,9 +1,15 @@
 "use client";
 
-import { Card, Group, SegmentedControl, Stack, Text } from "@mantine/core";
+import { Card, Group, Stack, Text } from "@mantine/core";
+import { DateInput } from "@mantine/dates";
+import dayjs from "dayjs";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
-import { useItemRealizedPnl } from "_features/portfolio/queries/use-query";
+import {
+  useAccountRealizedPnl,
+  useItemRealizedPnl,
+} from "_features/portfolio/queries/use-query";
 import type { RealizedPnlResponseType } from "_features/portfolio/types";
 import {
   formatProfitAmount,
@@ -13,39 +19,133 @@ import {
 import { fmt } from "_utilities/fmt";
 
 interface Props {
-  portfolioId: string;
+  // 둘 중 하나 — 종목 단위(portfolioId) 또는 계좌 누적(accountId)
+  portfolioId?: string;
+  accountId?: string;
+  initialFrom?: Date;
+  initialTo?: Date;
 }
 
-// 기간 프리셋 — 오늘 기준 fromDate 역산. 증권사 매매손익 화면과 동일.
-const PERIOD_OPTIONS = [
-  { value: "1m", label: "1개월" },
-  { value: "3m", label: "3개월" },
-  { value: "1y", label: "1년" },
-] as const;
-
-type Period = (typeof PERIOD_OPTIONS)[number]["value"];
-
-function fromDateOf(period: Period): string {
-  const now = new Date();
-  if (period === "1m") now.setMonth(now.getMonth() - 1);
-  else if (period === "3m") now.setMonth(now.getMonth() - 3);
-  else now.setFullYear(now.getFullYear() - 1);
-  return now.toISOString().slice(0, 10);
+function toISO(d: Date | null): string | undefined {
+  return d ? dayjs(d).format("YYYY-MM-DD") : undefined;
 }
 
-export default function RealizedPnlPanel({ portfolioId }: Props) {
-  const [period, setPeriod] = useState<Period>("1y");
-  const { data } = useItemRealizedPnl(portfolioId, fromDateOf(period));
-  const { summary, rows }: RealizedPnlResponseType = data.body.data;
+// 기본 범위 = 최근 1년 (지정 없을 때)
+function defaultRange(initialFrom?: Date, initialTo?: Date): [Date, Date] {
+  const to = initialTo ?? new Date();
+  const from = initialFrom ?? dayjs(to).subtract(1, "year").toDate();
+  return [from, to];
+}
+
+// 종목/계좌 useSuspenseQuery 는 조건부 호출 불가 → fetch 를 분리하고 뷰만 공유
+export default function RealizedPnlPanel({
+  portfolioId,
+  accountId,
+  initialFrom,
+  initialTo,
+}: Props) {
+  if (portfolioId)
+    return (
+      <ItemRealizedPnl
+        portfolioId={portfolioId}
+        initialFrom={initialFrom}
+        initialTo={initialTo}
+      />
+    );
+  if (accountId)
+    return (
+      <AccountRealizedPnl
+        accountId={accountId}
+        initialFrom={initialFrom}
+        initialTo={initialTo}
+      />
+    );
+  return null;
+}
+
+interface FetchProps {
+  initialFrom?: Date;
+  initialTo?: Date;
+}
+
+function ItemRealizedPnl({
+  portfolioId,
+  initialFrom,
+  initialTo,
+}: FetchProps & { portfolioId: string }) {
+  const [def] = useState(() => defaultRange(initialFrom, initialTo));
+  const [from, setFrom] = useState<Date | null>(def[0]);
+  const [to, setTo] = useState<Date | null>(def[1]);
+  const { data } = useItemRealizedPnl(portfolioId, toISO(from), toISO(to));
+  return (
+    <RealizedPnlView
+      data={data.body.data}
+      from={from}
+      to={to}
+      onFromChange={setFrom}
+      onToChange={setTo}
+    />
+  );
+}
+
+function AccountRealizedPnl({
+  accountId,
+  initialFrom,
+  initialTo,
+}: FetchProps & { accountId: string }) {
+  const [def] = useState(() => defaultRange(initialFrom, initialTo));
+  const [from, setFrom] = useState<Date | null>(def[0]);
+  const [to, setTo] = useState<Date | null>(def[1]);
+  const { data } = useAccountRealizedPnl(accountId, toISO(from), toISO(to));
+  return (
+    <RealizedPnlView
+      data={data.body.data}
+      from={from}
+      to={to}
+      onFromChange={setFrom}
+      onToChange={setTo}
+    />
+  );
+}
+
+interface ViewProps {
+  data: RealizedPnlResponseType;
+  from: Date | null;
+  to: Date | null;
+  onFromChange: (d: Date | null) => void;
+  onToChange: (d: Date | null) => void;
+}
+
+function RealizedPnlView({
+  data,
+  from,
+  to,
+  onFromChange,
+  onToChange,
+}: ViewProps) {
+  const t = useTranslations("portfolio");
+  const { summary, rows } = data;
+  const today = new Date();
 
   return (
     <Stack gap="sm">
-      <Group justify="flex-end">
-        <SegmentedControl
+      {/* 기간 자유 선택 — 시작일 ~ 종료일 (백엔드 fromDate/toDate) */}
+      <Group grow gap="xs">
+        <DateInput
           size="xs"
-          value={period}
-          onChange={(v) => setPeriod(v as Period)}
-          data={PERIOD_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+          label={t("period_from")}
+          value={from}
+          onChange={(d) => onFromChange(d ? dayjs(d).toDate() : null)}
+          valueFormat="YYYY-MM-DD"
+          maxDate={to ?? today}
+        />
+        <DateInput
+          size="xs"
+          label={t("period_to")}
+          value={to}
+          onChange={(d) => onToChange(d ? dayjs(d).toDate() : null)}
+          valueFormat="YYYY-MM-DD"
+          maxDate={today}
         />
       </Group>
 
@@ -54,7 +154,7 @@ export default function RealizedPnlPanel({ portfolioId }: Props) {
         <Stack gap="xs">
           <Group justify="space-between">
             <Text size="sm" c="dimmed">
-              실현손익
+              {t("realized_pnl")}
             </Text>
             <Group gap={6}>
               <Text
@@ -77,7 +177,7 @@ export default function RealizedPnlPanel({ portfolioId }: Props) {
           </Group>
           <Group justify="space-between">
             <Text size="xs" c="dimmed">
-              매도금액
+              {t("sell_amount")}
             </Text>
             <Text size="xs" fw={600} style={{ fontVariantNumeric: "tabular-nums" }}>
               {fmt(summary.sellAmount)}원
@@ -85,7 +185,7 @@ export default function RealizedPnlPanel({ portfolioId }: Props) {
           </Group>
           <Group justify="space-between">
             <Text size="xs" c="dimmed">
-              매수금액
+              {t("buy_amount")}
             </Text>
             <Text size="xs" fw={600} style={{ fontVariantNumeric: "tabular-nums" }}>
               {fmt(summary.buyAmount)}원
@@ -98,17 +198,27 @@ export default function RealizedPnlPanel({ portfolioId }: Props) {
       <Card radius="lg" p="md">
         <Stack gap="sm">
           <Text size="sm" fw={700}>
-            매도 내역 ({rows.length})
+            {t("sell_history")} ({rows.length})
           </Text>
           {rows.length === 0 ? (
             <Text size="sm" c="dimmed" ta="center" py="md">
-              매도 내역이 없습니다
+              {t("no_sell_history")}
             </Text>
           ) : (
             rows.map((r) => (
               <Group key={r.txId} justify="space-between">
                 <div>
-                  <Text size="sm" fw={600}>
+                  {/* 계좌 단위에서만 종목명 — 여러 종목 매도가 섞이므로 */}
+                  {r.name && (
+                    <Text size="sm" fw={700}>
+                      {r.name}
+                    </Text>
+                  )}
+                  <Text
+                    size={r.name ? "xs" : "sm"}
+                    fw={600}
+                    c={r.name ? "dimmed" : undefined}
+                  >
                     {r.txDate}
                   </Text>
                   <Text size="xs" c="dimmed">

@@ -124,7 +124,7 @@ export default function TradeForm({
         notifications.show({
           title: "매도 기록 완료",
           message: soldOut
-            ? "전량 매도되어 종목이 정리되었습니다."
+            ? "전량 매도되어 보유 종목에서 제외됐어요."
             : "매도 거래가 추가되었습니다.",
           color: "blue",
         });
