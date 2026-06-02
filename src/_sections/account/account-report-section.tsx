@@ -152,7 +152,7 @@ export default function AccountReportSection({ accountId }: Props) {
                   />
                   <XAxis
                     dataKey="month"
-                    tick={{ fontSize: 9, fill: "#8B95A1" }}
+                    tick={{ fontSize: 9, fill: "#A99C8D" }}
                     axisLine={false}
                     tickLine={false}
                   />

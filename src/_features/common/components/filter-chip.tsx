@@ -9,7 +9,7 @@ interface FilterChipProps {
 }
 
 /**
- * 토스 스타일 pill 칩 — 페이지 상단 필터 (전체/지출/수입 등) 공통 사용.
+ * pill 칩 — 페이지 상단 필터 (전체/지출/수입 등) 공통 사용.
  */
 export default function FilterChip({ label, active, onClick }: FilterChipProps) {
   return (

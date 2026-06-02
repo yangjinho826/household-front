@@ -215,7 +215,7 @@ export default function TradeForm({
           min={0}
           thousandSeparator=","
           rightSection={
-            <span style={{ fontSize: 11, color: "#8B95A1" }}>원</span>
+            <span style={{ fontSize: 11, color: "var(--mantine-color-gray-6)" }}>원</span>
           }
         />
         <DateInput
@@ -242,7 +242,7 @@ export default function TradeForm({
         />
 
         <Group justify="space-between" px={4}>
-          <span style={{ fontSize: 12, color: "#8B95A1" }}>
+          <span style={{ fontSize: 12, color: "var(--mantine-color-gray-6)" }}>
             {isBuy ? "매수금액" : "매도금액"}
           </span>
           <span style={{ fontSize: 14, fontWeight: 700 }}>

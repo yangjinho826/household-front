@@ -47,7 +47,7 @@ export default function QuickAddSheet() {
         },
       }}
     >
-      {/* 핸들바 — 토스 시그니처 (household-switcher 와 동일) */}
+      {/* 핸들바 (household-switcher 와 동일) */}
       <Group justify="center" pt={4} pb={8}>
         <div
           style={{

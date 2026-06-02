@@ -8,7 +8,7 @@ const COLORS = [
   TOKEN.blue, // 블루
   TOKEN.positive, // 세이지 그린 (양수/적립)
   TOKEN.red, // 레드
-  TOKEN.purple, // 토스 퍼플
+  TOKEN.purple, // 퍼플
   TOKEN.yellow, // 옐로우
   TOKEN.orange, // 오렌지
   "#FF6B6B", // 레드 라이트

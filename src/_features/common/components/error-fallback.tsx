@@ -57,7 +57,7 @@ export function ErrorFallback({ error, reset }: ErrorFallbackProps) {
       left={0}
       right={0}
       bottom={0}
-      bg="#f2f4f6"
+      bg="gray.0"
       style={{ zIndex: 1000, overflow: "auto" }}
     >
       <Container size={448} bg="white" mih="100dvh" px="md">
