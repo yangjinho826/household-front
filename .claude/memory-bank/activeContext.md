@@ -57,7 +57,24 @@ R1~R5a 전부 dev 커밋 완료. **dev→main 머지는 아직 안 함** — R5a
     - primary=세이지, **primaryShade light 5→6**(#647A5C — 대비 3.34→4.73 AA). accent=테라코타(shade4 #E5B197로 벌림). gray=웜그레이 교체, **textDim gray.5→6 #7A6F63**(대비). 카드 radius xl→3xl(이미 토큰 존재), defaultRadius는 유지(전역 영향 방지). 갈색톤 그림자.
     - **8장 = V3 작업 명세서**(mantineTheme.ts 변경표 + 8-3 linerGreen→positive 치환 파일목록 + design-tokens.ts TOKEN). primary 사용규칙: "수입은 반드시 c=info 명시".
     - 검토 경로: design-consultation 스킬은 프리뷰가 OpenAI 키 필요라 스킵→직접 작성, **codex exec로 교차 검토**(codex CLU 0.134 인증OK). 사용자: design 이미지용 OpenAI 키는 효용 낮은 단계라 안 만듦.
-  - ▶ **다음 재개점 = V3 토큰화** (DESIGN.md 8장대로 mantineTheme.ts + design-tokens.ts 교체 + 8-3 linerGreen 치환). primaryColor info→sage 회귀 확인 필수. 이후 V4 차트 Mantine Charts, V5 리브랜딩.
+  - ✅ **V3 토큰화 완료·커밋(2026-06-02, dev 미push)**: 커밋 099e466(DESIGN.md)·e597f09(토큰)·d0aff98(작업기록). mantineTheme(sage/terracotta/positive tuple, gray 웜그레이, primaryColor info→sage shade6, 갈색그림자, Card 3xl) + design-tokens TOKEN(green→positive) + 사용처(linerGreen→positive 8곳, TOKEN.green→positive 3곳, brand-logo sage) + globals.css 배경 #f2f4f6→크림 #faf6ef. typecheck/lint 통과, 로그인 화면 렌더로 sage/웜그레이 확인.
+
+  - 🔀 **방향 전환 → "화면별 레이아웃 리워크"** (2026-06-02): 사용자가 V3 후 "화면이 예전과 똑같다"(색만 바뀜). **오해 정리**: gstack 디자인 스킬(design-shotgun/consultation/review)은 전 화면 자동 재디자인 도구 아님 — 무드 시안+명세+QA고 레이아웃 코드는 내가 짜야 함. 사용자 기대=로그인부터 전 화면 디자이너 패스. **경로 B 선택**(OpenAI 키 없이 내가 직접 리워크 + HTML 목업 미리보기. Gemini는 design 바이너리가 OpenAI 전용이라 불가).
+  - 🔄 **로그인 화면 리워크 진행 중 (V4 차트 전에 끼어듦)**:
+    - codex 검토 완료 → **A안(중앙 미니멀) 채택 + B(브랜드강조) 따뜻한 카피만 흡수**. 보완: 완전중앙말고 상단45% 보정중앙(키보드), 약관카피는 실제 링크없으니 제거, 세리프 워드마크 1회만, pill 버튼 OK.
+    - **미커밋 적용분 3파일**: `base-layout.tsx`(Noto Serif KR CDN link 추가) / `globals.css`(`.brand-wordmark` 세리프 클래스) / `(guest)/layout.tsx`(bg white→크림 #FAF6EF + flex 수직중앙).
+    - **남은 작업**: ① `login-section.tsx` A안 리워크(브랜드블록=BrandLogo+"모음" 세리프 워드마크(className brand-wordmark)+캐치프레이즈 / 입력 / pill 버튼 / 회원가입·약관 주석블록 제거) ② i18n `auth.brand_name`("모음")·`auth.brand_tagline`("매달 내 자산이 어떻게 변하는지" 류) ko/en 추가 ③ typecheck ④ dev 재시작 후 browse 시각확인.
+    - **아이콘 결정 = D(전용 로고)**: 사용자가 Recraft.ai(SVG 무료) 또는 크몽/디자이너로 "모음" 로고 제작 → 받으면 내가 `public/icon.svg`·192/512·apple-touch + `brand-logo.tsx`(현재 tabler IconWallet placeholder) + `manifest.json` 교체. 로고는 로그인 레이아웃과 독립(자리만 잡아둠).
+    - **반응형**: 로그인=(guest) `Container size=448` 고정중앙이라 데스크톱/태블릿/폰 거의 동일(폰 목업=데스크톱). **(user) 화면(홈 등)은 데스크톱서 user-shell-wrap 사이드바+메인 2단**이라 홈 리워크 때 3뷰포트 별도 설계 필수.
+    - **환경 주의**: dev 서버 워커 크래시 빈발("Jest worker exceeding retry limit" — 재시작 필요). 백엔드 8000 DOWN → 홈/자산/투자는 force-dynamic이라 백엔드 없으면 500(로그인=(guest)는 백엔드 불필요).
+  - ✅ **로그인 화면 리워크 완료(2026-06-02, dev 미커밋) — 개선 B 채택**: 처음 A안(중앙 미니멀)으로 구현했다가 **사용자가 로그인 보드(login-redesign-20260602/board.html) 3번째=개선 B로 변경 요청**("시안 3번/C로"). 보드는 [현재]·[개선 A 중앙미니멀]·[개선 B 브랜드강조+카드시트] 3컬럼(C 라벨 없음, 3번째=B).
+    - **개선 B 구조**: (guest)layout = Container 448 + px0 + 상단 따뜻한 그라데이션(`linear-gradient(180deg,#F3E6DA 0%,#FAF6EF 38%)`) + flex column. login-section = hero(좌정렬 BrandLogo 64 + "모음" 세리프 40px brand-wordmark + 태그라인 keep-all, padding 64/28/32) + 하단 카드 시트(marginTop auto·TOKEN.card·radius 28 28 0 0·위로 그림자·padding 30/26/40) 안에 입력+pill 버튼. form flex:1.
+    - i18n `auth.brand_name`("모음"/"Moeum")·`auth.brand_tagline`("매달 내 자산이 어떻게 변하는지 한눈에 모아봐요" — B 따뜻한 카피) ko/en + brand-logo aria-label "가계부"→"모음".
+    - typecheck 통과 + **browse 시각확인(390 모바일 + 448 박스, 콘솔 에러 0, 그라데이션·세리프 명조 로드·카드시트·pill 의도대로)**. Noto Serif KR `notoLoaded:true` js 확인.
+    - 미커밋 3파일(base-layout Noto Serif link / globals.css .brand-wordmark)도 그대로 미커밋. (guest)layout은 B로 재수정됨.
+    - ⚠️ 미검증: 로그인 **실패 토스트** 동작(백엔드 8000 DOWN이라 로그인 시도 불가). 새로고침 제거는 코드레벨 확실.
+  - 🐛 **보너스 버그 fix(2026-06-02)**: 로그인 실패 시 페이지 새로고침되던 것 = `return-fetch-refresh.ts`가 로그인 401을 "세션만료"로 오인→refresh 시도 실패→`redirectToLogin()`의 `location.replace`로 리로드. 응답 인터셉터 체인이 안쪽부터(refresh가 api보다 먼저 401 가로챔)라 onLoginError 토스트 도달조차 못 함. **수정**: `isAuthEndpoint`(login/logout/refresh) 401은 refresh 스킵→api가 ApiResponseError throw→onLoginError 토스트. 사용자: 토스트 방식 유지 결정.
+  - ▶ **다음 재개점 = 홈 화면 리워크** (홈→거래→투자→자산→내정보 순). 화면별로 HTML 목업→codex 검토→구현→browse 확인 패턴. (user) 화면은 데스크톱 사이드바+메인 2단이라 3뷰포트 별도 설계 필수. **V4 차트 교체·V5 리브랜딩은 화면 리워크와 병합 진행**. 백엔드 8000 띄워야 (user) 화면 force-dynamic 500 안 남.
   - ⚠️ TaskList(V1~V5 5개)는 **세션 한정이라 휘발** — 이 activeContext 의 시각 트랙 줄 + 로드맵 `optimized-singing-russell.md` 가 정본. 다음 세션은 이 둘로 복원.
 
 > 교훈: R5a-3(월별 배분추이)까지가 사용자가 생각한 적정 스코프. TWR/goal은 과한 기능. 트랙①(자산성격 단순화)만 R5a 위에 얹음.
