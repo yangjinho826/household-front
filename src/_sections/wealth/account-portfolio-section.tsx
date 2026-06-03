@@ -29,7 +29,6 @@ import {
 } from "_features/portfolio/utils";
 import { PORTFOLIO_PALETTE, TOKEN } from "_styles/design-tokens";
 import { useMoney } from "_features/common/hooks/use-money";
-import { fmt } from "_utilities/fmt";
 
 /** 종목 비중 도넛: 상위 N개만 고유색, 나머지 "기타"·현금 회색 묶음 (메인과 동일 규칙) */
 const TOP_STOCKS = 5;
@@ -117,10 +116,7 @@ export default function AccountPortfolioSection({ accountId }: Props) {
               fw={800}
               style={{ fontVariantNumeric: "tabular-nums", lineHeight: 1.1 }}
             >
-              {fmt(account.balance)}
-              <Text span size="lg" c="dimmed" ml={4} fw={600}>
-                원
-              </Text>
+              {money(account.balance)}
             </Text>
             <Group
               gap={6}
@@ -140,7 +136,7 @@ export default function AccountPortfolioSection({ accountId }: Props) {
                 c={profitColor(profitLoss)}
                 style={{ fontVariantNumeric: "tabular-nums" }}
               >
-                {formatProfitAmount(profitLoss, fmt)}원
+                {formatProfitAmount(profitLoss, money)}
               </Text>
               <Text
                 size="sm"
@@ -285,7 +281,7 @@ export default function AccountPortfolioSection({ accountId }: Props) {
                           c={profitColor(profit)}
                           style={{ fontVariantNumeric: "tabular-nums" }}
                         >
-                          {formatProfitAmount(profit, fmt)}
+                          {formatProfitAmount(profit, money)}
                         </Text>
                         <Text
                           size="11px"

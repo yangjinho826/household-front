@@ -117,6 +117,7 @@
       "update_has_been_completed": "수정되었습니다."
     },
     "money": "{amount}원",
+    "won": "원",
     "unit": {
       "stock": "{count}주",
       "count": "{count}개",

@@ -23,8 +23,8 @@ import {
   profitColor,
 } from "_features/portfolio/utils";
 import TxRow from "_features/transaction/components/tx-row";
+import { useMoney } from "_features/common/hooks/use-money";
 import { queryKeys } from "_constants/queries";
-import { fmt } from "_utilities/fmt";
 
 import TotalAssetHero from "./components/total-asset-hero";
 
@@ -32,6 +32,7 @@ export default function HomeSection() {
   const routeParams = useParams<{ locale: string }>();
   const t = useTranslations("home");
   const tAssetClass = useTranslations("enum.asset-class");
+  const money = useMoney();
 
   const now = new Date();
   const currentYear = now.getFullYear();
@@ -113,8 +114,7 @@ export default function HomeSection() {
             fw={700}
             style={{ fontVariantNumeric: "tabular-nums" }}
           >
-            {fmt(summary.totalValuation)}
-            {t("won")}
+            {money(summary.totalValuation)}
           </Text>
         </Stack>
         <Stack gap={2}>
@@ -127,8 +127,7 @@ export default function HomeSection() {
             c={profitColor(summary.totalProfit)}
             style={{ fontVariantNumeric: "tabular-nums" }}
           >
-            {formatProfitAmount(summary.totalProfit, fmt)}
-            {t("won")}
+            {formatProfitAmount(summary.totalProfit, money)}
           </Text>
           <Text
             size="xs"
@@ -164,8 +163,7 @@ export default function HomeSection() {
                   flexShrink: 0,
                 }}
               >
-                {fmt(account.portfolioValuation ?? 0)}
-                {t("won")}
+                {money(account.portfolioValuation ?? 0)}
               </Text>
             </Group>
           ))}
@@ -219,7 +217,7 @@ export default function HomeSection() {
               c="info.5"
               style={{ fontVariantNumeric: "tabular-nums" }}
             >
-              {fmt(income)}
+              {money(income)}
             </Text>
           </Stack>
           <Stack gap={2}>
@@ -232,7 +230,7 @@ export default function HomeSection() {
               c="danger.5"
               style={{ fontVariantNumeric: "tabular-nums" }}
             >
-              {fmt(expense)}
+              {money(expense)}
             </Text>
           </Stack>
           <Stack gap={2}>

@@ -117,6 +117,7 @@
       "update_has_been_completed": "Updated."
     },
     "money": "₩{amount}",
+    "won": "₩",
     "unit": {
       "stock": "{count} shares",
       "count": "{count}",

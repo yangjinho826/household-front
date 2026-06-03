@@ -39,7 +39,6 @@ import {
   profitColor,
 } from "_features/portfolio/utils";
 import { useMoney } from "_features/common/hooks/use-money";
-import { fmt } from "_utilities/fmt";
 
 interface Props {
   portfolioId: string;
@@ -131,10 +130,7 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
             fw={800}
             style={{ fontVariantNumeric: "tabular-nums" }}
           >
-            {fmt(portfolio.currentValue)}
-            <Text span size="lg" c="dimmed" ml={4} fw={600}>
-              원
-            </Text>
+            {money(portfolio.currentValue)}
           </Text>
           <Group gap={6}>
             <Text
@@ -143,7 +139,7 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
               c={profitColor(portfolio.profitLoss)}
               style={{ fontVariantNumeric: "tabular-nums" }}
             >
-              {formatProfitAmount(portfolio.profitLoss, fmt)}원
+              {formatProfitAmount(portfolio.profitLoss, money)}
             </Text>
             <Text
               size="sm"

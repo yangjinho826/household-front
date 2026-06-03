@@ -28,6 +28,7 @@ export default function ManualAssetForm({
   const t = useTranslations("manual-asset");
   const tAssetClass = useTranslations("enum.asset-class");
   const tg = useTranslations("general.common");
+  const tGeneral = useTranslations("general");
 
   const { form, isUpdate, isPending, handleSubmit, handleRemove, handleCancel } =
     useManualAssetForm({ asset, onClose });
@@ -60,7 +61,7 @@ export default function ManualAssetForm({
           min={0}
           rightSection={
             <Text size="xs" c="dimmed" pr={8}>
-              원
+              {tGeneral("won")}
             </Text>
           }
         />

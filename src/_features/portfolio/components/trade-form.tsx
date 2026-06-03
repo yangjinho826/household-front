@@ -54,6 +54,7 @@ export default function TradeForm({
   onCancel,
 }: TradeFormProps) {
   const te = useTranslations("error");
+  const tg = useTranslations("general");
   const tPt = useTranslations("enum.portfolio-tx-type");
   const { data: ptTypeData } = useEnumOptions("portfolio-tx-type");
   const {
@@ -215,7 +216,7 @@ export default function TradeForm({
           min={0}
           thousandSeparator=","
           rightSection={
-            <span style={{ fontSize: 11, color: "var(--mantine-color-gray-6)" }}>원</span>
+            <span style={{ fontSize: 11, color: "var(--mantine-color-gray-6)" }}>{tg("won")}</span>
           }
         />
         <DateInput

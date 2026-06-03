@@ -18,7 +18,6 @@ import {
 import InvestmentAccountCard from "_sections/wealth/components/investment-account-card";
 import { PORTFOLIO_PALETTE, TOKEN } from "_styles/design-tokens";
 import { useMoney } from "_features/common/hooks/use-money";
-import { fmt } from "_utilities/fmt";
 
 /** 종목 비중 도넛: 상위 N개만 고유색, 나머지는 "기타"·현금으로 회색 묶음 (색 순환 혼동 방지) */
 const TOP_STOCKS = 5;
@@ -102,10 +101,7 @@ export default function PortfolioSection() {
                   fw={800}
                   style={{ fontVariantNumeric: "tabular-nums", lineHeight: 1.1 }}
                 >
-                  {fmt(summary.totalValuation)}
-                  <Text span size="lg" c="dimmed" ml={4} fw={600}>
-                    원
-                  </Text>
+                  {money(summary.totalValuation)}
                 </Text>
                 <Group
                   gap={6}
@@ -125,7 +121,7 @@ export default function PortfolioSection() {
                     c={profitColor(profit)}
                     style={{ fontVariantNumeric: "tabular-nums" }}
                   >
-                    {formatProfitAmount(profit, fmt)}원
+                    {formatProfitAmount(profit, money)}
                   </Text>
                   <Text
                     size="sm"
