@@ -11,5 +11,6 @@ export const ASSET_CLASS_COLOR: Record<AssetClass, string> = {
   CASH: "#C3B9A9", // 웜그레이 (중립)
   PENSION: "#C2674A", // terracotta-deep (벽돌)
   COMMODITY: "#E0B84C", // 골드 (금·원자재)
+  SAVINGS: "#7FA98C", // 적금 (세이지 녹색)
   OTHER: "#A99C8D", // 웜그레이 진한
 };

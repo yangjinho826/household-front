@@ -81,10 +81,13 @@ export default function TransactionForm({
     [fixedItems],
   );
 
+  // 출발 통장 — 수동자산(부동산·연금·금)은 이체에서만 선택 가능(지출/수입 불가).
   const accountOptions = useMemo(
     () =>
-      accounts.map((a) => ({ value: a.accountId, label: a.name })),
-    [accounts],
+      accounts
+        .filter((a) => isTransfer || !a.isManualAsset)
+        .map((a) => ({ value: a.accountId, label: a.name })),
+    [accounts, isTransfer],
   );
 
   const toAccountOptions = useMemo(

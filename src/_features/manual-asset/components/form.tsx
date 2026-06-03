@@ -37,6 +37,7 @@ export default function ManualAssetForm({
     { value: "REAL_ESTATE", label: tAssetClass("REAL_ESTATE") },
     { value: "PENSION", label: tAssetClass("PENSION") },
     { value: "COMMODITY", label: tAssetClass("COMMODITY") },
+    { value: "SAVINGS", label: tAssetClass("SAVINGS") },
   ];
 
   return (

@@ -138,7 +138,7 @@
       "count": "{count}",
       "man": "{value}0k"
     },
-    "etc_count": "+{count} more ({percent}%)",
+    "etc_count": "+{count} more",
     "empty": "Nothing to show",
     "all": "All",
     "settings": "Settings"
@@ -212,6 +212,11 @@
     "form_create_title": "New Holding",
     "form_update_title": "Edit Holding",
     "add": "Add",
+    "delete_blocked_holdings": "You still hold this — sell all to delete",
+    "refresh": "Refresh prices",
+    "refresh_success": "Updated prices for {count} holdings",
+    "refresh_empty": "No holdings to refresh",
+    "refresh_failed": "Failed to refresh prices",
     "search_term": "Search",
     "search_term_placeholder": "Search by name/code",
     "account": "Investment Account",
@@ -345,6 +350,8 @@
     "form_create_title": "New Household",
     "form_update_title": "Edit Household",
     "add": "Add",
+    "delete_confirm_title": "Delete this household?",
+    "delete_confirm_message": "All data in this household (accounts, transactions, holdings, categories, fixed expenses, etc.) will be deleted too. Delete anyway?",
     "search_term": "Search",
     "search_term_placeholder": "Search by name",
     "name": "Name",
@@ -369,6 +376,7 @@
       "invite_failed_title": "Invite failed",
       "user_not_found": "No user found with that email",
       "remove_confirm": "Remove {name} from this household?",
+      "remove_confirm_title": "Remove this member?",
       "remove_success_title": "Removed",
       "remove_success_message": "{name} was removed",
       "remove_failed_title": "Remove failed",
@@ -399,6 +407,7 @@
       "INVESTMENT": "Investment",
       "REAL_ESTATE": "Real estate",
       "PENSION": "Pension",
+      "SAVINGS_ASSET": "Savings",
       "OTHER": "Other"
     },
     "category-kind": {
@@ -428,6 +437,7 @@
       "CASH": "Cash",
       "REAL_ESTATE": "Real Estate",
       "PENSION": "Pension",
+      "SAVINGS": "Savings",
       "OTHER": "Other"
     }
   },

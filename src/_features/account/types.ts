@@ -7,6 +7,7 @@ export type AccountType =
   | "REAL_ESTATE"
   | "PENSION"
   | "COMMODITY"
+  | "SAVINGS_ASSET"
   | "OTHER";
 
 export interface AccountSearchRequestType {
@@ -42,6 +43,8 @@ export interface AccountListItemType {
   icon: string | null;
   sortOrder: number;
   isArchived: boolean;
+  // 수동자산 통장(부동산·연금·금)이면 true — 거래폼에서 이체 전용 분기
+  isManualAsset: boolean;
   // INVESTMENT 통장 한정 — 그 외 타입은 null
   cash: number | null;
   portfolioCost: number | null;
@@ -61,6 +64,8 @@ export interface AccountDetailItemType {
   icon: string | null;
   sortOrder: number;
   isArchived: boolean;
+  // 수동자산 통장(부동산·연금·금)이면 true
+  isManualAsset: boolean;
   // INVESTMENT 통장 한정
   cash: number | null;
   portfolioCost: number | null;

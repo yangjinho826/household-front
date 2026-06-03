@@ -13,6 +13,7 @@ export type AssetClass =
   | "CASH"
   | "REAL_ESTATE"
   | "PENSION"
+  | "SAVINGS"
   | "OTHER";
 
 export interface PortfolioSearchRequestType {
@@ -65,6 +66,13 @@ export interface PortfolioLookupResponse {
   name: string;
   currentPrice: number;
   yahooSymbol: string;
+}
+
+/** 수동 시세 갱신 결과 */
+export interface PortfolioRefreshResponse {
+  fetched: number;
+  skipped: number;
+  updatedRows: number;
 }
 
 export interface PortfolioListItemType {

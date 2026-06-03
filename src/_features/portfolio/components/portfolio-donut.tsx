@@ -1,7 +1,9 @@
 "use client";
 
-import { Group, Stack, Text } from "@mantine/core";
+import { Collapse, Group, Stack, Text, UnstyledButton } from "@mantine/core";
+import { IconChevronDown } from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
 
 export interface DonutBreakdownItem {
@@ -13,6 +15,88 @@ export interface DonutBreakdownItem {
   value: number;
   /** hex 색상 */
   color: string;
+  /** "외 N개" 처럼 묶인 항목의 펼침 상세 — 있으면 범례에서 탭하면 펼쳐짐 */
+  children?: DonutBreakdownItem[];
+}
+
+/** 범례 한 줄 — children 있으면 탭해서 묶인 항목 펼침 */
+function LegendRow({
+  item,
+  total,
+}: {
+  item: DonutBreakdownItem;
+  total: number;
+}) {
+  const [open, setOpen] = useState(false);
+  const pct = total > 0 ? (item.value / total) * 100 : 0;
+  const expandable = (item.children?.length ?? 0) > 0;
+
+  const head = (
+    <Group justify="space-between" gap={6} wrap="nowrap">
+      <Group gap={6} wrap="nowrap" style={{ minWidth: 0 }}>
+        <div
+          style={{
+            width: 6,
+            height: 6,
+            borderRadius: 999,
+            background: item.color,
+            flexShrink: 0,
+          }}
+        />
+        <Text size="11px" fw={700} truncate>
+          {item.label}
+        </Text>
+        {expandable && (
+          <IconChevronDown
+            size={12}
+            style={{
+              flexShrink: 0,
+              transform: open ? "rotate(180deg)" : "none",
+              transition: "transform 120ms",
+              color: "var(--mantine-color-gray-5)",
+            }}
+          />
+        )}
+      </Group>
+      <Text
+        size="10px"
+        c="dimmed"
+        fw={700}
+        style={{ flexShrink: 0, fontVariantNumeric: "tabular-nums" }}
+      >
+        {pct.toFixed(0)}%
+      </Text>
+    </Group>
+  );
+
+  if (!expandable) return head;
+
+  return (
+    <Stack gap={4}>
+      <UnstyledButton onClick={() => setOpen((v) => !v)}>{head}</UnstyledButton>
+      <Collapse in={open}>
+        <Stack gap={3} pl={12}>
+          {item.children!.map((c) => {
+            const cPct = total > 0 ? (c.value / total) * 100 : 0;
+            return (
+              <Group key={c.key} justify="space-between" gap={6} wrap="nowrap">
+                <Text size="10px" c="dimmed" truncate style={{ minWidth: 0 }}>
+                  {c.label}
+                </Text>
+                <Text
+                  size="10px"
+                  c="dimmed"
+                  style={{ flexShrink: 0, fontVariantNumeric: "tabular-nums" }}
+                >
+                  {cPct.toFixed(0)}%
+                </Text>
+              </Group>
+            );
+          })}
+        </Stack>
+      </Collapse>
+    </Stack>
+  );
 }
 
 interface Props {
@@ -47,7 +131,18 @@ export default function PortfolioDonut({
   const top = sorted.slice(0, topN);
   const rest = sorted.slice(topN);
   const restSum = rest.reduce((s, i) => s + i.value, 0);
-  const restPct = total > 0 ? (restSum / total) * 100 : 0;
+
+  // 상위 N개를 넘어가는 항목은 "외 N개" 한 줄로 묶되, 탭하면 펼쳐지도록 children 로 전달
+  const restItem: DonutBreakdownItem | null =
+    rest.length > 0
+      ? {
+          key: "__rest",
+          label: t("etc_count", { count: rest.length }),
+          value: restSum,
+          color: "var(--mantine-color-gray-4)",
+          children: rest,
+        }
+      : null;
 
   const isVertical = orientation === "vertical";
 
@@ -78,40 +173,10 @@ export default function PortfolioDonut({
 
   const legend = (
     <Stack gap={4} style={{ flex: 1, minWidth: 0, width: "100%" }}>
-      {top.map((it) => {
-        const pct = total > 0 ? (it.value / total) * 100 : 0;
-        return (
-          <Group key={it.key} justify="space-between" gap={6} wrap="nowrap">
-            <Group gap={6} wrap="nowrap" style={{ minWidth: 0 }}>
-              <div
-                style={{
-                  width: 6,
-                  height: 6,
-                  borderRadius: 999,
-                  background: it.color,
-                  flexShrink: 0,
-                }}
-              />
-              <Text size="11px" fw={700} truncate>
-                {it.label}
-              </Text>
-            </Group>
-            <Text
-              size="10px"
-              c="dimmed"
-              fw={700}
-              style={{ flexShrink: 0, fontVariantNumeric: "tabular-nums" }}
-            >
-              {pct.toFixed(0)}%
-            </Text>
-          </Group>
-        );
-      })}
-      {rest.length > 0 && (
-        <Text size="10px" c="dimmed" fw={600}>
-          {t("etc_count", { count: rest.length, percent: restPct.toFixed(0) })}
-        </Text>
-      )}
+      {top.map((it) => (
+        <LegendRow key={it.key} item={it} total={total} />
+      ))}
+      {restItem && <LegendRow item={restItem} total={total} />}
     </Stack>
   );
 

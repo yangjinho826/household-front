@@ -3,7 +3,7 @@ import type { AssetClass } from "_features/portfolio/types";
 /** 수동자산(부동산·연금·금)이 가질 수 있는 자산 성격 — 종목(INVESTMENT)은 제외 */
 export type ManualAssetClass = Extract<
   AssetClass,
-  "REAL_ESTATE" | "PENSION" | "COMMODITY"
+  "REAL_ESTATE" | "PENSION" | "COMMODITY" | "SAVINGS"
 >;
 
 /** 부동산·연금 등록 — accountId 미지정 시 전용계좌 자동 연결 */
