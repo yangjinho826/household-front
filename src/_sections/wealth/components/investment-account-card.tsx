@@ -2,8 +2,10 @@
 
 import { Card, Group, Stack, Text, UnstyledButton } from "@mantine/core";
 import { IconChevronRight } from "@tabler/icons-react";
+import { useTranslations } from "next-intl";
 import { useRouter, useParams } from "next/navigation";
 
+import { useMoney } from "_features/common/hooks/use-money";
 import type { AccountListItemType } from "_features/account/types";
 import {
   formatProfitAmount,
@@ -11,7 +13,6 @@ import {
   profitColor,
 } from "_features/portfolio/utils";
 import type { PortfolioListItemType } from "_features/portfolio/types";
-import { fmt } from "_utilities/fmt";
 
 interface Props {
   account: AccountListItemType;
@@ -21,6 +22,9 @@ interface Props {
 export default function InvestmentAccountCard({ account, portfolios }: Props) {
   const router = useRouter();
   const routeParams = useParams<{ locale: string }>();
+  const t = useTranslations("general");
+  const tPortfolio = useTranslations("portfolio");
+  const money = useMoney();
 
   // 백엔드가 통장 balance = cash + portfolio_valuation 으로 합산. 디테일 hero 와 동일 데이터 소스
   const profitLoss = account.portfolioProfitLoss ?? 0;
@@ -31,7 +35,7 @@ export default function InvestmentAccountCard({ account, portfolios }: Props) {
   return (
     <UnstyledButton
       onClick={() =>
-        router.push(`/${routeParams.locale}/wealth/account/${account.accountId}`)
+        router.push(`/${routeParams.locale}/invest/account/${account.accountId}`)
       }
       style={{ width: "100%" }}
     >
@@ -61,7 +65,7 @@ export default function InvestmentAccountCard({ account, portfolios }: Props) {
                 {account.name}
               </Text>
             </Group>
-            <IconChevronRight size={14} color="#8B95A1" />
+            <IconChevronRight size={14} color="var(--mantine-color-gray-5)" />
           </Group>
 
           <Stack gap={2}>
@@ -70,10 +74,7 @@ export default function InvestmentAccountCard({ account, portfolios }: Props) {
               fw={800}
               style={{ fontVariantNumeric: "tabular-nums" }}
             >
-              {fmt(account.balance)}
-              <Text span size="sm" c="dimmed" ml={4} fw={600}>
-                원
-              </Text>
+              {money(account.balance)}
             </Text>
             <Group gap={4}>
               <Text
@@ -82,7 +83,7 @@ export default function InvestmentAccountCard({ account, portfolios }: Props) {
                 c={profitColor(profitLoss)}
                 style={{ fontVariantNumeric: "tabular-nums" }}
               >
-                {formatProfitAmount(profitLoss, fmt)}원
+                {formatProfitAmount(profitLoss, money)}
               </Text>
               <Text
                 size="xs"
@@ -98,40 +99,40 @@ export default function InvestmentAccountCard({ account, portfolios }: Props) {
           <Group gap={12} mt={4}>
             <Group gap={4}>
               <Text size="10px" c="dimmed" fw={600}>
-                현금
+                {tPortfolio("cash_label")}
               </Text>
               <Text
                 size="10px"
                 fw={700}
                 style={{ fontVariantNumeric: "tabular-nums" }}
               >
-                {fmt(cash)}원
+                {money(cash)}
               </Text>
             </Group>
             <Text size="10px" c="dimmed">·</Text>
             <Group gap={4}>
               <Text size="10px" c="dimmed" fw={600}>
-                평가
+                {tPortfolio("meta_valuation")}
               </Text>
               <Text
                 size="10px"
                 fw={700}
                 style={{ fontVariantNumeric: "tabular-nums" }}
               >
-                {fmt(valuation)}원
+                {money(valuation)}
               </Text>
             </Group>
             <Text size="10px" c="dimmed">·</Text>
             <Group gap={4}>
               <Text size="10px" c="dimmed" fw={600}>
-                종목
+                {tPortfolio("meta_stock_count")}
               </Text>
               <Text
                 size="10px"
                 fw={700}
                 style={{ fontVariantNumeric: "tabular-nums" }}
               >
-                {portfolios.length}개
+                {t("unit.count", { count: portfolios.length })}
               </Text>
             </Group>
           </Group>

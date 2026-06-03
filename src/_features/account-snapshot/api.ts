@@ -23,9 +23,8 @@ export async function GetAccountSnapshotYearlyApi(
 }
 
 /**
- * 지난달 마감 자산 스냅샷 저장 — 백엔드가 KST 기준 자동 결정.
- * 예: 6/1~6/말 사이에 호출하면 5월 박제.
- * 같은 달 이미 있으면 백엔드 SNAPSHOT_ALREADY_EXISTS 에러.
+ * 수동 박제 — 지난달 자산 스냅샷 저장 (upsert).
+ * 예: 6/1~6/말 호출 시 5월 박제. 이미 있으면 덮어씀 (또 눌러도 안전).
  */
 export async function PostAccountSnapshotCreateApi(idempotencyKey?: string) {
   return apiFetch<ApiResponse<AccountSnapshotMonthItem>>(

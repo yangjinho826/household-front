@@ -1,10 +1,10 @@
 @import "tailwindcss";
 
-/* Mantine body 배경 (light-only) — 토스 회색 페이지 bg 유지.
+/* Mantine body 배경 (light-only) — Warm Ledger 크림 bg (DESIGN.md).
    Mantine 의 selector specificity 와 매칭: :root[data-mantine-color-scheme='light'] */
 :root[data-mantine-color-scheme="light"],
 :host([data-mantine-color-scheme="light"]) {
-  --mantine-color-body: #f2f4f6;
+  --mantine-color-body: #faf6ef;
 }
 
 /* 모바일 PWA 골격 토큰. fixed/sticky 요소가 모두 이 토큰 참조 — magic number 일원화.
@@ -34,6 +34,7 @@
 @media (min-width: 1200px) {
   :root {
     --container-max: 1280px;
+    --bottom-tab-h: 0px; /* 데스크탑은 BottomTab 숨김 → 하단 여백/FAB 기준 0 */
   }
 }
 
@@ -45,7 +46,7 @@
   width: 100%;
   max-width: var(--container-max);
   margin: 0 auto;
-  background: #f2f4f6;
+  background: #faf6ef;
 }
 @media (min-width: 1200px) {
   .user-shell-wrap {
@@ -85,7 +86,7 @@ body {
 }
 
 /* 글로벌 타이포 — Pretendard + 한글 본문 표준 자간/행간.
-   토스/네이버/리디북스 본문 자간 -0.02em / 행간 1.5 따름.
+   한글 본문 자간 -0.02em / 행간 1.5.
    tnum 으로 가계부 금액 자릿수 정렬. */
 html {
   font-family:
@@ -95,10 +96,19 @@ html {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* 스크롤바 폭 항상 예약 — 모달/Drawer 열려 scroll lock 돼도 100vw 불변
+     → 고정 요소(FAB) 위치 점프·레이아웃 시프트 방지 */
+  scrollbar-gutter: stable;
 }
 
 /* 작은 글자(caption, small)는 자간 0 — 좁은 자간 가독성 저하 보정 */
 small,
 .text-caption {
+  letter-spacing: 0;
+}
+
+/* 브랜드 워드마크 — 세리프(Noto Serif KR). DESIGN.md: 세리프는 브랜드명/로고에만. */
+.brand-wordmark {
+  font-family: "Noto Serif KR", Georgia, serif;
   letter-spacing: 0;
 }

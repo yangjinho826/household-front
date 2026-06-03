@@ -25,6 +25,7 @@ interface PortfolioFormProps {
 export default function PortfolioForm({ portfolioId }: PortfolioFormProps) {
   const t = useTranslations("portfolio");
   const tg = useTranslations("general.common");
+  const tGeneral = useTranslations("general");
 
   const {
     form,
@@ -129,7 +130,7 @@ export default function PortfolioForm({ portfolioId }: PortfolioFormProps) {
             min={0}
             rightSection={
               <Text size="xs" c="dimmed" pr={8}>
-                원
+                {tGeneral("won")}
               </Text>
             }
             description={isUpdate ? undefined : t("current_price_help")}

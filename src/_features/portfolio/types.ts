@@ -5,6 +5,16 @@ export type Market =
   | "NYSE"
   | "OTHER";
 
+/** 자산군 배분 슬라이스 축 — 배분 파이/추이 group by 키.
+ *  종목은 전부 INVESTMENT, 실물·부동산·연금은 수동자산이 차지. */
+export type AssetClass =
+  | "INVESTMENT"
+  | "COMMODITY"
+  | "CASH"
+  | "REAL_ESTATE"
+  | "PENSION"
+  | "OTHER";
+
 export interface PortfolioSearchRequestType {
   searchTerm?: string;
   accountId?: string;
@@ -58,7 +68,6 @@ export interface PortfolioLookupResponse {
 }
 
 export interface PortfolioListItemType {
-  rowNo: number;
   portfolioId: string;
   accountId: string;
   accountName: string;
@@ -84,7 +93,6 @@ export type PortfolioDetailItemType = PortfolioListItemType;
 export type PortfolioTxType = "BUY" | "SELL";
 
 export interface PortfolioTransactionItemType {
-  rowNo: number;
   txId: string;
   accountId: string;
   accountName: string;
@@ -97,6 +105,33 @@ export interface PortfolioTransactionItemType {
   total: number;
   txDate: string;
   memo: string | null;
+  /** 매도 실현손익 — SELL 만 값, BUY/미집계는 null */
+  realizedPnl: number | null;
+}
+
+/** 매매손익 — 매도 1건 (증권사 '매매손익' 테이블 행) */
+export interface RealizedPnlRowType {
+  txId: string;
+  txDate: string;
+  name?: string; // 계좌 단위 응답에서 종목명 (종목 단위 응답은 없음)
+  quantity: number;
+  sellPrice: number;
+  realizedPnl: number;
+  realizedRate: number;
+}
+
+/** 매매손익 요약 — 기간 내 매도 전체 합산 */
+export interface RealizedPnlSummaryType {
+  totalRealized: number;
+  totalRate: number;
+  sellAmount: number;
+  buyAmount: number;
+}
+
+/** 종목 매매손익 응답 */
+export interface RealizedPnlResponseType {
+  summary: RealizedPnlSummaryType;
+  rows: RealizedPnlRowType[];
 }
 
 /** 매수/매도 거래 수정 — pt_type 변경 불가 (백엔드 제약) */

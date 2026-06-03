@@ -11,6 +11,7 @@ import {
 } from "@mantine/core";
 import { IconAlertCircle } from "@tabler/icons-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 
 import { ApiResponseError } from "_libraries/fetch/api-response-error";
@@ -30,6 +31,7 @@ interface ErrorFallbackProps {
  */
 export function ErrorFallback({ error, reset }: ErrorFallbackProps) {
   const queryClient = useQueryClient();
+  const t = useTranslations("error");
 
   useEffect(() => {
     console.error("[ErrorBoundary]", error);
@@ -39,16 +41,16 @@ export function ErrorFallback({ error, reset }: ErrorFallbackProps) {
   const isServerDown = isApi && error.status >= 500;
 
   const title = isServerDown
-    ? "서버에 연결할 수 없습니다"
+    ? t("fallback_server_down")
     : isApi
-      ? "요청을 처리하지 못했습니다"
-      : "문제가 발생했습니다";
+      ? t("fallback_api")
+      : t("fallback_generic");
 
   const description = isServerDown
-    ? "잠시 후 다시 시도해주세요."
+    ? t("fallback_retry_later")
     : isApi
-      ? (error.errorMessage ?? "잠시 후 다시 시도해주세요.")
-      : "예기치 못한 오류가 발생했습니다.";
+      ? (error.errorMessage ?? t("fallback_retry_later"))
+      : t("fallback_unexpected");
 
   return (
     <Box
@@ -57,7 +59,7 @@ export function ErrorFallback({ error, reset }: ErrorFallbackProps) {
       left={0}
       right={0}
       bottom={0}
-      bg="#f2f4f6"
+      bg="gray.0"
       style={{ zIndex: 1000, overflow: "auto" }}
     >
       <Container size={448} bg="white" mih="100dvh" px="md">
@@ -82,7 +84,7 @@ export function ErrorFallback({ error, reset }: ErrorFallbackProps) {
                 }}
                 fullWidth
               >
-                다시 시도
+                {t("fallback_retry")}
               </Button>
             </Stack>
           </Card>

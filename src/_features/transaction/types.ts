@@ -30,7 +30,6 @@ export interface TransactionUpdateRequest extends TransactionBaseRequestType {
 }
 
 export interface TransactionListItemType {
-  rowNo: number;
   transactionId: string;
   householdId: string;
   txType: TxType;
@@ -48,6 +47,12 @@ export interface TransactionListItemType {
   categoryName?: string | null;
   categoryColor?: string | null;
   categoryIcon?: string | null;
+}
+
+/** 계좌별 거래 이력 행 — 거래 + 그 계좌 관점 부호 금액 + 거래 후 잔액(running balance) */
+export interface AccountLedgerItemType extends TransactionListItemType {
+  signedAmount: number; // 이 계좌 기준 +(입금/수입)/−(출금/지출)
+  balanceAfter: number; // 그 거래 직후 이 계좌 잔액
 }
 
 /** 달력 일별 합계 1건 — calendarFull 응답 안의 days[] */

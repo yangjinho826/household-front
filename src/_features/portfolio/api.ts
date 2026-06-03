@@ -22,13 +22,14 @@ import type {
   PortfolioValueHistoryByAccountRequest,
   PortfolioValueHistoryByItem,
   PortfolioValueHistoryByItemRequest,
+  RealizedPnlResponseType,
 } from "./types";
 import type { AccountListItemType } from "_features/account/types";
 
 // 백엔드는 `id`(PK) + `valuation`(평가액). 프론트는 `portfolioId` + `currentValue`.
 type BackendPortfolioResponse = Omit<
   PortfolioListItemType,
-  "rowNo" | "portfolioId" | "currentValue" | "householdId"
+  "portfolioId" | "currentValue" | "householdId"
 > & {
   id: string;
   valuation: number;
@@ -36,35 +37,26 @@ type BackendPortfolioResponse = Omit<
 
 type BackendPortfolioTxResponse = Omit<
   PortfolioTransactionItemType,
-  "rowNo" | "txId"
+  "txId"
 > & { id: string };
 
-type BackendAccountResponse = Omit<AccountListItemType, "accountId" | "rowNo"> & {
+type BackendAccountResponse = Omit<AccountListItemType, "accountId"> & {
   id: string;
 };
 
-function toListItem(
-  b: BackendPortfolioResponse,
-  rowNo: number,
-): PortfolioListItemType {
+function toListItem(b: BackendPortfolioResponse): PortfolioListItemType {
   const { id, valuation, ...rest } = b;
-  return { ...rest, portfolioId: id, currentValue: valuation, rowNo };
+  return { ...rest, portfolioId: id, currentValue: valuation };
 }
 
-function toTx(
-  b: BackendPortfolioTxResponse,
-  rowNo: number,
-): PortfolioTransactionItemType {
+function toTx(b: BackendPortfolioTxResponse): PortfolioTransactionItemType {
   const { id, ...rest } = b;
-  return { ...rest, txId: id, rowNo };
+  return { ...rest, txId: id };
 }
 
-function toAccount(
-  b: BackendAccountResponse,
-  rowNo: number,
-): AccountListItemType {
+function toAccount(b: BackendAccountResponse): AccountListItemType {
   const { id, ...rest } = b;
-  return { ...rest, accountId: id, rowNo };
+  return { ...rest, accountId: id };
 }
 
 // =========================================================
@@ -83,9 +75,9 @@ export async function GetPortfolioOverviewApi() {
   >(`/api/portfolio/overview`, { method: "GET" });
 
   const investmentAccounts: InvestmentAccountWithPortfolios[] =
-    res.body.data.investmentAccounts.map((g, gi) => ({
-      account: toAccount(g.account, gi + 1),
-      portfolios: g.portfolios.map((p, pi) => toListItem(p, pi + 1)),
+    res.body.data.investmentAccounts.map((g) => ({
+      account: toAccount(g.account),
+      portfolios: g.portfolios.map((p) => toListItem(p)),
     }));
 
   const mapped: PortfolioOverviewResponse = {
@@ -104,8 +96,8 @@ export async function GetAccountOverviewApi(accountId: string) {
   >(`/api/portfolio/accounts/${accountId}/overview`, { method: "GET" });
 
   const mapped: AccountOverviewResponse = {
-    account: toAccount(res.body.data.account, 1),
-    portfolios: res.body.data.portfolios.map((p, i) => toListItem(p, i + 1)),
+    account: toAccount(res.body.data.account),
+    portfolios: res.body.data.portfolios.map((p) => toListItem(p)),
   };
   return { ...res, body: { ...res.body, data: mapped } };
 }
@@ -116,8 +108,8 @@ export async function GetPortfolioFormOptionsApi() {
   >(`/api/portfolio/form-options`, { method: "GET" });
 
   const mapped: PortfolioFormOptionsResponse = {
-    investmentAccounts: res.body.data.investmentAccounts.map((a, i) =>
-      toAccount(a, i + 1),
+    investmentAccounts: res.body.data.investmentAccounts.map((a) =>
+      toAccount(a),
     ),
   };
   return { ...res, body: { ...res.body, data: mapped } };
@@ -132,7 +124,7 @@ export async function GetPortfolioItemApi(itemId: string) {
     `/api/portfolio/items/${itemId}`,
     { method: "GET" },
   );
-  return { ...res, body: { ...res.body, data: toListItem(res.body.data, 1) } };
+  return { ...res, body: { ...res.body, data: toListItem(res.body.data) } };
 }
 
 export async function GetPortfolioItemTransactionsApi(
@@ -154,7 +146,7 @@ export async function GetPortfolioItemTransactionsApi(
   >(`/api/portfolio/items/${itemId}/transactions?${queryString}`, {
     method: "GET",
   });
-  const items = res.body.data.items.map((b, i) => toTx(b, i + 1));
+  const items = res.body.data.items.map((b) => toTx(b));
   const wrapped: ApiCursorPage<PortfolioTransactionItemType> = {
     code: res.body.code,
     message: res.body.message,
@@ -167,6 +159,38 @@ export async function GetPortfolioItemTransactionsApi(
     },
   };
   return { ...res, body: wrapped };
+}
+
+/** 종목 매매손익 — 기간 내 매도 건별 실현손익 + 요약 (기본 최근 12개월) */
+export async function GetPortfolioItemRealizedPnlApi(
+  itemId: string,
+  fromDate?: string,
+  toDate?: string,
+) {
+  const queryParams: Record<string, unknown> = {};
+  if (fromDate) queryParams.fromDate = fromDate;
+  if (toDate) queryParams.toDate = toDate;
+  const queryString = objectToParams(queryParams).toString();
+  return apiFetch<ApiResponse<RealizedPnlResponseType>>(
+    `/api/portfolio/items/${itemId}/realized-pnl${queryString ? `?${queryString}` : ""}`,
+    { method: "GET" },
+  );
+}
+
+/** 계좌 누적 매매손익 — 계좌 전체 매도 건별 실현손익 + 요약 (전량매도된 종목 포함, 기본 최근 12개월) */
+export async function GetAccountRealizedPnlApi(
+  accountId: string,
+  fromDate?: string,
+  toDate?: string,
+) {
+  const queryParams: Record<string, unknown> = {};
+  if (fromDate) queryParams.fromDate = fromDate;
+  if (toDate) queryParams.toDate = toDate;
+  const queryString = objectToParams(queryParams).toString();
+  return apiFetch<ApiResponse<RealizedPnlResponseType>>(
+    `/api/portfolio/accounts/${accountId}/realized-pnl${queryString ? `?${queryString}` : ""}`,
+    { method: "GET" },
+  );
 }
 
 // =========================================================
@@ -187,7 +211,7 @@ export async function PostPortfolioCreateApi(
       errorHandleMethod: "reject",
     },
   );
-  return { ...res, body: { ...res.body, data: toListItem(res.body.data, 1) } };
+  return { ...res, body: { ...res.body, data: toListItem(res.body.data) } };
 }
 
 /** 야후 파이낸스 종목 조회 — 폼 자동 채움용 (저장 X) */
@@ -214,7 +238,7 @@ export async function PostPortfolioBuyApi(
       errorHandleMethod: "reject",
     },
   );
-  return { ...res, body: { ...res.body, data: toListItem(res.body.data, 1) } };
+  return { ...res, body: { ...res.body, data: toListItem(res.body.data) } };
 }
 
 /** 매도 (부분/전량) */
@@ -232,7 +256,7 @@ export async function PostPortfolioSellApi(
       errorHandleMethod: "reject",
     },
   );
-  const data = res.body.data ? toListItem(res.body.data, 1) : null;
+  const data = res.body.data ? toListItem(res.body.data) : null;
   return { ...res, body: { ...res.body, data } };
 }
 
@@ -243,7 +267,7 @@ export async function PutPortfolioUpdateApi(params: PortfolioUpdateRequest) {
     `/api/portfolio/update/${portfolioId}`,
     { method: "PUT", body, errorHandleMethod: "reject" },
   );
-  return { ...res, body: { ...res.body, data: toListItem(res.body.data, 1) } };
+  return { ...res, body: { ...res.body, data: toListItem(res.body.data) } };
 }
 
 /** 매수/매도 거래 수정 (pt_type 불변) */
@@ -255,7 +279,7 @@ export async function PutPortfolioTxUpdateApi(
     `/api/portfolio/transactions/${txId}`,
     { method: "PUT", body, errorHandleMethod: "reject" },
   );
-  return { ...res, body: { ...res.body, data: toTx(res.body.data, 1) } };
+  return { ...res, body: { ...res.body, data: toTx(res.body.data) } };
 }
 
 /** 매수/매도 거래 soft delete — 해당 종목 quantity/avg_price 자동 재계산 */

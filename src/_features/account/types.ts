@@ -1,5 +1,13 @@
-// 백엔드 enum: LIVING / SAVINGS / INVESTMENT / OTHER
-export type AccountType = "LIVING" | "SAVINGS" | "INVESTMENT" | "OTHER";
+// 백엔드 enum: LIVING / SAVINGS / INVESTMENT / REAL_ESTATE / PENSION / COMMODITY / OTHER
+// REAL_ESTATE / PENSION / COMMODITY 는 수동자산(부동산·연금·금) roll-up 전용 계좌 타입
+export type AccountType =
+  | "LIVING"
+  | "SAVINGS"
+  | "INVESTMENT"
+  | "REAL_ESTATE"
+  | "PENSION"
+  | "COMMODITY"
+  | "OTHER";
 
 export interface AccountSearchRequestType {
   searchTerm?: string;
@@ -24,7 +32,6 @@ export interface AccountUpdateRequest extends AccountBaseRequestType {
 }
 
 export interface AccountListItemType {
-  rowNo: number;
   accountId: string;
   householdId: string;
   name: string;
@@ -60,4 +67,20 @@ export interface AccountDetailItemType {
   portfolioValuation: number | null;
   portfolioProfitLoss: number | null;
   portfolioProfitLossRate: number | null;
+}
+
+export interface AccountMonthlyFlowType {
+  monthDate: string; // YYYY-MM-DD (그달 1일)
+  income: number;
+  expense: number;
+  fixedExpense: number;
+  balance: number; // 그달 잔액 (이번달은 현재 잔액)
+}
+
+export interface AccountReportType {
+  accountId: string;
+  accountName: string;
+  accountType: AccountType;
+  balance: number;
+  monthlyFlows: AccountMonthlyFlowType[];
 }

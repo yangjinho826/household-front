@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 
 import AccountTable from "_features/account/components/table";
-import { ACCOUNT_TYPE_ORDER } from "_features/account/constants";
+import { ACCOUNT_TYPE_ORDER, isAccountType } from "_features/account/constants";
 import { useAccountSearch } from "_features/account/hooks/use-sub/use-search";
 import type { AccountListItemType, AccountType } from "_features/account/types";
 import FilterChip from "_features/common/components/filter-chip";
@@ -17,6 +17,7 @@ import { InfiniteSentinel } from "_libraries/query/infinite-sentinel";
 export default function AccountSection() {
   const t = useTranslations("account");
   const tType = useTranslations("enum.account-type");
+  const tGeneral = useTranslations("general");
   const router = useRouter();
   const routeParams = useParams<{ locale: string }>();
   const {
@@ -29,7 +30,8 @@ export default function AccountSection() {
   } = useAccountSearch();
 
   const { data: typeData } = useEnumOptions("account-type");
-  const types = typeData.body.data as AccountType[];
+  // 백엔드 enum 응답(string[])에서 알려진 AccountType 만 통과 — as 단언 대신 런타임 검증
+  const types = (typeData.body.data ?? []).filter(isAccountType);
 
   // "전체" 칩이면 타입별 그룹화. 특정 타입 칩이면 그대로 단일 리스트.
   const groupedByType = useMemo(() => {
@@ -62,7 +64,7 @@ export default function AccountSection() {
 
       <Group gap="xs">
         <FilterChip
-          label="전체"
+          label={tGeneral("all")}
           active={accountType === undefined}
           onClick={() => setAccountType(undefined)}
         />

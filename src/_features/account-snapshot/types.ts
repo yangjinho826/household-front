@@ -8,12 +8,18 @@ export interface AccountSnapshotBalanceItem {
   accountId: string;
   accountName: string;
   balance: number;
+  monthlyIncome: number;
+  monthlyExpense: number;
+  monthlyFixedExpense: number;
 }
 
 // 한 달 스냅샷 묶음 — 백엔드가 미리 합산
 export interface AccountSnapshotMonthItem {
   snapshotDate: string; // YYYY-MM-DD (그달 1일)
   totalBalance: number;
+  totalIncome: number;
+  totalExpense: number;
+  totalFixedExpense: number;
   accounts: AccountSnapshotBalanceItem[];
 }
 

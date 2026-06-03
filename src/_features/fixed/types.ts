@@ -21,7 +21,6 @@ export interface FixedUpdateRequest extends FixedBaseRequestType {
 }
 
 export interface FixedListItemType {
-  rowNo: number;
   fixedId: string;
   householdId: string;
   name: string;

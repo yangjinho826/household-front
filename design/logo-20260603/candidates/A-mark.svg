@@ -1,0 +1,22 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgA" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8AA17F"/>
+      <stop offset="1" stop-color="#566B4E"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 배경: 둥근 사각 (앱 아이콘 형태) -->
+  <rect x="0" y="0" width="512" height="512" rx="116" fill="url(#bgA)"/>
+
+  <!-- ㅁ = 모으는 상자. 두꺼운 크림 테두리 -->
+  <rect x="138" y="138" width="236" height="236" rx="40"
+        fill="none" stroke="#FAF6EF" stroke-width="26"/>
+
+  <!-- 상자 안 코인 스택 (자산이 쌓임) -->
+  <g>
+    <ellipse cx="256" cy="318" rx="78" ry="20" fill="#D4A95F"/>
+    <ellipse cx="256" cy="288" rx="78" ry="20" fill="#E2BC77"/>
+    <ellipse cx="256" cy="258" rx="78" ry="20" fill="#D4A95F"/>
+  </g>
+</svg>

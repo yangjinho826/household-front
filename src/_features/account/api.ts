@@ -9,6 +9,7 @@ import type {
   AccountCreateRequest,
   AccountDetailItemType,
   AccountListItemType,
+  AccountReportType,
   AccountSearchRequestType,
   AccountUpdateRequest,
 } from "./types";
@@ -25,12 +26,9 @@ interface BackendCursorPage<T> {
   totalCount: number | null;
 }
 
-function toListItem(
-  b: BackendAccountResponse,
-  rowNo: number,
-): AccountListItemType {
+function toListItem(b: BackendAccountResponse): AccountListItemType {
   const { id, ...rest } = b;
-  return { ...rest, accountId: id, rowNo };
+  return { ...rest, accountId: id };
 }
 
 /** 통장 목록 — cursor 무한 스크롤. cursor=null 이면 첫 페이지. */
@@ -51,7 +49,7 @@ export async function GetAccountSearchApi(
   >(`/api/account/list${queryString ? `?${queryString}` : ""}`, {
     method: "GET",
   });
-  const items = res.body.data.items.map((b, i) => toListItem(b, i + 1));
+  const items = res.body.data.items.map((b) => toListItem(b));
   const wrapped: ApiCursorPage<AccountListItemType> = {
     code: res.body.code,
     message: res.body.message,
@@ -74,6 +72,14 @@ export async function GetAccountDetailApi(accountId: string) {
   const { id, ...rest } = res.body.data;
   const mapped: AccountDetailItemType = { ...rest, accountId: id };
   return { ...res, body: { ...res.body, data: mapped } };
+}
+
+// 백엔드가 accountId 그대로(camelCase) 내려줌 — 별도 매핑 불필요
+export async function GetAccountReportApi(accountId: string) {
+  return apiFetch<ApiResponse<AccountReportType>>(
+    `/api/account/report/${accountId}`,
+    { method: "GET" },
+  );
 }
 
 export async function PostAccountCreateApi(

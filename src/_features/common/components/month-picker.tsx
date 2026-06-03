@@ -2,6 +2,7 @@
 
 import { ActionIcon, Group, Text } from "@mantine/core";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
+import { useTranslations } from "next-intl";
 
 import { currentYearMonthKst } from "_utilities/datetime";
 
@@ -17,6 +18,7 @@ interface MonthPickerProps {
  * value/onChange 는 "YYYY-MM" 문자열로 외부 동기화 (URL/state 둘 다 호환).
  */
 export default function MonthPicker({ value, onChange }: MonthPickerProps) {
+  const t = useTranslations("general");
   const [yearStr, monthStr] = value.split("-");
   const year = Number(yearStr);
   const month = Number(monthStr);
@@ -33,9 +35,7 @@ export default function MonthPicker({ value, onChange }: MonthPickerProps) {
       <ActionIcon variant="subtle" onClick={() => shift(-1)} aria-label="prev month">
         <IconChevronLeft size={16} />
       </ActionIcon>
-      <Text fw={700}>
-        {year}년 {month}월
-      </Text>
+      <Text fw={700}>{t("year_month", { year: String(year), month })}</Text>
       <ActionIcon variant="subtle" onClick={() => shift(1)} aria-label="next month">
         <IconChevronRight size={16} />
       </ActionIcon>

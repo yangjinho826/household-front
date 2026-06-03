@@ -3,4 +3,5 @@ export type EnumName =
   | "category-kind"
   | "tx-type"
   | "portfolio-tx-type"
-  | "market";
+  | "market"
+  | "asset-class";

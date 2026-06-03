@@ -1,11 +1,11 @@
 "use client";
 
-import { Center, Loader } from "@mantine/core";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter, useParams, usePathname } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
 
 import { queryKeys } from "_constants/queries";
+import { PageLoader } from "_features/common/components/page-loader";
 import { useHouseholdStore } from "_features/household/store";
 
 /**
@@ -55,11 +55,7 @@ export function OnboardingGuard({ children }: { children: ReactNode }) {
   const shouldRedirect =
     (count === 0 && !isOnboarding) || (count > 0 && isOnboarding);
   if (shouldRedirect) {
-    return (
-      <Center py="xl">
-        <Loader />
-      </Center>
-    );
+    return <PageLoader />;
   }
 
   return <>{children}</>;

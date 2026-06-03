@@ -22,7 +22,8 @@ function showApiErrorToast(error: unknown) {
     error.errorMessage ||
     em.unknown ||
     em.default ||
-    "오류가 발생했습니다.";
+    em.fallback_generic ||
+    "";
 
   notifications.show({
     message,

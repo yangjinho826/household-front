@@ -24,6 +24,39 @@ export const usePortfolioItem = (itemId: string) => {
   return useSuspenseQuery(queryKeys.portfolio.item(itemId));
 };
 
+/** 종목 매매손익 — 기간 내 매도 건별 실현손익 + 요약 */
+export const useItemRealizedPnl = (
+  itemId: string,
+  fromDate?: string,
+  toDate?: string,
+) => {
+  return useSuspenseQuery(
+    queryKeys.portfolio.itemRealizedPnl({ itemId, fromDate, toDate }),
+  );
+};
+
+/** 계좌 누적 매매손익 — 계좌 전체 매도 건별 실현손익 + 요약 (전량매도된 종목 포함) */
+export const useAccountRealizedPnl = (
+  accountId: string,
+  fromDate?: string,
+  toDate?: string,
+) => {
+  return useSuspenseQuery(
+    queryKeys.portfolio.accountRealizedPnl({ accountId, fromDate, toDate }),
+  );
+};
+
+/** 종목 평가액 월별 추이 — 기본 최근 12개월 */
+export const usePortfolioValueHistoryByItem = (
+  portfolioItemId: string,
+  fromDate?: string,
+  toDate?: string,
+) => {
+  return useSuspenseQuery(
+    queryKeys.portfolio.valueHistoryByItem({ portfolioItemId, fromDate, toDate }),
+  );
+};
+
 /** 종목 단건 거래 내역 — 무한 스크롤. transaction 패턴과 동일. */
 export const usePortfolioItemTransactionsInfinite = (
   itemId: string,

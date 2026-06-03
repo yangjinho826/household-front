@@ -18,7 +18,7 @@ interface SubHeaderProps {
  * SubHeader — 풀페이지 sub-route 의 표준 상단.
  *
  * 인라인 `<Group> + <ActionIcon back> + <Title>` 패턴이 9곳에 중복돼 추출.
- * Title `order={4}` (20px, fw=800) 통일 — 토스 페이지 타이틀 표준.
+ * Title `order={4}` (20px, fw=800) 통일 — 페이지 타이틀 표준.
  *
  * 사용:
  *   <SubHeader title="거래 추가" />

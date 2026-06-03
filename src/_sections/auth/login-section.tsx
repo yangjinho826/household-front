@@ -1,23 +1,20 @@
 "use client";
 
 import {
-  // Anchor,  // 회원가입 링크 차단 시 미사용 — 재오픈 시 주석 풀기
   Button,
-  // Group,   // 회원가입 링크 차단 시 미사용
   PasswordInput,
   Stack,
   Text,
   TextInput,
-  Title,
 } from "@mantine/core";
 import { isEmail, isNotEmpty, useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
-// import Link from "next/link";  // 회원가입 링크 차단 시 미사용
 import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import BrandLogo from "_features/auth/components/brand-logo";
 import { useAuthMutations } from "_features/auth/queries/use-mutations";
+import { TOKEN } from "_styles/design-tokens";
 
 export default function LoginSection() {
   const t = useTranslations("auth");
@@ -58,70 +55,63 @@ export default function LoginSection() {
   });
 
   return (
-    <form onSubmit={onSubmit}>
-      <Stack gap="xl">
-        <Stack gap="md">
-          <BrandLogo />
-          <Stack gap={4}>
-            <Title
-              order={2}
-              fw={800}
-              style={{
-                whiteSpace: "pre-line",
-                lineHeight: 1.3,
-                fontSize: 32,
-              }}
-            >
-              {t("welcome_title")}
-            </Title>
-            <Text size="sm" c="dimmed">
-              {t("welcome_subtitle")}
-            </Text>
-          </Stack>
+    <form
+      onSubmit={onSubmit}
+      style={{ display: "flex", flexDirection: "column", flex: 1 }}
+    >
+      {/* hero — 상단 그라데이션 위 브랜드 블록(좌정렬). 세리프 워드마크 1회만(DESIGN.md). */}
+      <Stack gap={18} align="flex-start" style={{ padding: "64px 28px 32px" }}>
+        <BrandLogo size={64} />
+        <Stack gap={10}>
+          <Text
+            component="h1"
+            className="brand-wordmark"
+            style={{ fontSize: 40, fontWeight: 700, lineHeight: 1.1 }}
+          >
+            {t("brand_name")}
+          </Text>
+          <Text size="md" c="dimmed" style={{ lineHeight: 1.5, wordBreak: "keep-all" }}>
+            {t("brand_tagline")}
+          </Text>
         </Stack>
+      </Stack>
 
+      {/* 카드 시트 — 하단에 붙는 폼 카드(상단 라운드 + 위로 떨어지는 그림자). */}
+      <div
+        style={{
+          marginTop: "auto",
+          background: TOKEN.card,
+          borderRadius: "28px 28px 0 0",
+          boxShadow: "0 -8px 30px rgba(120, 100, 70, 0.1)",
+          padding: "30px 26px 40px",
+        }}
+      >
         <Stack gap="sm">
           <TextInput
             {...form.getInputProps("email")}
             label={t("email")}
             placeholder={t("email_placeholder")}
+            size="md"
           />
           <PasswordInput
             {...form.getInputProps("password")}
             label={t("password")}
             placeholder={t("password_placeholder")}
+            size="md"
           />
         </Stack>
-
-        <Stack gap="sm">
-          <Button
-            type="submit"
-            fullWidth
-            size="lg"
-            radius="md"
-            fw={700}
-            loading={loginMutation.isPending}
-          >
-            {t("login_submit")}
-          </Button>
-          {/*
-            회원가입 진입점 — 베타 단계에서 차단. 재오픈 시 주석만 풀면 됨.
-            <Group justify="center" gap={6}>
-              <Text size="xs" c="dimmed">
-                {t("register_prompt")}
-              </Text>
-              <Anchor
-                component={Link}
-                href={`/${params.locale}/register`}
-                size="xs"
-                fw={700}
-              >
-                {t("register_link")}
-              </Anchor>
-            </Group>
-          */}
-        </Stack>
-      </Stack>
+        <Button
+          type="submit"
+          fullWidth
+          size="lg"
+          radius="xl"
+          fw={700}
+          mt="lg"
+          loading={loginMutation.isPending}
+        >
+          {t("login_submit")}
+        </Button>
+      </div>
     </form>
   );
 }

@@ -1,28 +1,20 @@
 "use client";
 
-import {
-  ActionIcon,
-  Card,
-  Group,
-  SegmentedControl,
-  Stack,
-  Title,
-} from "@mantine/core";
-import { IconCalendar, IconList, IconPlus } from "@tabler/icons-react";
+import { ActionIcon, Group, Stack, Title } from "@mantine/core";
+import { IconPlus } from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
 
-import FilterChip from "_features/common/components/filter-chip";
 import MonthPicker from "_features/common/components/month-picker";
-import { useEnumOptions } from "_features/enum/queries/use-query";
+import AccountLedgerView from "_features/transaction/components/account-ledger-view";
 import TransactionCalendarView from "_features/transaction/components/calendar-view";
-import TransactionListView from "_features/transaction/components/list-view";
 import { useTransactionSearch } from "_features/transaction/hooks/use-sub/use-search";
 import { useQuickAddStore } from "_features/transaction/store";
-import type { TxType } from "_features/transaction/types";
+
+import MonthSummary from "./components/month-summary";
+import TransactionToolbar from "./components/transaction-toolbar";
 
 export default function TransactionsSection() {
   const t = useTranslations("transaction");
-  const tTxType = useTranslations("enum.tx-type");
   const openQuickAdd = useQuickAddStore((s) => s.open);
 
   const {
@@ -31,90 +23,54 @@ export default function TransactionsSection() {
     month,
     year,
     monthNum,
+    accountId,
     setView,
     setFilter,
     setMonth,
+    setAccountId,
   } = useTransactionSearch();
-
-  const { data: txTypeData } = useEnumOptions("tx-type");
-  const txTypes = txTypeData.body.data as TxType[];
 
   return (
     <Stack gap="md">
-      <Group justify="space-between" align="center">
+      <Group justify="space-between" align="center" wrap="nowrap">
         <Title order={3}>{t("list_title")}</Title>
-        <ActionIcon
-          size="lg"
-          radius="xl"
-          onClick={openQuickAdd}
-          aria-label={t("add")}
-        >
-          <IconPlus size={18} />
-        </ActionIcon>
+        <Group gap="xs" wrap="nowrap">
+          <MonthPicker value={month} onChange={setMonth} />
+          <ActionIcon
+            size="lg"
+            radius="xl"
+            onClick={openQuickAdd}
+            aria-label={t("add")}
+          >
+            <IconPlus size={18} />
+          </ActionIcon>
+        </Group>
       </Group>
 
-      <Card radius="lg" p="sm">
-        <MonthPicker value={month} onChange={setMonth} />
-      </Card>
+      {/* 이번 달 요약 — 리스트/캘린더 공통 상단 */}
+      <MonthSummary year={year} month={monthNum} />
 
-      <SegmentedControl
-        value={view}
-        onChange={(v) => setView(v as "list" | "calendar")}
-        data={[
-          {
-            value: "list",
-            label: (
-              <Group gap={6} justify="center">
-                <IconList size={14} />
-                <span>{t("view_list")}</span>
-              </Group>
-            ),
-          },
-          {
-            value: "calendar",
-            label: (
-              <Group gap={6} justify="center">
-                <IconCalendar size={14} />
-                <span>{t("view_calendar")}</span>
-              </Group>
-            ),
-          },
-        ]}
-        fullWidth
+      {/* 거래 툴바 — 뷰 전환 + 필터 한 덩어리 */}
+      <TransactionToolbar
+        view={view}
+        filter={filter}
+        accountId={accountId}
+        onViewChange={setView}
+        onFilterChange={setFilter}
+        onAccountChange={setAccountId}
       />
 
-      {view === "list" && (
-        <Group gap="xs">
-          <FilterChip
-            label={t("filter_all")}
-            active={filter === "all"}
-            onClick={() => setFilter("all")}
-          />
-          {txTypes.map((tp) => (
-            <FilterChip
-              key={tp}
-              label={tTxType(tp)}
-              active={filter === tp}
-              onClick={() => setFilter(tp)}
-            />
-          ))}
-        </Group>
-      )}
-
       {view === "list" ? (
-        <TransactionListView
-          searchParams={{
-            year,
-            month: monthNum,
-            ...(filter !== "all" && { txType: filter }),
-          }}
-        />
+        accountId ? (
+          <AccountLedgerView
+            accountId={accountId}
+            year={year}
+            month={monthNum}
+            filter={filter}
+          />
+        ) : null // 첫 거래계좌 자동 선택 직전 — toolbar useEffect 가 즉시 채움
       ) : (
-        <TransactionCalendarView
-          key={month}
-          year={year}
-          month={monthNum}
-        />
+        <TransactionCalendarView key={month} year={year} month={monthNum} />
       )}
     </Stack>
   );

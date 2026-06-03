@@ -1,0 +1,15 @@
+<svg width="440" height="140" viewBox="0 0 440 140" xmlns="http://www.w3.org/2000/svg">
+  <!-- 밝은 배경용 워드마크 (마크 + '모음' 세리프) -->
+  <g transform="translate(10,18)">
+    <!-- 미니 마크 -->
+    <g>
+      <circle cx="38" cy="42" r="30" fill="#7C9473" opacity="0.88"/>
+      <circle cx="76" cy="42" r="30" fill="#A6B89A" opacity="0.88"/>
+      <circle cx="57" cy="74" r="30" fill="#D4A95F" opacity="0.88"/>
+      <circle cx="57" cy="53" r="13.5" fill="#566B4E"/>
+    </g>
+  </g>
+  <!-- 브랜드명 — Noto Serif KR (base-layout에서 로드) -->
+  <text x="150" y="70" font-family="'Noto Serif KR',serif" font-size="74" font-weight="700"
+        fill="#566B4E" dominant-baseline="central">모음</text>
+</svg>

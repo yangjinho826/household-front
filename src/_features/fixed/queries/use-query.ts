@@ -1,19 +1,9 @@
-import {
-  useInfiniteQuery,
-  useQueryClient,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 
 import { queryKeys } from "_constants/queries";
 
 import { GetFixedSearchApi } from "../api";
 import type { FixedSearchRequestType } from "../types";
-
-export const useFixedList = (
-  params: FixedSearchRequestType & { limit?: number },
-) => {
-  return useSuspenseQuery(queryKeys.fixed.list(params));
-};
 
 export const useFixedInfiniteList = (
   params: FixedSearchRequestType,

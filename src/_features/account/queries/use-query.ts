@@ -9,10 +9,8 @@ import { queryKeys } from "_constants/queries";
 import { GetAccountSearchApi } from "../api";
 import type { AccountSearchRequestType } from "../types";
 
-export const useAccountList = (
-  params: AccountSearchRequestType & { limit?: number },
-) => {
-  return useSuspenseQuery(queryKeys.account.list(params));
+export const useAccountReport = (accountId: string) => {
+  return useSuspenseQuery(queryKeys.account.report(accountId));
 };
 
 /** 통장 무한 스크롤 — 관리 페이지용 */

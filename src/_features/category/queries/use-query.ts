@@ -1,19 +1,9 @@
-import {
-  useInfiniteQuery,
-  useQueryClient,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 
 import { queryKeys } from "_constants/queries";
 
 import { GetCategorySearchApi } from "../api";
 import type { CategorySearchRequestType } from "../types";
-
-export const useCategoryList = (
-  params: CategorySearchRequestType & { limit?: number },
-) => {
-  return useSuspenseQuery(queryKeys.category.list(params));
-};
 
 export const useCategoryInfiniteList = (
   params: CategorySearchRequestType,

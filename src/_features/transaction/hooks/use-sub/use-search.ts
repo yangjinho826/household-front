@@ -26,6 +26,8 @@ export function useTransactionSearch() {
       "all",
     ),
     month: parseAsString.withDefault(defaultYearMonth()),
+    // 계좌 필터 — 빈 문자열 = 전체 계좌
+    account: parseAsString.withDefault(""),
   });
 
   const [yearStr, monthStr] = params.month.split("-");
@@ -36,10 +38,13 @@ export function useTransactionSearch() {
     view: params.view,
     filter: params.filter,
     month: params.month,
+    accountId: params.account || undefined,
     year,
     monthNum: month,
     setView: (next: TransactionViewMode) => setParams({ view: next }),
     setFilter: (next: TransactionFilterMode) => setParams({ filter: next }),
     setMonth: (next: string) => setParams({ month: next }),
+    setAccountId: (next: string | undefined) =>
+      setParams({ account: next ?? "" }),
   };
 }

@@ -1,19 +1,13 @@
-import { Center, Loader } from "@mantine/core";
 import { Suspense } from "react";
 
+import { PageLoader } from "_features/common/components/page-loader";
 import HouseholdSection from "_sections/household/household-section";
 
 export const dynamic = "force-dynamic";
 
 export default function HouseholdPage() {
   return (
-    <Suspense
-      fallback={
-        <Center py="xl">
-          <Loader />
-        </Center>
-      }
-    >
+    <Suspense fallback={<PageLoader />}>
       <HouseholdSection />
     </Suspense>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Box,
   Button,
   Card,
   Group,
@@ -13,6 +14,7 @@ import {
 import { useDisclosure } from "@mantine/hooks";
 import { IconChevronRight, IconLogout, IconUsers } from "@tabler/icons-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { useRouter, useParams } from "next/navigation";
 
 import { useAuthContext } from "_features/auth/context";
@@ -26,6 +28,8 @@ export default function SettingsSection() {
   const { user, actions, state } = useAuthContext();
   const [switcherOpened, switcher] = useDisclosure(false);
   const currentId = useHouseholdStore((s) => s.currentHouseholdId);
+  const t = useTranslations("settings");
+  const th = useTranslations("household");
 
   // 의식적 예외 — "한 페이지=한 endpoint" 원칙의 예외 1건.
   // household.list 는 가계부 전환 (HouseholdSwitcher) 용 전체 목록이라
@@ -55,30 +59,37 @@ export default function SettingsSection() {
 
   return (
     <Stack gap="md">
-      <Title order={3}>내정보</Title>
+      <Title order={3}>{t("title")}</Title>
 
-      {/* 사용자 카드 */}
+      {/* 프로필 Hero — 통계 흡수 */}
       {user && (
-        <Card radius="lg" p="md">
-          <Group gap="md">
-            <div
+        <Card
+          p="xl"
+          shadow="md"
+          style={{
+            background:
+              "linear-gradient(160deg, var(--mantine-color-sage-0) 0%, var(--mantine-color-gray-0) 62%)",
+          }}
+        >
+          <Group gap="md" wrap="nowrap">
+            <Box
               style={{
-                width: 56,
-                height: 56,
-                borderRadius: 28,
-                background: "var(--mantine-color-info-0)",
+                width: 60,
+                height: 60,
+                borderRadius: "50%",
+                background: "var(--mantine-color-sage-6)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 flexShrink: 0,
               }}
             >
-              <Text size="xl" fw={800} c="info.5">
+              <Text size="xl" fw={800} c="white">
                 {user.name?.[0] ?? "U"}
               </Text>
-            </div>
+            </Box>
             <Stack gap={2} style={{ flex: 1, minWidth: 0 }}>
-              <Text fw={700} truncate>
+              <Text size="lg" fw={800} truncate>
                 {user.name}
               </Text>
               <Text size="xs" c="dimmed" truncate>
@@ -86,55 +97,74 @@ export default function SettingsSection() {
               </Text>
             </Stack>
           </Group>
+
+          <SimpleGrid
+            cols={3}
+            mt="lg"
+            pt="lg"
+            style={{ borderTop: "1px solid var(--mantine-color-gray-2)" }}
+          >
+            <Stat value={counts.accountCount} label={t("stat_accounts")} />
+            <Stat
+              value={counts.transactionCount}
+              label={t("stat_transactions")}
+            />
+            <Stat value={counts.portfolioCount} label={t("stat_portfolios")} />
+          </SimpleGrid>
         </Card>
       )}
 
       {/* 현재 가계부 */}
       <Stack gap={4}>
         <Text size="xs" fw={700} c="dimmed" px={8}>
-          현재 가계부
+          {t("current_household")}
         </Text>
-        <Card radius="lg" p="xs">
+        <Card p="xs">
           <Stack gap={0}>
             <UnstyledButton
               onClick={switcher.open}
               style={{ padding: 12, borderRadius: 12 }}
             >
               <Group gap={12}>
-                <div
+                <Box
                   style={{
                     width: 40,
                     height: 40,
                     borderRadius: 12,
-                    background: "var(--mantine-color-info-0)",
+                    background: "var(--mantine-color-sage-0)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     flexShrink: 0,
                   }}
                 >
-                  <Text size="sm" fw={800} c="info.5">
+                  <Text size="sm" fw={800} c="sage.6">
                     {currentHousehold?.name?.[0] ?? "H"}
                   </Text>
-                </div>
+                </Box>
                 <Stack gap={2} style={{ flex: 1, minWidth: 0 }}>
                   <Text size="sm" fw={700} truncate>
                     {currentHousehold?.name ?? "—"}
                   </Text>
                   <Text size="xs" c="dimmed">
-                    {currentHousehold?.role === "OWNER" ? "소유자" : "멤버"} ·
-                    전체 {households.length}개
+                    {currentHousehold?.role === "OWNER"
+                      ? th("member.role_owner")
+                      : th("member.role_member")}{" "}
+                    · {t("total_count", { count: households.length })}
                   </Text>
                 </Stack>
-                <Text size="xs" fw={700} c="info.5">
-                  전환
+                <Text size="xs" fw={700} c="sage.6">
+                  {t("switch")}
                 </Text>
               </Group>
             </UnstyledButton>
-            <SettingsRow label="가계부 관리" onClick={() => navTo("/household")} />
+            <SettingsRow
+              label={t("household_manage")}
+              onClick={() => navTo("/household")}
+            />
             {currentHousehold && (
               <SettingsRow
-                label="멤버 관리"
+                label={t("member_manage")}
                 icon={IconUsers}
                 onClick={() =>
                   navTo(`/household/${currentHousehold.householdId}/members`)
@@ -150,54 +180,26 @@ export default function SettingsSection() {
         onClose={switcher.close}
       />
 
-      {/* 통계 */}
-      <SimpleGrid cols={3} spacing="sm">
-        <Card radius="lg" p="sm" ta="center">
-          <Text size="lg" fw={800}>
-            {counts.accountCount}
-          </Text>
-          <Text size="10px" fw={500} c="dimmed">
-            통장
-          </Text>
-        </Card>
-        <Card radius="lg" p="sm" ta="center">
-          <Text size="lg" fw={800}>
-            {counts.transactionCount}
-          </Text>
-          <Text size="10px" fw={500} c="dimmed">
-            거래
-          </Text>
-        </Card>
-        <Card radius="lg" p="sm" ta="center">
-          <Text size="lg" fw={800}>
-            {counts.portfolioCount}
-          </Text>
-          <Text size="10px" fw={500} c="dimmed">
-            종목
-          </Text>
-        </Card>
-      </SimpleGrid>
-
-      {/* 데이터 관리 */}
+      {/* 관리 */}
       <Stack gap={4}>
         <Text size="xs" fw={700} c="dimmed" px={8}>
-          관리
+          {t("manage_section")}
         </Text>
-        <Card radius="lg" p="xs">
+        <Card p="xs">
           <Stack gap={0}>
             <SettingsRow
-              label="카테고리 관리"
-              value={`${counts.categoryCount}개`}
+              label={t("category_manage")}
+              value={t("count_suffix", { count: counts.categoryCount })}
               onClick={() => navTo("/category")}
             />
             <SettingsRow
-              label="고정지출 관리"
-              value={`${counts.fixedCount}개`}
+              label={t("fixed_manage")}
+              value={t("count_suffix", { count: counts.fixedCount })}
               onClick={() => navTo("/fixed")}
             />
             <SettingsRow
-              label="통장 관리"
-              value={`${counts.accountCount}개`}
+              label={t("account_manage")}
+              value={t("count_suffix", { count: counts.accountCount })}
               onClick={() => navTo("/account")}
             />
           </Stack>
@@ -214,8 +216,21 @@ export default function SettingsSection() {
         disabled={state.isLoggingOut}
         onClick={onLogout}
       >
-        로그아웃
+        {t("logout")}
       </Button>
+    </Stack>
+  );
+}
+
+function Stat({ value, label }: { value: number; label: string }) {
+  return (
+    <Stack gap={2} align="center">
+      <Text size="lg" fw={800}>
+        {value}
+      </Text>
+      <Text size="xs" c="dimmed">
+        {label}
+      </Text>
     </Stack>
   );
 }
@@ -235,7 +250,7 @@ function SettingsRow({
     <UnstyledButton onClick={onClick} style={{ padding: 12, borderRadius: 12 }}>
       <Group justify="space-between">
         <Group gap={8}>
-          {Icon && <Icon size={16} color="#4E5968" />}
+          {Icon && <Icon size={16} color="var(--mantine-color-gray-6)" />}
           <Text size="sm" fw={500}>
             {label}
           </Text>
@@ -246,7 +261,7 @@ function SettingsRow({
               {value}
             </Text>
           )}
-          <IconChevronRight size={14} color="#8B95A1" />
+          <IconChevronRight size={14} color="var(--mantine-color-gray-5)" />
         </Group>
       </Group>
     </UnstyledButton>

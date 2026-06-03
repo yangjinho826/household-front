@@ -10,12 +10,12 @@ import type { CategoryListItemType } from "_features/category/types";
 import type { FixedListItemType } from "_features/fixed/types";
 
 import type {
+  AccountLedgerItemType,
   TransactionCalendarFullType,
   TransactionCreateRequest,
   TransactionDetailItemType,
   TransactionFormOptionsType,
   TransactionListItemType,
-  TransactionSearchRequestType,
   TransactionUpdateRequest,
 } from "./types";
 
@@ -24,19 +24,9 @@ type BackendTransactionResponse = Omit<
   "transactionId"
 > & { id: string };
 
-interface BackendTransactionListPage {
-  items: BackendTransactionResponse[];
-  nextCursor: string | null;
-  hasNext: boolean;
-  totalCount: number | null;
-}
-
-function toListItem(
-  b: BackendTransactionResponse,
-  rowNo: number,
-): TransactionListItemType {
+function toListItem(b: BackendTransactionResponse): TransactionListItemType {
   const { id, ...rest } = b;
-  return { ...rest, transactionId: id, rowNo };
+  return { ...rest, transactionId: id };
 }
 
 function toDetail(b: BackendTransactionResponse): TransactionDetailItemType {
@@ -44,32 +34,45 @@ function toDetail(b: BackendTransactionResponse): TransactionDetailItemType {
   return { ...rest, transactionId: id };
 }
 
-export async function GetTransactionSearchApi(
-  params: TransactionSearchRequestType & {
+type BackendLedgerItem = BackendTransactionResponse & {
+  signedAmount: number;
+  balanceAfter: number;
+};
+
+interface BackendLedgerPage {
+  items: BackendLedgerItem[];
+  nextCursor: string | null;
+  hasNext: boolean;
+  totalCount: number | null;
+}
+
+function toLedgerItem(b: BackendLedgerItem): AccountLedgerItemType {
+  const { id, ...rest } = b;
+  return { ...rest, transactionId: id };
+}
+
+export async function GetAccountLedgerApi(
+  accountId: string,
+  params: {
     cursor?: string | null;
     limit?: number;
+    year?: number;
+    month?: number;
   },
 ) {
   const queryParams: Record<string, unknown> = {};
   if (params.cursor) queryParams.cursor = params.cursor;
   if (params.limit) queryParams.limit = params.limit;
-  if (params.txType) queryParams.txType = params.txType;
-  if (params.accountId) queryParams.accountId = params.accountId;
-  if (params.categoryId) queryParams.categoryId = params.categoryId;
   if (params.year !== undefined) queryParams.year = params.year;
   if (params.month !== undefined) queryParams.month = params.month;
-  if (params.fromDate) queryParams.fromDate = params.fromDate;
-  if (params.toDate) queryParams.toDate = params.toDate;
 
   const queryString = objectToParams(queryParams).toString();
-  const res = await apiFetch<ApiResponse<BackendTransactionListPage>>(
-    `/api/transaction/list${queryString ? `?${queryString}` : ""}`,
+  const res = await apiFetch<ApiResponse<BackendLedgerPage>>(
+    `/api/transaction/account/${accountId}/ledger${queryString ? `?${queryString}` : ""}`,
     { method: "GET" },
   );
-  const items = (res.body.data?.items ?? []).map((b, idx) =>
-    toListItem(b, idx + 1),
-  );
-  const wrapped: ApiCursorPage<TransactionListItemType> = {
+  const items = (res.body.data?.items ?? []).map((b) => toLedgerItem(b));
+  const wrapped: ApiCursorPage<AccountLedgerItemType> = {
     code: res.body.code,
     message: res.body.message,
     status: res.body.status,
@@ -124,13 +127,13 @@ export function DeleteTransactionDeleteApi(transactionId: string) {
   );
 }
 
-type BackendAccount = Omit<AccountListItemType, "accountId" | "rowNo"> & {
+type BackendAccount = Omit<AccountListItemType, "accountId"> & {
   id: string;
 };
-type BackendCategory = Omit<CategoryListItemType, "categoryId" | "rowNo"> & {
+type BackendCategory = Omit<CategoryListItemType, "categoryId"> & {
   id: string;
 };
-type BackendFixed = Omit<FixedListItemType, "fixedId" | "rowNo"> & {
+type BackendFixed = Omit<FixedListItemType, "fixedId"> & {
   id: string;
 };
 
@@ -154,9 +157,7 @@ export async function GetTransactionCalendarFullApi(params: {
     `/api/transaction/calendar/${params.year}/${params.month}/full`,
     { method: "GET" },
   );
-  const transactions = res.body.data.transactions.map((b, i) =>
-    toListItem(b, i + 1),
-  );
+  const transactions = res.body.data.transactions.map((b) => toListItem(b));
   const mapped: TransactionCalendarFullType = {
     year: res.body.data.year,
     month: res.body.data.month,
@@ -177,13 +178,13 @@ export async function GetTransactionFormOptionsApi() {
     { method: "GET" },
   );
   const accounts: AccountListItemType[] = res.body.data.accounts.map(
-    ({ id, ...rest }, i) => ({ ...rest, accountId: id, rowNo: i + 1 }),
+    ({ id, ...rest }) => ({ ...rest, accountId: id }),
   );
   const categories: CategoryListItemType[] = res.body.data.categories.map(
-    ({ id, ...rest }, i) => ({ ...rest, categoryId: id, rowNo: i + 1 }),
+    ({ id, ...rest }) => ({ ...rest, categoryId: id }),
   );
   const fixedExpenses: FixedListItemType[] = res.body.data.fixedExpenses.map(
-    ({ id, ...rest }, i) => ({ ...rest, fixedId: id, rowNo: i + 1 }),
+    ({ id, ...rest }) => ({ ...rest, fixedId: id }),
   );
   const mapped: TransactionFormOptionsType = {
     accounts,

@@ -1,10 +1,11 @@
 "use client";
 
-import { Center, Drawer, Group, Loader, Stack, Text } from "@mantine/core";
+import { Drawer, Group, Stack, Text } from "@mantine/core";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { Suspense } from "react";
 
+import { PageLoader } from "_features/common/components/page-loader";
 import TransactionForm from "_features/transaction/components/form";
 import { useQuickAddStore } from "_features/transaction/store";
 
@@ -47,7 +48,7 @@ export default function QuickAddSheet() {
         },
       }}
     >
-      {/* 핸들바 — 토스 시그니처 (household-switcher 와 동일) */}
+      {/* 핸들바 (household-switcher 와 동일) */}
       <Group justify="center" pt={4} pb={8}>
         <div
           style={{
@@ -70,13 +71,7 @@ export default function QuickAddSheet() {
           상위 페이지 Suspense 까지 throw 가 올라가 페이지 전체가 깜박이는 걸 막기 위해
           시트 안에 자체 Suspense fallback 을 둔다. */}
       {opened && (
-        <Suspense
-          fallback={
-            <Center py="xl">
-              <Loader />
-            </Center>
-          }
-        >
+        <Suspense fallback={<PageLoader />}>
           <TransactionForm onDone={handleDone} hideCard />
         </Suspense>
       )}

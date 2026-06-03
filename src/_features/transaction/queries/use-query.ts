@@ -2,27 +2,34 @@ import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 
 import { queryKeys } from "_constants/queries";
 
-import { GetTransactionSearchApi } from "../api";
-import type { TransactionSearchRequestType } from "../types";
+import { GetAccountLedgerApi } from "../api";
 
 /**
- * 커서 기반 무한 스크롤 list.
+ * 계좌별 거래 이력(running balance) 무한 스크롤.
  *
- * queryKey 는 query-key-factory 의 `transaction.infinite` 를 통과해서
- * mutation 의 `queryKeys.transaction._def` invalidate 에 자동으로 잡힌다.
+ * 백엔드가 각 행에 balanceAfter 를 박아 내려주므로 cursor 에 carry 잔액이 실려
+ * 페이지 경계 잔액이 이어진다.
  */
-export const useTransactionInfiniteList = (
-  params: TransactionSearchRequestType,
+export const useAccountLedgerInfinite = (
+  accountId: string,
   pageSize = 30,
+  year?: number,
+  month?: number,
 ) => {
-  const keyDef = queryKeys.transaction.infinite({ ...params, pageSize });
+  const keyDef = queryKeys.transaction.accountLedger(
+    accountId,
+    pageSize,
+    year,
+    month,
+  );
   return useInfiniteQuery({
     queryKey: keyDef.queryKey,
     queryFn: ({ pageParam }) =>
-      GetTransactionSearchApi({
-        ...params,
+      GetAccountLedgerApi(accountId, {
         cursor: pageParam,
         limit: pageSize,
+        year,
+        month,
       }),
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => {

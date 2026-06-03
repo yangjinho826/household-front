@@ -1,6 +1,5 @@
 "use client";
 
-import { Center, Loader } from "@mantine/core";
 import {
   createContext,
   ReactNode,
@@ -9,6 +8,7 @@ import {
   useState,
 } from "react";
 
+import { PageLoader } from "_features/common/components/page-loader";
 import { cookieFetch } from "_libraries/fetch/api-fetch";
 
 import { useAuth } from "./hooks/use-auth";
@@ -93,11 +93,7 @@ function AuthChildren({ children }: { children: ReactNode }) {
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const ready = useSilentRefreshOnMount();
   if (!ready) {
-    return (
-      <Center py="xl">
-        <Loader />
-      </Center>
-    );
+    return <PageLoader />;
   }
   return <AuthChildren>{children}</AuthChildren>;
 };

@@ -1,262 +1,172 @@
 "use client";
 
-import {
-  Card,
-  Group,
-  Progress,
-  Stack,
-  Text,
-  Title,
-  UnstyledButton,
-} from "@mantine/core";
-import { modals } from "@mantine/modals";
-import { notifications } from "@mantine/notifications";
-import { IconCheck, IconPlus } from "@tabler/icons-react";
+import { Card, Group, Modal, Stack, Text, UnstyledButton } from "@mantine/core";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useRouter, useParams } from "next/navigation";
-import { useMemo } from "react";
-import {
-  Area,
-  AreaChart,
-  ResponsiveContainer,
-  XAxis,
-} from "recharts";
+import { useState } from "react";
 
-import { useAccountSnapshotMutations } from "_features/account-snapshot/queries/use-mutations";
 import { ACCOUNT_TYPE_MANTINE_COLOR } from "_features/account/constants";
-import type { AccountListItemType, AccountType } from "_features/account/types";
+import type { AccountListItemType } from "_features/account/types";
+import SubHeader from "_features/layout/components/sub-header";
+import ManualAssetForm from "_features/manual-asset/components/form";
+import { useManualAssetList } from "_features/manual-asset/queries/use-query";
+import type { ManualAssetListItemType } from "_features/manual-asset/types";
+import { ASSET_CLASS_COLOR } from "_features/portfolio/constants";
+import { useMoney } from "_features/common/hooks/use-money";
 import { queryKeys } from "_constants/queries";
-import { getErrorMessage } from "_libraries/fetch/error-message";
-import { fmt } from "_utilities/fmt";
+
+import AllocationTrendChart from "./components/allocation-trend-chart";
 
 // 시각 색상 매핑은 _features/account/constants.ts 에서 중앙 관리
 const TYPE_COLOR = ACCOUNT_TYPE_MANTINE_COLOR;
 
+/**
+ * WealthSection — 자산 상세(sub-route /wealth).
+ *
+ * 총자산 hero·월별 추이·자산군 도넛은 홈 대시보드로 이관됨(TotalAssetHero).
+ * 여기는 자산군 배분 추이 + 수동자산 + 통장 리스트만.
+ */
 export default function WealthSection() {
   const router = useRouter();
   const routeParams = useParams<{ locale: string }>();
-  const te = useTranslations("error");
-  const tType = useTranslations("enum.account-type");
+  const tAssetClass = useTranslations("enum.asset-class");
+  const tManual = useTranslations("manual-asset");
+  const tWealth = useTranslations("wealth");
+  const tGeneral = useTranslations("general.common");
+  const money = useMoney();
 
-  const { data: overviewRes } = useSuspenseQuery(
-    queryKeys.wealth.overview({}),
-  );
+  const { data: overviewRes } = useSuspenseQuery(queryKeys.wealth.overview({}));
+  const { data: manualAssetRes } = useManualAssetList();
+  const manualAssetItems = manualAssetRes.body.data;
 
-  const { createMutation } = useAccountSnapshotMutations();
+  // 부동산·연금 폼 모달 — modals.open() portal 은 QueryClientProvider 밖이라
+  // 트리 안(<Modal>)에서 직접 렌더해야 useQuery/useMutation 컨텍스트가 잡힘
+  const [manualAssetFormOpen, setManualAssetFormOpen] = useState(false);
+  const [manualAssetEdit, setManualAssetEdit] = useState<
+    ManualAssetListItemType | undefined
+  >(undefined);
 
   const overview = overviewRes.body.data;
-  // 백엔드 account.balance 는 INVESTMENT 도 cash + 평가금 합산해서 내려옴
   const accounts: AccountListItemType[] = overview.accounts;
-  const yearly = overview.yearlySnapshots;
-  const total = overview.totalBalance;
-
-  const trendData = useMemo(
-    () =>
-      yearly.months.map((m) => ({
-        month: `${Number(m.snapshotDate.slice(5, 7))}월`, // "5월"
-        value: m.totalBalance,
-      })),
-    [yearly.months],
+  // 수동자산 전용계좌(부동산·연금·금)는 통장 리스트에서 제외 — 별도 수동자산 섹션에서 관리
+  const visibleAccounts = accounts.filter(
+    (a) =>
+      a.accountType !== "REAL_ESTATE" &&
+      a.accountType !== "PENSION" &&
+      a.accountType !== "COMMODITY",
   );
 
-  const byType = useMemo(() => {
-    const types: AccountType[] = ["LIVING", "SAVINGS", "INVESTMENT", "OTHER"];
-    return types
-      .map((type) => {
-        const accs = accounts.filter((a) => a.accountType === type);
-        const sum = accs.reduce((s, a) => s + a.balance, 0);
-        const pct = total > 0 ? (sum / total) * 100 : 0;
-        return { type, sum, accs, pct };
-      })
-      .filter((t) => t.accs.length > 0);
-  }, [accounts, total]);
-
-  const hasTargetMonth = yearly.targetMonthSaved;
-  const targetMonthLabel = `${Number(yearly.targetMonthDate.slice(5, 7))}월`;
-
-  const handleTakeSnapshot = () => {
-    if (hasTargetMonth || createMutation.isPending) return;
-    modals.openConfirmModal({
-      centered: true,
-      title: `${targetMonthLabel} 자산 기록`,
-      labels: { confirm: "기록하기", cancel: "취소" },
-      children: (
-        <Text size="sm">
-          {targetMonthLabel} 자산 스냅샷을 저장할까요?
-          <br />
-          모든 통장의 현재 잔액이 기록됩니다.
-        </Text>
-      ),
-      onConfirm: async () => {
-        try {
-          await createMutation.mutateAsync();
-          notifications.show({
-            title: "기록 완료",
-            message: `${targetMonthLabel} 자산이 기록되었습니다.`,
-            color: "green",
-          });
-        } catch (error) {
-          notifications.show({
-            title: "기록 실패",
-            message: getErrorMessage(error, te),
-            color: "red",
-          });
-        }
-      },
-    });
+  const openManualAssetForm = (asset?: ManualAssetListItemType) => {
+    setManualAssetEdit(asset);
+    setManualAssetFormOpen(true);
   };
 
   return (
     <Stack gap="md">
-      <Title order={3}>자산</Title>
+      <SubHeader title={tWealth("title")} back={`/${routeParams.locale}`} />
 
-      <Card radius="xl" p="xl" shadow="md">
-        <Stack gap={4}>
-          <Group justify="space-between" align="center">
-            <Text size="xs" fw={500} c="dimmed">
-              총 자산
+      {overview.allocation.allocationTrend.length > 1 && (
+        <Card radius="lg">
+          <Stack gap="sm">
+            <Text size="sm" fw={700}>
+              {tWealth("allocation_trend")}
             </Text>
-            <UnstyledButton
-              onClick={handleTakeSnapshot}
-              disabled={hasTargetMonth || createMutation.isPending}
-              style={{
-                padding: "6px 12px",
-                borderRadius: 999,
-                background: hasTargetMonth
-                  ? "var(--mantine-color-gray-0)"
-                  : "var(--mantine-color-info-0)",
-                opacity: createMutation.isPending ? 0.5 : 1,
-              }}
-            >
-              <Group gap={4} wrap="nowrap">
-                {hasTargetMonth ? (
-                  <IconCheck size={12} stroke={3} color="#8B95A1" />
-                ) : (
-                  <IconPlus size={12} stroke={3} color="#3B82F6" />
-                )}
-                <Text
-                  size="10px"
-                  fw={700}
-                  c={hasTargetMonth ? "dimmed" : "info.5"}
-                >
-                  {hasTargetMonth
-                    ? `${targetMonthLabel} 저장됨`
-                    : `${targetMonthLabel} 자산 기록`}
-                </Text>
-              </Group>
-            </UnstyledButton>
-          </Group>
-          <Text
-            size="2rem"
-            fw={800}
-            style={{ fontVariantNumeric: "tabular-nums" }}
-          >
-            {fmt(total)}
-            <Text span size="lg" c="dimmed" ml={4} fw={600}>
-              원
-            </Text>
-          </Text>
-          <div className="chart-trend-wrap">
-            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-              <AreaChart
-                data={trendData}
-                margin={{ top: 12, right: 0, bottom: 0, left: 0 }}
-              >
-                <defs>
-                  <linearGradient id="wealthTrend" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#3B82F6" stopOpacity={0.3} />
-                    <stop offset="100%" stopColor="#3B82F6" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <Area
-                  type="monotone"
-                  dataKey="value"
-                  stroke="#3B82F6"
-                  strokeWidth={2.5}
-                  fill="url(#wealthTrend)"
-                />
-                <XAxis
-                  dataKey="month"
-                  tick={{ fontSize: 9, fill: "#8B95A1" }}
-                  axisLine={false}
-                  tickLine={false}
-                  interval={1}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </Stack>
-      </Card>
-
-      <Card radius="lg">
-        <Stack gap="sm">
-          <Text size="sm" fw={700}>
-            자산 분포
-          </Text>
-          <Stack gap="xs">
-            {byType.map((t) => (
-              <Stack key={t.type} gap={4}>
-                <Group justify="space-between">
-                  <Group gap={6}>
-                    <div
-                      style={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: 4,
-                        background: `var(--mantine-color-${TYPE_COLOR[t.type]}-5)`,
-                      }}
-                    />
-                    <Text size="sm" fw={600}>
-                      {tType(t.type)}
-                    </Text>
-                    <Text size="xs" c="dimmed">
-                      {t.pct.toFixed(0)}%
-                    </Text>
-                  </Group>
-                  <Text
-                    size="sm"
-                    fw={700}
-                    style={{ fontVariantNumeric: "tabular-nums" }}
-                  >
-                    {fmt(t.sum)}원
-                  </Text>
-                </Group>
-                <Progress
-                  value={t.pct}
-                  color={TYPE_COLOR[t.type]}
-                  size="xs"
-                  radius="xl"
-                />
-              </Stack>
-            ))}
+            <AllocationTrendChart data={overview.allocation.allocationTrend} />
           </Stack>
-        </Stack>
-      </Card>
+        </Card>
+      )}
 
       <Group justify="space-between" align="center" px={4}>
         <Text size="sm" fw={700}>
-          통장 ({accounts.length})
+          {tManual("section_title")}
         </Text>
-        <UnstyledButton
-          onClick={() => router.push(`/${routeParams.locale}/account/new`)}
-        >
+        <UnstyledButton onClick={() => openManualAssetForm()}>
           <Text size="xs" fw={700} c="info.5">
-            + 추가
+            + {tGeneral("create")}
           </Text>
         </UnstyledButton>
       </Group>
 
       <Card radius="lg" p="xs">
         <Stack gap={0}>
-          {accounts.map((a) => (
+          {manualAssetItems.length === 0 ? (
+            <Text size="xs" c="dimmed" ta="center" py="md">
+              {tManual("empty")}
+            </Text>
+          ) : (
+            manualAssetItems.map((m) => (
+              <UnstyledButton
+                key={m.manualAssetId}
+                onClick={() => openManualAssetForm(m)}
+                style={{ padding: 12, borderRadius: 12 }}
+              >
+                <Group gap={12}>
+                  <div
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 12,
+                      background: `${ASSET_CLASS_COLOR[m.assetClass]}20`,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Text
+                      size="sm"
+                      fw={700}
+                      style={{ color: ASSET_CLASS_COLOR[m.assetClass] }}
+                    >
+                      {m.name.slice(0, 1)}
+                    </Text>
+                  </div>
+                  <Stack gap={0} style={{ flex: 1, minWidth: 0 }}>
+                    <Text size="sm" fw={600} truncate>
+                      {m.name}
+                    </Text>
+                    <Text size="xs" c="dimmed">
+                      {tAssetClass(m.assetClass)}
+                    </Text>
+                  </Stack>
+                  <Text
+                    size="sm"
+                    fw={700}
+                    style={{ fontVariantNumeric: "tabular-nums" }}
+                  >
+                    {money(m.currentValuation)}
+                  </Text>
+                </Group>
+              </UnstyledButton>
+            ))
+          )}
+        </Stack>
+      </Card>
+
+      <Group justify="space-between" align="center" px={4}>
+        <Text size="sm" fw={700}>
+          {tWealth("accounts_count", { count: visibleAccounts.length })}
+        </Text>
+        <UnstyledButton
+          onClick={() => router.push(`/${routeParams.locale}/account/new`)}
+        >
+          <Text size="xs" fw={700} c="info.5">
+            + {tGeneral("create")}
+          </Text>
+        </UnstyledButton>
+      </Group>
+
+      <Card radius="lg" p="xs">
+        <Stack gap={0}>
+          {visibleAccounts.map((a) => (
             <UnstyledButton
               key={a.accountId}
               onClick={() => {
                 // INVESTMENT 는 포트폴리오 디테일로, 그 외는 일반 통장 디테일로
                 const path =
                   a.accountType === "INVESTMENT"
-                    ? `/wealth/account/${a.accountId}`
+                    ? `/invest/account/${a.accountId}`
                     : `/account/${a.accountId}`;
                 router.push(`/${routeParams.locale}${path}`);
               }}
@@ -300,13 +210,29 @@ export default function WealthSection() {
                   style={{ fontVariantNumeric: "tabular-nums" }}
                   c={a.balance < 0 ? "danger.5" : undefined}
                 >
-                  {fmt(a.balance)}원
+                  {money(a.balance)}
                 </Text>
               </Group>
             </UnstyledButton>
           ))}
         </Stack>
       </Card>
+
+      <Modal
+        opened={manualAssetFormOpen}
+        onClose={() => setManualAssetFormOpen(false)}
+        title={
+          manualAssetEdit
+            ? `${tManual("section_title")} ${tGeneral("update")}`
+            : `${tManual("section_title")} ${tGeneral("create")}`
+        }
+        centered
+      >
+        <ManualAssetForm
+          asset={manualAssetEdit}
+          onClose={() => setManualAssetFormOpen(false)}
+        />
+      </Modal>
     </Stack>
   );
 }

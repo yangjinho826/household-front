@@ -24,12 +24,9 @@ interface BackendCursorPage<T> {
   totalCount: number | null;
 }
 
-function toListItem(
-  b: BackendFixedResponse,
-  rowNo: number,
-): FixedListItemType {
+function toListItem(b: BackendFixedResponse): FixedListItemType {
   const { id, ...rest } = b;
-  return { ...rest, fixedId: id, rowNo };
+  return { ...rest, fixedId: id };
 }
 
 /** 고정지출 목록 — cursor 무한 스크롤 */
@@ -49,7 +46,7 @@ export async function GetFixedSearchApi(
   >(`/api/fixed/list${queryString ? `?${queryString}` : ""}`, {
     method: "GET",
   });
-  const items = res.body.data.items.map((b, i) => toListItem(b, i + 1));
+  const items = res.body.data.items.map((b) => toListItem(b));
   const wrapped: ApiCursorPage<FixedListItemType> = {
     code: res.body.code,
     message: res.body.message,

@@ -1,0 +1,26 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgA2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8AA17F"/>
+      <stop offset="1" stop-color="#566B4E"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="0" y="0" width="512" height="512" rx="116" fill="url(#bgA2)"/>
+
+  <!-- ㅁ = 모으는 상자 -->
+  <rect x="132" y="132" width="248" height="248" rx="44"
+        fill="none" stroke="#FAF6EF" stroke-width="28"/>
+
+  <!-- 코인 2장 — 얇고 또렷, 명도차 강조 (codex 조언) -->
+  <g>
+    <!-- 아래 코인 -->
+    <ellipse cx="256" cy="312" rx="78" ry="20" fill="#BE8F3F"/>
+    <ellipse cx="256" cy="304" rx="78" ry="20" fill="#E0BC72"/>
+    <!-- 위 코인 -->
+    <ellipse cx="256" cy="270" rx="78" ry="20" fill="#BE8F3F"/>
+    <ellipse cx="256" cy="262" rx="78" ry="20" fill="#E0BC72"/>
+    <!-- 금속 림 라인 (하이라이트 대신) -->
+    <ellipse cx="256" cy="262" rx="78" ry="20" fill="none" stroke="#F0D89E" stroke-width="3"/>
+  </g>
+</svg>

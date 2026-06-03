@@ -9,6 +9,7 @@ import {
 } from "@mantine/core";
 import { IconCheck, IconCrown, IconPlus, IconUsers } from "@tabler/icons-react";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { useRouter, useParams } from "next/navigation";
 
 import { queryKeys } from "_constants/queries";
@@ -24,6 +25,7 @@ export function HouseholdSwitcher({ opened, onClose }: HouseholdSwitcherProps) {
   const router = useRouter();
   const routeParams = useParams<{ locale: string }>();
   const queryClient = useQueryClient();
+  const t = useTranslations("household");
 
   const { data: hData } = useSuspenseQuery(queryKeys.household.list());
   const households = hData.body.data.items;
@@ -70,7 +72,7 @@ export function HouseholdSwitcher({ opened, onClose }: HouseholdSwitcherProps) {
         },
       }}
     >
-      {/* 핸들바 — 토스 시그니처 */}
+      {/* 핸들바 */}
       <Group justify="center" pt={4} pb={8}>
         <div
           style={{
@@ -84,10 +86,10 @@ export function HouseholdSwitcher({ opened, onClose }: HouseholdSwitcherProps) {
 
       <Stack gap={4} px="md" pb="xs">
         <Text size="md" fw={800}>
-          가계부 선택
+          {t("switcher_title")}
         </Text>
         <Text size="xs" fw={500} c="dimmed">
-          관리 중인 가계부 {households.length}개
+          {t("switcher_count", { count: households.length })}
         </Text>
       </Stack>
 
@@ -108,8 +110,8 @@ export function HouseholdSwitcher({ opened, onClose }: HouseholdSwitcherProps) {
                     height: 44,
                     borderRadius: 12,
                     background: isOwner
-                      ? "var(--mantine-color-info-0)"
-                      : "var(--mantine-color-purple-0)",
+                      ? "var(--mantine-color-sage-0)"
+                      : "var(--mantine-color-terracotta-0)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -120,8 +122,8 @@ export function HouseholdSwitcher({ opened, onClose }: HouseholdSwitcherProps) {
                     size={20}
                     color={
                       isOwner
-                        ? "var(--mantine-color-info-5)"
-                        : "var(--mantine-color-purple-5)"
+                        ? "var(--mantine-color-sage-6)"
+                        : "var(--mantine-color-terracotta-6)"
                     }
                   />
                 </div>
@@ -133,16 +135,18 @@ export function HouseholdSwitcher({ opened, onClose }: HouseholdSwitcherProps) {
                     {isOwner && (
                       <IconCrown
                         size={12}
-                        color="#F59E0B"
-                        fill="#F59E0B"
+                        color="var(--mantine-color-warning-5)"
+                        fill="var(--mantine-color-warning-5)"
                         style={{ flexShrink: 0 }}
                       />
                     )}
                   </Group>
                   <Text size="xs" fw={500} c="dimmed">
-                    {isOwner ? "소유자" : "멤버"}
+                    {isOwner
+                      ? t("member.role_owner")
+                      : t("member.role_member")}
                     {typeof h.memberCount === "number"
-                      ? ` · ${h.memberCount}명`
+                      ? ` · ${t("member_count", { count: h.memberCount })}`
                       : ""}
                   </Text>
                 </Stack>
@@ -152,7 +156,7 @@ export function HouseholdSwitcher({ opened, onClose }: HouseholdSwitcherProps) {
                       width: 24,
                       height: 24,
                       borderRadius: 12,
-                      background: "var(--mantine-color-info-5)",
+                      background: "var(--mantine-color-sage-6)",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -168,10 +172,10 @@ export function HouseholdSwitcher({ opened, onClose }: HouseholdSwitcherProps) {
         })}
       </Stack>
 
-      {/* 새 가계부 만들기 */}
+      {/* 새 모음 만들기 */}
       <div
         style={{
-          borderTop: "1px solid var(--mantine-color-gray-1)",
+          borderTop: "1px solid var(--mantine-color-gray-2)",
           padding: "8px",
         }}
       >
@@ -191,10 +195,10 @@ export function HouseholdSwitcher({ opened, onClose }: HouseholdSwitcherProps) {
                 justifyContent: "center",
               }}
             >
-              <IconPlus size={20} color="#4E5968" />
+              <IconPlus size={20} color="var(--mantine-color-gray-6)" />
             </div>
             <Text size="sm" fw={700}>
-              새 가계부 만들기
+              {t("create_new")}
             </Text>
           </Group>
         </UnstyledButton>

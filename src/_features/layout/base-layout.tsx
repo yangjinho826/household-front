@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-head-element */
 import { ColorSchemeScript } from "@mantine/core";
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages } from "next-intl/server";
+import { getMessages, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { MantineProviders } from "_providers/mantine-provider";
@@ -24,6 +24,7 @@ export async function BaseLayout({
   children: ReactNode;
 }) {
   const messages = await getMessages();
+  const t = await getTranslations({ locale, namespace: "app" });
 
   return (
     <html lang={locale} data-mantine-color-scheme="light">
@@ -33,17 +34,29 @@ export async function BaseLayout({
           rel="stylesheet"
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css"
         />
+        {/* 브랜드 워드마크 전용 세리프 (Noto Serif KR) — 로고/브랜드명에만 사용.
+            전역 1회 로드라 next/font 페이지 단위 권고는 해당 없음 → 룰 비활성화. */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600;700&display=swap"
+        />
         <meta
           name="viewport"
           content="minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no, viewport-fit=cover"
         />
-        <meta name="theme-color" content="#3B82F6" />
+        <meta name="theme-color" content="#7C9473" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="가계부" />
+        <meta name="apple-mobile-web-app-title" content={t("meta_title")} />
         <link rel="manifest" href="/manifest.json" />
-        <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
       {/* 양옆 bg 는 살짝 어두운 회색 — 박스를 시각적으로 분리.
           박스 max-width / bg / minHeight 는 각 layout (UserShell / GuestLayout) 책임. */}
