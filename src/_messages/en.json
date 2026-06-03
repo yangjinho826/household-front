@@ -3,7 +3,9 @@
     "title": "Personal",
     "loading": "Loading...",
     "not_found": "Page not found.",
-    "go_home": "Go home"
+    "go_home": "Go home",
+    "meta_title": "Moeum",
+    "meta_description": "All your wealth in one place — stocks & budgeting"
   },
   "nav": {
     "home": "Home",

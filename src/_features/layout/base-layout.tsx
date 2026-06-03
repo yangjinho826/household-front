@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-head-element */
 import { ColorSchemeScript } from "@mantine/core";
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages } from "next-intl/server";
+import { getMessages, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { MantineProviders } from "_providers/mantine-provider";
@@ -24,6 +24,7 @@ export async function BaseLayout({
   children: ReactNode;
 }) {
   const messages = await getMessages();
+  const t = await getTranslations({ locale, namespace: "app" });
 
   return (
     <html lang={locale} data-mantine-color-scheme="light">
@@ -54,7 +55,7 @@ export async function BaseLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="모음" />
+        <meta name="apple-mobile-web-app-title" content={t("meta_title")} />
         <link rel="manifest" href="/manifest.json" />
       </head>
       {/* 양옆 bg 는 살짝 어두운 회색 — 박스를 시각적으로 분리.
