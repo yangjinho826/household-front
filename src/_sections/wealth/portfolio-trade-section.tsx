@@ -18,7 +18,7 @@ import { IconPencil } from "@tabler/icons-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useRouter, useParams } from "next/navigation";
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 
 import { queryKeys } from "_constants/queries";
 import SubHeader from "_features/layout/components/sub-header";
@@ -27,6 +27,7 @@ import {
   usePortfolioItem,
   usePortfolioItemTransactionsInfinite,
 } from "_features/portfolio/queries/use-query";
+import { usePortfolioSheetStore } from "_features/portfolio/store";
 import PortfolioValueTrend from "_sections/wealth/components/portfolio-value-trend";
 import { InfiniteSentinel } from "_libraries/query/infinite-sentinel";
 import type {
@@ -51,9 +52,20 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
   const router = useRouter();
   const routeParams = useParams<{ locale: string }>();
   const queryClient = useQueryClient();
+  const openPortfolioSheet = usePortfolioSheetStore((s) => s.open);
 
   const { data: itemData } = usePortfolioItem(portfolioId);
   const portfolio = itemData.body.data;
+
+  // 수정 시트에서 삭제(archive)하면 시트만 닫혀 archive 된 종목 상세에 잔류 →
+  // archive 감지 시 계좌로 복귀(어디서 archive 했든 일관 처리).
+  useEffect(() => {
+    if (portfolio.isArchived) {
+      router.replace(
+        `/${routeParams.locale}/invest/account/${portfolio.accountId}`,
+      );
+    }
+  }, [portfolio.isArchived, portfolio.accountId, routeParams.locale, router]);
 
   const {
     data: txPages,
@@ -79,7 +91,7 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
   };
 
   const handleEditPortfolio = () => {
-    router.push(`/${routeParams.locale}/invest/${portfolio.portfolioId}`);
+    openPortfolioSheet(portfolio.portfolioId);
   };
 
   const handleCloseModal = () => {

@@ -10,6 +10,21 @@
 
 ## Status
 
+### 투자 새로고침 + 종목 시트통일 + 전도메인 삭제가드 + 멤버 시트화 (2026-06-03, 미커밋, front+back)
+- **P1 투자 시세 수동 새로고침**: 백엔드 `market_price.refresh(session, markets, household_id?)` 에 household 스코프 추가(repo `find_active_distinct_code_market_by_household_and_markets`), `POST /portfolio/refresh-prices`(CurrentHousehold, 4시장, 가격은 시장공통이라 bulk update 는 전 가계부 적용·fetch 만 보유종목 한정). 프론트 투자메인 헤더 IconRefresh 버튼 → `refreshMutation`(invalidateAll).
+- **P2 종목 추가/수정 시트 통일**: `usePortfolioSheetStore(open(editId?,accountId?))` + `PortfolioSheet`(UserShell). PortfolioForm `defaultAccountId` prefill. 트리거 교체: 투자메인(+버튼), 계좌상세 account-portfolio-section:224(그 계좌 프리필), 종목매매 portfolio-trade-section handleEditPortfolio(수정). 페이지 라우트는 fallback 유지.
+- **P3 삭제 가드(도메인별 혼합)**: ErrorCode PT002/AC001/CT001 신설. **종목**=quantity>0 차단(`delete_portfolio` + archive 경로 `update_portfolio` isArchived; 프론트 삭제버튼 disable+힌트). **통장**=거래(from/to 양방향)·종목 있으면 차단(`TransactionRepository.exists_active_by_account_id`, `PortfolioItemRepository.count_active_by_account_id`). **카테고리**=거래·고정비 있으면 차단(각 repo exists). **고정비**=DB FK SET NULL 로 안전, 가드 없음. **가계부**=cascade soft-delete 전 자식(`_cascade_soft_delete_children`: household_id 보유 9개 모델 bulk UPDATE + account_snapshots 는 account_id 서브쿼리) + 프론트 강한 확인모달(red).
+- **P4 멤버 관리 시트화**: `useMembersSheetStore` + `MembersSheet`(UserShell). 설정 진입점 navTo→openMembers. MembersSection `inSheet` prop(SubHeader 숨김), 멤버삭제 JS confirm()→Mantine modals.openConfirmModal.
+- **검증**: 프론트 typecheck+lint 통과. 백엔드 app import OK(75 routes, refresh-prices 등록). ruff venv 미설치로 스킵. 브라우저/curl E2E 미실시.
+- **알려진 엣지**: 종목 매매 상세에서 시트로 archive 시 상세에 잔류(통장 리포트와 동일 류, 드묾).
+
+### UX 일관화 — 폼 전부 bottom sheet 통일 + 도넛 외N + 통장타입 축소 (2026-06-03, 미커밋)
+- **#1 종목비중 "외 N개" 전 도넛 펼침**: `PortfolioDonut` 내부 rest 도 LegendRow(children)로 — 탭하면 묶인 항목 Collapse. 홈 자산구성·투자·계좌상세 전부 적용. `general.etc_count` 에서 `{percent}` 제거(LegendRow 가 우측 % 별도 표시).
+- **#3 통장 추가 타입 축소**: account form `CREATABLE_ACCOUNT_TYPES=[LIVING,SAVINGS,INVESTMENT]` 로 필터(수동자산 타입은 자산화면 전용이라 제외).
+- **#2 추가/수정/상세 UI 전부 bottom sheet 통일**(사용자 결정): 공용 `FormSheet`(common/components, quick-add Drawer 일반화) 신설. 각 폼 훅에 `onDone` 옵션(시트 close), 폼 컴포넌트에 `hideCard`(Fragment 분기) 추가. 전환: 거래(수정=row클릭, QuickAddStore+editId), 통장(account/store useAccountSheetStore, 추가=wealth/account-section·수정=report-section), 자산(wealth-section Modal→FormSheet), 카테고리·고정비(섹션 local state), 가계부(useHouseholdSheetStore, switcher+section), 종목추가(invest local state). **페이지 라우트 삭제 안 함**(deep-link fallback). 리치 상세(account 리포트·invest 포트폴리오)는 페이지 유지.
+- **알려진 엣지**: 통장 리포트(/account/[id])에서 시트로 **삭제** 시 시트만 닫히고 삭제된 통장 리포트에 잔류(이전엔 /account 이동). 드물어 보류 — 후속.
+- **검증**: typecheck·lint 통과. 브라우저 E2E 미실시.
+
 ### R5b 트랙② 디자인·브랜딩 + i18n 전건 (2026-06-03, front 13커밋)
 - **로고 풀세트**: "모음" 마크(겹치는 세 원 → 중앙 핵 수렴 = "여러 자산이 한곳으로". codex 교차검토로 A/B/C 시안 중 B안 채택). `design/logo-20260603/`(mark.svg·워드마크 라이트/다크·favicon 세트·브랜드 README). BrandLogo(로그인·사이드바) 구식 지갑아이콘 → 새 마크 inline SVG.
 - **favicon 500 픽스**: Next14 App Router는 `app/icon.svg`를 `/icon.svg` 라우트로 자동 등록하는데 `metadata.icons.icon`에 `/icon.svg`를 또 지정 → 경로 충돌로 500. metadata에서 /icon.svg 제거, app/icon.svg를 구식 ₩ 임시아이콘 → 새 마크로(자동 favicon 정본), public/icon.svg 중복 삭제.

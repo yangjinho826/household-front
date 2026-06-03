@@ -3,9 +3,13 @@
 import { Stack } from "@mantine/core";
 import type { ReactNode } from "react";
 
+import AccountSheet from "_features/account/components/account-sheet";
+import HouseholdSheet from "_features/household/components/household-sheet";
+import MembersSheet from "_features/household/components/members-sheet";
 import AppHeader from "_features/layout/components/app-header";
 import { BottomTab } from "_features/layout/components/bottom-tab";
 import { SidebarNav } from "_features/layout/components/sidebar-nav";
+import PortfolioSheet from "_features/portfolio/components/portfolio-sheet";
 import QuickAddSheet from "_features/transaction/components/quick-add-sheet";
 
 /**
@@ -41,6 +45,10 @@ export function UserShell({ children }: { children: ReactNode }) {
       </div>
 
       <QuickAddSheet />
+      <AccountSheet />
+      <HouseholdSheet />
+      <PortfolioSheet />
+      <MembersSheet />
     </div>
   );
 }

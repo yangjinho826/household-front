@@ -9,6 +9,7 @@ import {
   TextInput,
   UnstyledButton,
 } from "@mantine/core";
+import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import {
   IconCrown,
@@ -30,11 +31,17 @@ import { useTranslations } from "next-intl";
 
 interface MembersSectionProps {
   householdId: string;
+  /** 시트 안에서 렌더 시 — 자체 SubHeader 숨김(FormSheet 제목 사용) */
+  inSheet?: boolean;
 }
 
-export default function MembersSection({ householdId }: MembersSectionProps) {
+export default function MembersSection({
+  householdId,
+  inSheet = false,
+}: MembersSectionProps) {
   const routeParams = useParams<{ locale: string }>();
   const t = useTranslations("household.member");
+  const tg = useTranslations("general.common");
   const te = useTranslations("error");
 
   const { data: hData } = useSuspenseQuery(
@@ -95,27 +102,37 @@ export default function MembersSection({ householdId }: MembersSectionProps) {
     }
   };
 
-  const handleRemove = async (memberId: string, memberName: string) => {
-    if (!confirm(t("remove_confirm", { name: memberName }))) return;
-    try {
-      await removeMemberMutation.mutateAsync({ householdId, memberId });
-      notifications.show({
-        title: t("remove_success_title"),
-        message: t("remove_success_message", { name: memberName }),
-        color: "green",
-      });
-    } catch (error) {
-      notifications.show({
-        title: t("remove_failed_title"),
-        message: getErrorMessage(error, te),
-        color: "red",
-      });
-    }
+  const handleRemove = (memberId: string, memberName: string) => {
+    modals.openConfirmModal({
+      centered: true,
+      title: t("remove_confirm_title"),
+      labels: { confirm: tg("delete"), cancel: tg("cancel") },
+      confirmProps: { color: "red" },
+      children: <span>{t("remove_confirm", { name: memberName })}</span>,
+      onConfirm: async () => {
+        try {
+          await removeMemberMutation.mutateAsync({ householdId, memberId });
+          notifications.show({
+            title: t("remove_success_title"),
+            message: t("remove_success_message", { name: memberName }),
+            color: "green",
+          });
+        } catch (error) {
+          notifications.show({
+            title: t("remove_failed_title"),
+            message: getErrorMessage(error, te),
+            color: "red",
+          });
+        }
+      },
+    });
   };
 
   return (
     <Stack gap="md">
-      <SubHeader title={t("title")} back={`/${routeParams.locale}/settings`} />
+      {!inSheet && (
+        <SubHeader title={t("title")} back={`/${routeParams.locale}/settings`} />
+      )}
 
       <Text size="xs" c="dimmed" px={4}>
         {t("subtitle", { name: household.name, count: members.length })}

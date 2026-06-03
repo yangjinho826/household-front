@@ -1,15 +1,17 @@
 "use client";
 
 import { ActionIcon, Card, Divider, Group, Stack, Text, Title } from "@mantine/core";
-import { IconPlus } from "@tabler/icons-react";
+import { IconPlus, IconRefresh } from "@tabler/icons-react";
+import { notifications } from "@mantine/notifications";
 import { useTranslations } from "next-intl";
-import { useParams, useRouter } from "next/navigation";
 import { useMemo } from "react";
 
 import PortfolioDonut, {
   type DonutBreakdownItem,
 } from "_features/portfolio/components/portfolio-donut";
+import { usePortfolioMutations } from "_features/portfolio/queries/use-mutations";
 import { usePortfolioOverview } from "_features/portfolio/queries/use-query";
+import { usePortfolioSheetStore } from "_features/portfolio/store";
 import {
   formatProfitAmount,
   formatProfitRate,
@@ -25,11 +27,24 @@ const TOP_STOCKS = 5;
 export default function PortfolioSection() {
   const t = useTranslations("portfolio");
   const money = useMoney();
-  const router = useRouter();
-  const { locale } = useParams<{ locale: string }>();
+  const openSheet = usePortfolioSheetStore((s) => s.open);
+  const { refreshMutation } = usePortfolioMutations();
 
   const { data } = usePortfolioOverview();
   const { summary, investmentAccounts } = data.body.data;
+
+  const handleRefresh = async () => {
+    try {
+      const res = await refreshMutation.mutateAsync();
+      const fetched = res.body.data.fetched;
+      notifications.show({
+        message: fetched > 0 ? t("refresh_success", { count: fetched }) : t("refresh_empty"),
+        color: "green",
+      });
+    } catch {
+      notifications.show({ message: t("refresh_failed"), color: "red" });
+    }
+  };
 
   // 종목별 비중 — 전체 투자 평가액 안에서 각 종목이 차지하는 %. 상위 5 + 기타 + 현금.
   const stockBreakdown = useMemo<DonutBreakdownItem[]>(() => {
@@ -55,6 +70,13 @@ export default function PortfolioSection() {
         label: t("etc_count", { count: rest.length }),
         value: restSum,
         color: TOKEN.warmGrayDeep,
+        // 범례에서 "외 N개" 탭하면 펼쳐질 묶인 종목들
+        children: rest.map((p) => ({
+          key: p.portfolioId,
+          label: p.name,
+          value: p.currentValue,
+          color: TOKEN.warmGrayDeep,
+        })),
       });
     }
     if (summary.totalCash > 0) {
@@ -77,14 +99,26 @@ export default function PortfolioSection() {
     <Stack gap="md">
       <Group justify="space-between" align="center">
         <Title order={3}>{t("title")}</Title>
-        <ActionIcon
-          radius="xl"
-          size="lg"
-          onClick={() => router.push(`/${locale}/invest/new`)}
-          aria-label={t("add_stock")}
-        >
-          <IconPlus size={18} />
-        </ActionIcon>
+        <Group gap="xs">
+          <ActionIcon
+            radius="xl"
+            size="lg"
+            variant="light"
+            onClick={handleRefresh}
+            loading={refreshMutation.isPending}
+            aria-label={t("refresh")}
+          >
+            <IconRefresh size={18} />
+          </ActionIcon>
+          <ActionIcon
+            radius="xl"
+            size="lg"
+            onClick={() => openSheet()}
+            aria-label={t("add_stock")}
+          >
+            <IconPlus size={18} />
+          </ActionIcon>
+        </Group>
       </Group>
 
       {/* 투자 손익 hero — 대표값=평가액, pill=손익, 메타=매입·현금 (계좌 0개면 숨김) */}

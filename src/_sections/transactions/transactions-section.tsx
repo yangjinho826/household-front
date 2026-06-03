@@ -39,7 +39,7 @@ export default function TransactionsSection() {
           <ActionIcon
             size="lg"
             radius="xl"
-            onClick={openQuickAdd}
+            onClick={() => openQuickAdd()}
             aria-label={t("add")}
           >
             <IconPlus size={18} />

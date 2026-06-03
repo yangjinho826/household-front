@@ -8,6 +8,7 @@ import {
   GetPortfolioLookupApi,
   PostPortfolioBuyApi,
   PostPortfolioCreateApi,
+  PostPortfolioRefreshPricesApi,
   PostPortfolioSellApi,
   PutPortfolioTxUpdateApi,
   PutPortfolioUpdateApi,
@@ -93,6 +94,12 @@ export function usePortfolioMutations() {
       GetPortfolioLookupApi(props.market, props.code),
   });
 
+  // 수동 시세 갱신 — 성공 시 평가액/잔액 반영 위해 전체 invalidate
+  const refreshMutation = useMutation({
+    mutationFn: () => PostPortfolioRefreshPricesApi(),
+    onSuccess: invalidateAll,
+  });
+
   return {
     createMutation,
     buyMutation,
@@ -101,5 +108,6 @@ export function usePortfolioMutations() {
     updateTxMutation,
     removeTxMutation,
     lookupMutation,
+    refreshMutation,
   };
 }

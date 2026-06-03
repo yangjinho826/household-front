@@ -15,6 +15,7 @@ import type {
   PortfolioListItemType,
   PortfolioLookupResponse,
   PortfolioOverviewResponse,
+  PortfolioRefreshResponse,
   PortfolioSellRequest,
   PortfolioTransactionItemType,
   PortfolioTxUpdateRequest,
@@ -212,6 +213,14 @@ export async function PostPortfolioCreateApi(
     },
   );
   return { ...res, body: { ...res.body, data: toListItem(res.body.data) } };
+}
+
+/** 수동 시세 갱신 — 이 가계부 보유 종목 current_price 를 야후로 즉시 갱신 */
+export async function PostPortfolioRefreshPricesApi() {
+  return apiFetch<ApiResponse<PortfolioRefreshResponse>>(
+    `/api/portfolio/refresh-prices`,
+    { method: "POST", errorHandleMethod: "reject" },
+  );
 }
 
 /** 야후 파이낸스 종목 조회 — 폼 자동 채움용 (저장 X) */

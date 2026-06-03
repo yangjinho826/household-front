@@ -10,7 +10,7 @@ import {
   Text,
   TextInput,
 } from "@mantine/core";
-import { useEffect, useMemo } from "react";
+import { Fragment, useEffect, useMemo } from "react";
 import { useTranslations } from "next-intl";
 
 import { useEnumOptions } from "_features/enum/queries/use-query";
@@ -20,9 +20,20 @@ import { usePortfolioFormOptions } from "../queries/use-query";
 
 interface PortfolioFormProps {
   portfolioId?: string;
+  /** 시트에서 사용 시 — 성공·취소 후 호출(시트 close) */
+  onDone?: () => void;
+  /** 시트 안에서는 Card 래퍼 없이(이미 패딩 있음) */
+  hideCard?: boolean;
+  /** 계좌 상세에서 추가 시 — 그 계좌로 프리필(create 전용) */
+  defaultAccountId?: string;
 }
 
-export default function PortfolioForm({ portfolioId }: PortfolioFormProps) {
+export default function PortfolioForm({
+  portfolioId,
+  onDone,
+  hideCard = false,
+  defaultAccountId,
+}: PortfolioFormProps) {
   const t = useTranslations("portfolio");
   const tg = useTranslations("general.common");
   const tGeneral = useTranslations("general");
@@ -30,13 +41,16 @@ export default function PortfolioForm({ portfolioId }: PortfolioFormProps) {
   const {
     form,
     isUpdate,
+    quantity,
     isPending,
     isLookupPending,
     handleLookup,
     handleSubmit,
     handleRemove,
     handleCancel,
-  } = usePortfolioForm({ portfolioId });
+  } = usePortfolioForm({ portfolioId, onDone });
+
+  const Wrapper = hideCard ? Fragment : Card;
 
   const tMarket = useTranslations("enum.market");
   const { data: marketData } = useEnumOptions("market");
@@ -66,19 +80,23 @@ export default function PortfolioForm({ portfolioId }: PortfolioFormProps) {
     [formOptionsData],
   );
 
-  // 신규 생성 시 INVESTMENT 계좌가 1개면 자동 선택
+  // 신규 생성 시 계좌 프리필 — 계좌 상세에서 열면 그 계좌, 아니면 INVESTMENT 1개일 때 자동 선택
   useEffect(() => {
     if (isUpdate) return;
     if (form.values.accountId) return;
+    if (defaultAccountId) {
+      form.setFieldValue("accountId", defaultAccountId);
+      return;
+    }
     if (investAccountOptions.length === 1) {
       const first = investAccountOptions[0];
       if (first) form.setFieldValue("accountId", first.value);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [investAccountOptions, isUpdate]);
+  }, [investAccountOptions, isUpdate, defaultAccountId]);
 
   return (
-    <Card>
+    <Wrapper>
       <form onSubmit={form.onSubmit(handleSubmit)}>
         <Stack gap="sm">
           <Select
@@ -149,19 +167,26 @@ export default function PortfolioForm({ portfolioId }: PortfolioFormProps) {
             </Button>
           </Group>
           {isUpdate && (
-            <Button
-              type="button"
-              variant="light"
-              color="red"
-              onClick={handleRemove}
-              disabled={isPending}
-              fullWidth
-            >
-              {tg("delete")}
-            </Button>
+            <Stack gap={4}>
+              <Button
+                type="button"
+                variant="light"
+                color="red"
+                onClick={handleRemove}
+                disabled={isPending || quantity > 0}
+                fullWidth
+              >
+                {tg("delete")}
+              </Button>
+              {quantity > 0 && (
+                <Text size="xs" c="dimmed" ta="center">
+                  {t("delete_blocked_holdings")}
+                </Text>
+              )}
+            </Stack>
           )}
         </Stack>
       </form>
-    </Card>
+    </Wrapper>
   );
 }

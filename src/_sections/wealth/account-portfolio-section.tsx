@@ -22,6 +22,7 @@ import PortfolioDonut, {
 import AccountBalanceTrend from "_sections/wealth/components/account-balance-trend";
 import RealizedPnlRail from "_sections/wealth/components/realized-pnl-rail";
 import { useAccountOverview } from "_features/portfolio/queries/use-query";
+import { usePortfolioSheetStore } from "_features/portfolio/store";
 import {
   formatProfitAmount,
   formatProfitRate,
@@ -44,6 +45,7 @@ export default function AccountPortfolioSection({ accountId }: Props) {
   const money = useMoney();
   const router = useRouter();
   const routeParams = useParams<{ locale: string }>();
+  const openSheet = usePortfolioSheetStore((s) => s.open);
 
   const { data } = useAccountOverview(accountId);
   const account = data.body.data.account;
@@ -83,6 +85,13 @@ export default function AccountPortfolioSection({ accountId }: Props) {
         label: t("etc_count", { count: rest.length }),
         value: restSum,
         color: TOKEN.warmGrayDeep,
+        // 범례에서 "외 N개" 탭하면 펼쳐질 묶인 종목들
+        children: rest.map((p) => ({
+          key: p.portfolioId,
+          label: p.name,
+          value: p.currentValue,
+          color: TOKEN.warmGrayDeep,
+        })),
       });
     }
     if (cash > 0) {
@@ -214,7 +223,7 @@ export default function AccountPortfolioSection({ accountId }: Props) {
           {t("holdings")}
         </Text>
         <UnstyledButton
-          onClick={() => router.push(`/${routeParams.locale}/invest/new`)}
+          onClick={() => openSheet(undefined, accountId)}
         >
           <Text size="xs" fw={700} c="sage.6">
             + {t("add_stock")}

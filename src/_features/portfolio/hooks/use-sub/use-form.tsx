@@ -3,7 +3,7 @@ import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { useRouter, useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 
 import { usePortfolioMutations } from "_features/portfolio/queries/use-mutations";
@@ -14,6 +14,8 @@ import { usePortfolioItemFetch } from "../../queries/use-query";
 
 interface UsePortfolioFormOptions {
   portfolioId?: string;
+  /** 시트에서 사용 시 — 성공·취소 후 페이지 이동 대신 이 콜백(시트 close) 호출 */
+  onDone?: () => void;
 }
 
 interface FormValues {
@@ -25,7 +27,10 @@ interface FormValues {
   isArchived: boolean;
 }
 
-export function usePortfolioForm({ portfolioId }: UsePortfolioFormOptions) {
+export function usePortfolioForm({
+  portfolioId,
+  onDone,
+}: UsePortfolioFormOptions) {
   const t = useTranslations("portfolio");
   const tg = useTranslations("general.common");
   const te = useTranslations("error");
@@ -36,6 +41,8 @@ export function usePortfolioForm({ portfolioId }: UsePortfolioFormOptions) {
   const { createMutation, updateMutation, lookupMutation } = usePortfolioMutations();
 
   const isUpdate = Boolean(portfolioId);
+  // 보유수량 — 삭제(보관) 가드용. >0 이면 삭제 버튼 비활성(백엔드도 차단).
+  const [quantity, setQuantity] = useState(0);
 
   const form = useForm<FormValues>({
     initialValues: {
@@ -76,6 +83,7 @@ export function usePortfolioForm({ portfolioId }: UsePortfolioFormOptions) {
       const res = await fetchDetail(portfolioId);
       if (cancelled || !res) return;
       const d = res.body.data;
+      setQuantity(d.quantity);
       form.setValues({
         accountId: d.accountId,
         market: d.market,
@@ -146,7 +154,8 @@ export function usePortfolioForm({ portfolioId }: UsePortfolioFormOptions) {
           color: "green",
         });
       }
-      router.replace(`/${routeParams.locale}/invest`);
+      if (onDone) onDone();
+      else router.replace(`/${routeParams.locale}/invest`);
     } catch (error) {
       notifications.show({
         title: tg("notificationstitle"),
@@ -170,18 +179,21 @@ export function usePortfolioForm({ portfolioId }: UsePortfolioFormOptions) {
           message: tg("confirmyescontent"),
           color: "green",
         });
-        router.replace(`/${routeParams.locale}/invest`);
+        if (onDone) onDone();
+        else router.replace(`/${routeParams.locale}/invest`);
       },
     });
   };
 
   const handleCancel = () => {
-    router.back();
+    if (onDone) onDone();
+    else router.back();
   };
 
   return {
     form,
     isUpdate,
+    quantity,
     isPending: createMutation.isPending || updateMutation.isPending,
     isLookupPending: lookupMutation.isPending,
     handleLookup,
