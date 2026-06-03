@@ -47,7 +47,7 @@ export function useManualAssetForm({
     validate: zodResolver(
       z.object({
         name: z.string().min(1, t("name_required_message")),
-        assetClass: z.enum(["REAL_ESTATE", "PENSION", "COMMODITY"]),
+        assetClass: z.enum(["REAL_ESTATE", "PENSION", "COMMODITY", "SAVINGS"]),
         currentValuation: z.number().positive(t("valuation_required_message")),
         valuedAt: z.string().min(1, t("valued_at_required_message")),
       }),
