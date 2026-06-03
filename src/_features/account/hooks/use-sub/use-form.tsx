@@ -117,14 +117,22 @@ export function useAccountForm({ accountId, onDone }: UseAccountFormOptions) {
       labels: { confirm: tg("confirm"), cancel: tg("cancel") },
       children: <span>{tg("want_to_delete")}</span>,
       onConfirm: async () => {
-        await removeMutation.mutateAsync(accountId);
-        notifications.show({
-          title: tg("notificationstitle"),
-          message: tg("confirmyescontent"),
-          color: "green",
-        });
-        if (onDone) onDone();
-        else router.replace(`/${routeParams.locale}/account`);
+        try {
+          await removeMutation.mutateAsync(accountId);
+          notifications.show({
+            title: tg("notificationstitle"),
+            message: tg("confirmyescontent"),
+            color: "green",
+          });
+          if (onDone) onDone();
+          else router.replace(`/${routeParams.locale}/account`);
+        } catch (error) {
+          notifications.show({
+            title: tg("notificationstitle"),
+            message: getErrorMessage(error, te),
+            color: "red",
+          });
+        }
       },
     });
   };

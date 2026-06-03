@@ -111,14 +111,22 @@ export function useFixedForm({ fixedId, onDone }: UseFixedFormOptions) {
       labels: { confirm: tg("confirm"), cancel: tg("cancel") },
       children: <span>{tg("want_to_delete")}</span>,
       onConfirm: async () => {
-        await removeMutation.mutateAsync(fixedId);
-        notifications.show({
-          title: tg("notificationstitle"),
-          message: tg("confirmyescontent"),
-          color: "green",
-        });
-        if (onDone) onDone();
-        else router.replace(`/${routeParams.locale}/fixed`);
+        try {
+          await removeMutation.mutateAsync(fixedId);
+          notifications.show({
+            title: tg("notificationstitle"),
+            message: tg("confirmyescontent"),
+            color: "green",
+          });
+          if (onDone) onDone();
+          else router.replace(`/${routeParams.locale}/fixed`);
+        } catch (error) {
+          notifications.show({
+            title: tg("notificationstitle"),
+            message: getErrorMessage(error, te),
+            color: "red",
+          });
+        }
       },
     });
   };

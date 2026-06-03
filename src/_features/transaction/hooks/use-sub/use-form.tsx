@@ -140,16 +140,24 @@ export function useTransactionForm({
       labels: { confirm: tg("confirm"), cancel: tg("cancel") },
       children: <span>{tg("want_to_delete")}</span>,
       onConfirm: async () => {
-        await removeMutation.mutateAsync(transactionId);
-        notifications.show({
-          title: tg("notificationstitle"),
-          message: tg("confirmyescontent"),
-          color: "green",
-        });
-        if (onDone) {
-          onDone();
-        } else {
-          router.replace(`/${routeParams.locale}/transactions`);
+        try {
+          await removeMutation.mutateAsync(transactionId);
+          notifications.show({
+            title: tg("notificationstitle"),
+            message: tg("confirmyescontent"),
+            color: "green",
+          });
+          if (onDone) {
+            onDone();
+          } else {
+            router.replace(`/${routeParams.locale}/transactions`);
+          }
+        } catch (error) {
+          notifications.show({
+            title: tg("notificationstitle"),
+            message: getErrorMessage(error, te),
+            color: "red",
+          });
         }
       },
     });

@@ -173,14 +173,22 @@ export function usePortfolioForm({
       labels: { confirm: tg("confirm"), cancel: tg("cancel") },
       children: <span>{tg("want_to_delete")}</span>,
       onConfirm: async () => {
-        await updateMutation.mutateAsync({ portfolioId, isArchived: true });
-        notifications.show({
-          title: tg("notificationstitle"),
-          message: tg("confirmyescontent"),
-          color: "green",
-        });
-        if (onDone) onDone();
-        else router.replace(`/${routeParams.locale}/invest`);
+        try {
+          await updateMutation.mutateAsync({ portfolioId, isArchived: true });
+          notifications.show({
+            title: tg("notificationstitle"),
+            message: tg("confirmyescontent"),
+            color: "green",
+          });
+          if (onDone) onDone();
+          else router.replace(`/${routeParams.locale}/invest`);
+        } catch (error) {
+          notifications.show({
+            title: tg("notificationstitle"),
+            message: getErrorMessage(error, te),
+            color: "red",
+          });
+        }
       },
     });
   };

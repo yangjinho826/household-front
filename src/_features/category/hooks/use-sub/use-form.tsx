@@ -110,14 +110,22 @@ export function useCategoryForm({ categoryId, onDone }: UseCategoryFormOptions) 
       labels: { confirm: tg("confirm"), cancel: tg("cancel") },
       children: <span>{tg("want_to_delete")}</span>,
       onConfirm: async () => {
-        await removeMutation.mutateAsync(categoryId);
-        notifications.show({
-          title: tg("notificationstitle"),
-          message: tg("confirmyescontent"),
-          color: "green",
-        });
-        if (onDone) onDone();
-        else router.replace(`/${routeParams.locale}/category`);
+        try {
+          await removeMutation.mutateAsync(categoryId);
+          notifications.show({
+            title: tg("notificationstitle"),
+            message: tg("confirmyescontent"),
+            color: "green",
+          });
+          if (onDone) onDone();
+          else router.replace(`/${routeParams.locale}/category`);
+        } catch (error) {
+          notifications.show({
+            title: tg("notificationstitle"),
+            message: getErrorMessage(error, te),
+            color: "red",
+          });
+        }
       },
     });
   };
