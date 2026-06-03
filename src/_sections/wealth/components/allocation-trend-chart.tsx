@@ -14,7 +14,7 @@ import {
 import { ASSET_CLASS_COLOR } from "_features/portfolio/constants";
 import type { AssetClass } from "_features/portfolio/types";
 import type { AllocationTrendPoint } from "_features/wealth/types";
-import { fmt } from "_utilities/fmt";
+import { useMoney } from "_features/common/hooks/use-money";
 
 // 서버에선 false, 클라 마운트 후 true — hydration-safe. recharts SSR prerender 회피용.
 const noopSubscribe = () => () => {};
@@ -61,6 +61,7 @@ interface Props {
 // 월별 자산군 배분추이 — 스택 영역 차트. 표시 전용.
 export default function AllocationTrendChart({ data }: Props) {
   const tAssetClass = useTranslations("enum.asset-class");
+  const money = useMoney();
   // recharts ResponsiveContainer 는 SSR prerender 에서 깨질 수 있어 클라 마운트 후에만 그림
   const mounted = useMounted();
 
@@ -115,7 +116,7 @@ export default function AllocationTrendChart({ data }: Props) {
                           fontVariantNumeric: "tabular-nums",
                         }}
                       >
-                        {tAssetClass(c)} {fmt(v)}원
+                        {tAssetClass(c)} {money(v)}
                       </Text>
                     );
                   })}

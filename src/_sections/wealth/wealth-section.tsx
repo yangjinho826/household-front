@@ -13,8 +13,8 @@ import ManualAssetForm from "_features/manual-asset/components/form";
 import { useManualAssetList } from "_features/manual-asset/queries/use-query";
 import type { ManualAssetListItemType } from "_features/manual-asset/types";
 import { ASSET_CLASS_COLOR } from "_features/portfolio/constants";
+import { useMoney } from "_features/common/hooks/use-money";
 import { queryKeys } from "_constants/queries";
-import { fmt } from "_utilities/fmt";
 
 import AllocationTrendChart from "./components/allocation-trend-chart";
 
@@ -32,6 +32,7 @@ export default function WealthSection() {
   const routeParams = useParams<{ locale: string }>();
   const tAssetClass = useTranslations("enum.asset-class");
   const tManual = useTranslations("manual-asset");
+  const money = useMoney();
 
   const { data: overviewRes } = useSuspenseQuery(queryKeys.wealth.overview({}));
   const { data: manualAssetRes } = useManualAssetList();
@@ -132,7 +133,7 @@ export default function WealthSection() {
                     fw={700}
                     style={{ fontVariantNumeric: "tabular-nums" }}
                   >
-                    {fmt(m.currentValuation)}원
+                    {money(m.currentValuation)}
                   </Text>
                 </Group>
               </UnstyledButton>
@@ -207,7 +208,7 @@ export default function WealthSection() {
                   style={{ fontVariantNumeric: "tabular-nums" }}
                   c={a.balance < 0 ? "danger.5" : undefined}
                 >
-                  {fmt(a.balance)}원
+                  {money(a.balance)}
                 </Text>
               </Group>
             </UnstyledButton>

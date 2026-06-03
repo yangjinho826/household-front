@@ -10,7 +10,7 @@ import {
   XAxis,
 } from "recharts";
 
-import { fmt } from "_utilities/fmt";
+import { useMoney } from "_features/common/hooks/use-money";
 
 // 서버에선 false, 클라 마운트 후 true — hydration-safe. recharts SSR prerender 회피용.
 const noopSubscribe = () => () => {};
@@ -35,6 +35,7 @@ function TrendTooltip({
   active?: boolean;
   payload?: { payload: TrendPoint }[];
 }) {
+  const money = useMoney();
   if (!active || !payload?.length) return null;
   const p = payload[0]?.payload;
   if (!p) return null;
@@ -52,7 +53,7 @@ function TrendTooltip({
         {p.month}
       </Text>
       <Text size="sm" fw={800} style={{ fontVariantNumeric: "tabular-nums" }}>
-        {fmt(p.value)}원
+        {money(p.value)}
       </Text>
       {p.momPct !== null && (
         <Text

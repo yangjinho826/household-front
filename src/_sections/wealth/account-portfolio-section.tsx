@@ -28,6 +28,7 @@ import {
   profitColor,
 } from "_features/portfolio/utils";
 import { PORTFOLIO_PALETTE, TOKEN } from "_styles/design-tokens";
+import { useMoney } from "_features/common/hooks/use-money";
 import { fmt } from "_utilities/fmt";
 
 /** 종목 비중 도넛: 상위 N개만 고유색, 나머지 "기타"·현금 회색 묶음 (메인과 동일 규칙) */
@@ -39,7 +40,9 @@ interface Props {
 
 export default function AccountPortfolioSection({ accountId }: Props) {
   const t = useTranslations("portfolio");
+  const tGeneral = useTranslations("general");
   const tMarket = useTranslations("enum.market");
+  const money = useMoney();
   const router = useRouter();
   const routeParams = useParams<{ locale: string }>();
 
@@ -158,7 +161,7 @@ export default function AccountPortfolioSection({ accountId }: Props) {
                 {t("cash_label")}
               </Text>
               <Text size="sm" fw={700} style={{ fontVariantNumeric: "tabular-nums" }}>
-                {fmt(cash)}원
+                {money(cash)}
               </Text>
             </Stack>
             <Stack gap={2}>
@@ -166,7 +169,7 @@ export default function AccountPortfolioSection({ accountId }: Props) {
                 {t("meta_valuation")}
               </Text>
               <Text size="sm" fw={700} style={{ fontVariantNumeric: "tabular-nums" }}>
-                {fmt(valuation)}원
+                {money(valuation)}
               </Text>
             </Stack>
             <Stack gap={2}>
@@ -174,7 +177,7 @@ export default function AccountPortfolioSection({ accountId }: Props) {
                 {t("meta_stock_count")}
               </Text>
               <Text size="sm" fw={700} style={{ fontVariantNumeric: "tabular-nums" }}>
-                {portfolios.length}개
+                {tGeneral("unit.count", { count: portfolios.length })}
               </Text>
             </Stack>
           </Group>
@@ -251,7 +254,8 @@ export default function AccountPortfolioSection({ accountId }: Props) {
                         {p.name}
                       </Text>
                       <Text size="xs" c="dimmed">
-                        {p.code} · {tMarket(p.market)} · {p.quantity}주
+                        {p.code} · {tMarket(p.market)} ·{" "}
+                        {tGeneral("unit.stock", { count: p.quantity })}
                       </Text>
                       <Group gap={4} mt={4}>
                         <Text size="10px" c="dimmed" fw={600}>
@@ -262,7 +266,7 @@ export default function AccountPortfolioSection({ accountId }: Props) {
                           fw={700}
                           style={{ fontVariantNumeric: "tabular-nums" }}
                         >
-                          {fmt(p.avgPrice)}원
+                          {money(p.avgPrice)}
                         </Text>
                       </Group>
                     </Stack>
@@ -272,7 +276,7 @@ export default function AccountPortfolioSection({ accountId }: Props) {
                         fw={700}
                         style={{ fontVariantNumeric: "tabular-nums" }}
                       >
-                        {fmt(p.currentValue)}원
+                        {money(p.currentValue)}
                       </Text>
                       <Group gap={4}>
                         <Text

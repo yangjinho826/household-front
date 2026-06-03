@@ -4,7 +4,7 @@ import { Card, Center, Group, Stack, Text, UnstyledButton } from "@mantine/core"
 import { useTranslations } from "next-intl";
 
 import IconBox from "_features/common/components/icon-box";
-import { fmt } from "_utilities/fmt";
+import { useMoney } from "_features/common/hooks/use-money";
 
 import type { FixedListItemType } from "../types";
 
@@ -22,6 +22,7 @@ export default function FixedTable({
 }: FixedTableProps) {
   const t = useTranslations("fixed");
   const tg = useTranslations("general.common");
+  const money = useMoney();
 
   if (!items.length) {
     return (
@@ -70,7 +71,7 @@ export default function FixedTable({
                     flexShrink: 0,
                   }}
                 >
-                  {fmt(used)}원
+                  {money(used)}
                 </Text>
               </Group>
             </UnstyledButton>

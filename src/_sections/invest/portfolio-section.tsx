@@ -17,6 +17,7 @@ import {
 } from "_features/portfolio/utils";
 import InvestmentAccountCard from "_sections/wealth/components/investment-account-card";
 import { PORTFOLIO_PALETTE, TOKEN } from "_styles/design-tokens";
+import { useMoney } from "_features/common/hooks/use-money";
 import { fmt } from "_utilities/fmt";
 
 /** 종목 비중 도넛: 상위 N개만 고유색, 나머지는 "기타"·현금으로 회색 묶음 (색 순환 혼동 방지) */
@@ -24,6 +25,7 @@ const TOP_STOCKS = 5;
 
 export default function PortfolioSection() {
   const t = useTranslations("portfolio");
+  const money = useMoney();
   const router = useRouter();
   const { locale } = useParams<{ locale: string }>();
 
@@ -148,7 +150,7 @@ export default function PortfolioSection() {
                     fw={700}
                     style={{ fontVariantNumeric: "tabular-nums" }}
                   >
-                    {fmt(summary.totalCost)}원
+                    {money(summary.totalCost)}
                   </Text>
                 </Stack>
                 <Stack gap={2}>
@@ -160,7 +162,7 @@ export default function PortfolioSection() {
                     fw={700}
                     style={{ fontVariantNumeric: "tabular-nums" }}
                   >
-                    {fmt(summary.totalCash)}원
+                    {money(summary.totalCash)}
                   </Text>
                 </Stack>
               </Group>

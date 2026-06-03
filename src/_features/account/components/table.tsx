@@ -4,7 +4,7 @@ import { Card, Center, Group, Stack, Text, UnstyledButton } from "@mantine/core"
 import { useTranslations } from "next-intl";
 
 import IconBox from "_features/common/components/icon-box";
-import { fmt } from "_utilities/fmt";
+import { useMoney } from "_features/common/hooks/use-money";
 
 import { ACCOUNT_TYPE_HEX } from "../constants";
 import type { AccountListItemType } from "../types";
@@ -17,6 +17,7 @@ interface AccountTableProps {
 export default function AccountTable({ items, onClickRow }: AccountTableProps) {
   const tType = useTranslations("enum.account-type");
   const tg = useTranslations("general.common");
+  const money = useMoney();
 
   if (!items.length) {
     return (
@@ -65,7 +66,7 @@ export default function AccountTable({ items, onClickRow }: AccountTableProps) {
                     flexShrink: 0,
                   }}
                 >
-                  {fmt(it.balance)}원
+                  {money(it.balance)}
                 </Text>
               </Group>
             </UnstyledButton>

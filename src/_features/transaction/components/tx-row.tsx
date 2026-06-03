@@ -4,8 +4,8 @@ import { Group, Stack, Text, UnstyledButton } from "@mantine/core";
 import { useRouter, useParams } from "next/navigation";
 
 import IconBox from "_features/common/components/icon-box";
+import { useMoney } from "_features/common/hooks/use-money";
 import { TOKEN } from "_styles/design-tokens";
-import { fmt } from "_utilities/fmt";
 
 import type { TransactionListItemType, TxType } from "../types";
 
@@ -34,6 +34,7 @@ const TYPE_FALLBACK_HEX: Record<TxType, string> = {
 export default function TxRow({ t }: { t: TransactionListItemType }) {
   const router = useRouter();
   const params = useParams<{ locale: string }>();
+  const money = useMoney();
 
   const accent = t.categoryColor ?? TYPE_FALLBACK_HEX[t.txType];
 
@@ -66,7 +67,7 @@ export default function TxRow({ t }: { t: TransactionListItemType }) {
           }}
         >
           {SIGN[t.txType]}
-          {fmt(t.amount)}원
+          {money(t.amount)}
         </Text>
       </Group>
     </UnstyledButton>

@@ -11,12 +11,12 @@ import {
   useItemRealizedPnl,
 } from "_features/portfolio/queries/use-query";
 import type { RealizedPnlResponseType } from "_features/portfolio/types";
+import { useMoney } from "_features/common/hooks/use-money";
 import {
   formatProfitAmount,
   formatProfitRate,
   profitColor,
 } from "_features/portfolio/utils";
-import { fmt } from "_utilities/fmt";
 
 interface Props {
   // 둘 중 하나 — 종목 단위(portfolioId) 또는 계좌 누적(accountId)
@@ -124,6 +124,8 @@ function RealizedPnlView({
   onToChange,
 }: ViewProps) {
   const t = useTranslations("portfolio");
+  const tGeneral = useTranslations("general");
+  const money = useMoney();
   const { summary, rows } = data;
   const today = new Date();
 
@@ -163,7 +165,7 @@ function RealizedPnlView({
                 c={profitColor(summary.totalRealized)}
                 style={{ fontVariantNumeric: "tabular-nums" }}
               >
-                {formatProfitAmount(summary.totalRealized, fmt)}원
+                {formatProfitAmount(summary.totalRealized, money)}
               </Text>
               <Text
                 size="sm"
@@ -180,7 +182,7 @@ function RealizedPnlView({
               {t("sell_amount")}
             </Text>
             <Text size="xs" fw={600} style={{ fontVariantNumeric: "tabular-nums" }}>
-              {fmt(summary.sellAmount)}원
+              {money(summary.sellAmount)}
             </Text>
           </Group>
           <Group justify="space-between">
@@ -188,7 +190,7 @@ function RealizedPnlView({
               {t("buy_amount")}
             </Text>
             <Text size="xs" fw={600} style={{ fontVariantNumeric: "tabular-nums" }}>
-              {fmt(summary.buyAmount)}원
+              {money(summary.buyAmount)}
             </Text>
           </Group>
         </Stack>
@@ -222,7 +224,8 @@ function RealizedPnlView({
                     {r.txDate}
                   </Text>
                   <Text size="xs" c="dimmed">
-                    {fmt(r.quantity)}주 @{fmt(r.sellPrice)}원
+                    {tGeneral("unit.stock", { count: r.quantity })} @
+                    {money(r.sellPrice)}
                   </Text>
                 </div>
                 <div style={{ textAlign: "right" }}>
@@ -232,7 +235,7 @@ function RealizedPnlView({
                     c={profitColor(r.realizedPnl)}
                     style={{ fontVariantNumeric: "tabular-nums" }}
                   >
-                    {formatProfitAmount(r.realizedPnl, fmt)}원
+                    {formatProfitAmount(r.realizedPnl, money)}
                   </Text>
                   <Text
                     size="xs"

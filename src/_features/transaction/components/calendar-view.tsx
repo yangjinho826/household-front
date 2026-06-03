@@ -2,6 +2,7 @@
 
 import { Card, Grid, SimpleGrid, Stack, Text, UnstyledButton } from "@mantine/core";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
 import { TOKEN } from "_styles/design-tokens";
@@ -26,6 +27,7 @@ interface CalendarViewProps {
  * 월 선택은 부모(transactions-section) 의 MonthPicker 에서 관리.
  */
 export default function TransactionCalendarView({ year, month }: CalendarViewProps) {
+  const tGeneral = useTranslations("general");
   const today = todayIso(); // YYYY-MM-DD (KST)
   const monthPrefix = `${year}-${String(month).padStart(2, "0")}`;
 
@@ -140,7 +142,7 @@ export default function TransactionCalendarView({ year, month }: CalendarViewPro
                           fw={700}
                           c={isSelected ? "white" : "info.5"}
                         >
-                          +{Math.round(stat.income / 10000)}만
+                          +{tGeneral("unit.man", { value: Math.round(stat.income / 10000) })}
                         </Text>
                       )}
                       {stat.expense > 0 && (
@@ -149,7 +151,7 @@ export default function TransactionCalendarView({ year, month }: CalendarViewPro
                           fw={700}
                           c={isSelected ? "white" : "danger.5"}
                         >
-                          -{Math.round(stat.expense / 10000)}만
+                          -{tGeneral("unit.man", { value: Math.round(stat.expense / 10000) })}
                         </Text>
                       )}
                     </Stack>

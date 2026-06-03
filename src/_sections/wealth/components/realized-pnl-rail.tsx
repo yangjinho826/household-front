@@ -8,13 +8,13 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import RealizedPnlPanel from "_sections/wealth/components/realized-pnl-panel";
+import { useMoney } from "_features/common/hooks/use-money";
 import { useAccountRealizedPnl } from "_features/portfolio/queries/use-query";
 import {
   formatProfitAmount,
   formatProfitRate,
   profitColor,
 } from "_features/portfolio/utils";
-import { fmt } from "_utilities/fmt";
 
 interface Props {
   accountId: string;
@@ -28,6 +28,7 @@ interface Props {
  */
 export default function RealizedPnlRail({ accountId }: Props) {
   const t = useTranslations("portfolio");
+  const money = useMoney();
   const [opened, { open, close }] = useDisclosure(false);
   // 레일 대표 = 최근 1년. 시트에 같은 기본 범위를 넘겨 일관(거기서 자유 변경).
   const [range] = useState(() => {
@@ -64,7 +65,7 @@ export default function RealizedPnlRail({ accountId }: Props) {
                   c={profitColor(summary.totalRealized)}
                   style={{ fontVariantNumeric: "tabular-nums" }}
                 >
-                  {formatProfitAmount(summary.totalRealized, fmt)}원
+                  {formatProfitAmount(summary.totalRealized, money)}
                 </Text>
                 <Text
                   size="xs"

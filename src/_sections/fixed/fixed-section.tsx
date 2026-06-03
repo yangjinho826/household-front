@@ -11,13 +11,14 @@ import { queryKeys } from "_constants/queries";
 import MonthPicker, {
   defaultYearMonth,
 } from "_features/common/components/month-picker";
+import { useMoney } from "_features/common/hooks/use-money";
 import FixedTable from "_features/fixed/components/table";
 import { useFixedSearch } from "_features/fixed/hooks/use-sub/use-search";
 import { InfiniteSentinel } from "_libraries/query/infinite-sentinel";
-import { fmt } from "_utilities/fmt";
 
 export default function FixedSection() {
   const t = useTranslations("fixed");
+  const money = useMoney();
   const router = useRouter();
   const routeParams = useParams<{ locale: string }>();
   const {
@@ -69,7 +70,7 @@ export default function FixedSection() {
             fw={800}
             style={{ fontVariantNumeric: "tabular-nums" }}
           >
-            {fmt(totalFixedAmount)}원
+            {money(totalFixedAmount)}
           </Text>
         </Group>
       </Card>

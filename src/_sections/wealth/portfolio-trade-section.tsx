@@ -38,6 +38,7 @@ import {
   formatProfitRate,
   profitColor,
 } from "_features/portfolio/utils";
+import { useMoney } from "_features/common/hooks/use-money";
 import { fmt } from "_utilities/fmt";
 
 interface Props {
@@ -46,6 +47,8 @@ interface Props {
 
 export default function PortfolioTradeSection({ portfolioId }: Props) {
   const t = useTranslations("portfolio");
+  const tGeneral = useTranslations("general");
+  const money = useMoney();
   const router = useRouter();
   const routeParams = useParams<{ locale: string }>();
   const queryClient = useQueryClient();
@@ -174,7 +177,7 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
                 fw={700}
                 style={{ fontVariantNumeric: "tabular-nums" }}
               >
-                {fmt(portfolio.avgPrice)}원
+                {money(portfolio.avgPrice)}
               </Text>
             </Stack>
             <Stack gap={2}>
@@ -186,7 +189,7 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
                 fw={700}
                 style={{ fontVariantNumeric: "tabular-nums" }}
               >
-                {fmt(portfolio.currentPrice)}원
+                {money(portfolio.currentPrice)}
               </Text>
             </Stack>
           </SimpleGrid>
@@ -281,15 +284,15 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
                         fw={700}
                         style={{ fontVariantNumeric: "tabular-nums" }}
                       >
-                        {fmt(tx.total)}원
+                        {money(tx.total)}
                       </Text>
                     </Group>
                     <Group gap={8}>
                       <Text size="11px" c="dimmed">
-                        {tx.quantity}주
+                        {tGeneral("unit.stock", { count: tx.quantity })}
                       </Text>
                       <Text size="11px" c="dimmed">
-                        × {fmt(tx.price)}원
+                        × {money(tx.price)}
                       </Text>
                     </Group>
                     {tx.memo && (

@@ -16,10 +16,10 @@ import { useTranslations } from "next-intl";
 
 import { LEDGER_ACCOUNT_TYPES } from "_features/account/constants";
 import { useAccountReport } from "_features/account/queries/use-query";
+import { useMoney } from "_features/common/hooks/use-money";
 import SubHeader from "_features/layout/components/sub-header";
 import AccountLedgerView from "_features/transaction/components/account-ledger-view";
 import AccountBalanceTrend from "_sections/wealth/components/account-balance-trend";
-import { fmt } from "_utilities/fmt";
 
 interface Props {
   accountId: string;
@@ -35,6 +35,7 @@ function FlowTooltip({
   payload?: { dataKey: string; value: number }[];
   label?: string;
 }) {
+  const money = useMoney();
   if (!active || !payload?.length) return null;
   const income = payload.find((p) => p.dataKey === "income")?.value ?? 0;
   const expense = payload.find((p) => p.dataKey === "expense")?.value ?? 0;
@@ -57,7 +58,7 @@ function FlowTooltip({
         c="positive.6"
         style={{ fontVariantNumeric: "tabular-nums" }}
       >
-        수입 +{fmt(income)}원
+        수입 +{money(income)}
       </Text>
       <Text
         size="xs"
@@ -65,7 +66,7 @@ function FlowTooltip({
         c="danger.5"
         style={{ fontVariantNumeric: "tabular-nums" }}
       >
-        지출 −{fmt(expense)}원
+        지출 −{money(expense)}
       </Text>
     </div>
   );
@@ -75,6 +76,7 @@ export default function AccountReportSection({ accountId }: Props) {
   const router = useRouter();
   const { locale } = useParams<{ locale: string }>();
   const t = useTranslations("transaction");
+  const money = useMoney();
   const { data } = useAccountReport(accountId);
   const report = data.body.data;
   const showLedger = LEDGER_ACCOUNT_TYPES.has(report.accountType);
@@ -116,10 +118,7 @@ export default function AccountReportSection({ accountId }: Props) {
             fw={800}
             style={{ fontVariantNumeric: "tabular-nums" }}
           >
-            {fmt(report.balance)}
-            <Text span size="lg" c="dimmed" ml={4} fw={600}>
-              원
-            </Text>
+            {money(report.balance)}
           </Text>
         </Stack>
       </Card>
