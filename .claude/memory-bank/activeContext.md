@@ -10,6 +10,13 @@
 
 ## Status
 
+### R5b 트랙② 디자인·브랜딩 + i18n 전건 (2026-06-03, front 13커밋)
+- **로고 풀세트**: "모음" 마크(겹치는 세 원 → 중앙 핵 수렴 = "여러 자산이 한곳으로". codex 교차검토로 A/B/C 시안 중 B안 채택). `design/logo-20260603/`(mark.svg·워드마크 라이트/다크·favicon 세트·브랜드 README). BrandLogo(로그인·사이드바) 구식 지갑아이콘 → 새 마크 inline SVG.
+- **favicon 500 픽스**: Next14 App Router는 `app/icon.svg`를 `/icon.svg` 라우트로 자동 등록하는데 `metadata.icons.icon`에 `/icon.svg`를 또 지정 → 경로 충돌로 500. metadata에서 /icon.svg 제거, app/icon.svg를 구식 ₩ 임시아이콘 → 새 마크로(자동 favicon 정본), public/icon.svg 중복 삭제.
+- **로딩 중앙정렬**: Suspense fallback·인증가드의 `<Center py="xl">`(높이 없어 상단 붙음) → 공통 `PageLoader`(mih=70dvh) 13곳 통일.
+- **i18n 하드코딩 124건 전건 제거**: 통화(`useMoney` 훅 ko"1,000원"/en"₩1,000")·단위(`general.unit` 주/개/만)·날짜(`useMonthLabel`·`general.weekday`/`year_month`)·개별텍스트(`wealth` NS 신설 포함 9개 NS)·메타데이터(`generateMetadata` 동적화). 공통 인프라(헬퍼+키) 메인 선작업 후 컴포넌트 치환은 서브에이전트 병렬(json 충돌 회피).
+- **검증**: typecheck·lint·build 통과 + `/browse`로 `/en` 4페이지(login·home·transactions·invest) E2E — UI 한글 0건(잔존은 전부 사용자 데이터: 계좌명·종목명·카테고리·household명). 통화 ₩·etc_count·month-picker·필터·계좌카드 메타 전부 영어 확인.
+
 ### R5c — running balance 머지 전 리뷰·핫픽스 (2026-06-03)
 4소스 교차 리뷰(fastapi-reviewer·code-reviewer·codex 양레포 **소스 전체** 스캔) 후 **5개 즉시 fix → typecheck/lint/py_compile 통과, 커밋 진행 중**:
 - [back] 포트폴리오 평단 replay 통합(`portfolio/service.py`) — 매도후재매수 평단 왜곡(133.33 vs 정답150) 수정. `_recompute_realized_pnl`이 최종 보유 반환→avg_price 재사용
