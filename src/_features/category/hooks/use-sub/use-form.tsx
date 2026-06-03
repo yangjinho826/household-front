@@ -17,9 +17,11 @@ import type {
 
 interface UseCategoryFormOptions {
   categoryId?: string;
+  /** 시트에서 사용 시 — 성공·취소 후 페이지 이동 대신 이 콜백(시트 close) 호출 */
+  onDone?: () => void;
 }
 
-export function useCategoryForm({ categoryId }: UseCategoryFormOptions) {
+export function useCategoryForm({ categoryId, onDone }: UseCategoryFormOptions) {
   const t = useTranslations("category");
   const tg = useTranslations("general.common");
   const te = useTranslations("error");
@@ -89,7 +91,8 @@ export function useCategoryForm({ categoryId }: UseCategoryFormOptions) {
           color: "green",
         });
       }
-      router.replace(`/${routeParams.locale}/category`);
+      if (onDone) onDone();
+      else router.replace(`/${routeParams.locale}/category`);
     } catch (error) {
       notifications.show({
         title: tg("notificationstitle"),
@@ -113,13 +116,15 @@ export function useCategoryForm({ categoryId }: UseCategoryFormOptions) {
           message: tg("confirmyescontent"),
           color: "green",
         });
-        router.replace(`/${routeParams.locale}/category`);
+        if (onDone) onDone();
+        else router.replace(`/${routeParams.locale}/category`);
       },
     });
   };
 
   const handleCancel = () => {
-    router.back();
+    if (onDone) onDone();
+    else router.back();
   };
 
   return {

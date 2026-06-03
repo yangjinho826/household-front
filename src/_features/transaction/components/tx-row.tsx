@@ -2,12 +2,12 @@
 
 import { Group, Stack, Text, UnstyledButton } from "@mantine/core";
 import { useTranslations } from "next-intl";
-import { useRouter, useParams } from "next/navigation";
 
 import IconBox from "_features/common/components/icon-box";
 import { useMoney } from "_features/common/hooks/use-money";
 import { TOKEN } from "_styles/design-tokens";
 
+import { useQuickAddStore } from "../store";
 import type { TransactionListItemType, TxType } from "../types";
 
 const SIGN: Record<TxType, string> = {
@@ -33,18 +33,15 @@ const TYPE_FALLBACK_HEX: Record<TxType, string> = {
 };
 
 export default function TxRow({ item }: { item: TransactionListItemType }) {
-  const router = useRouter();
-  const params = useParams<{ locale: string }>();
   const money = useMoney();
   const t = useTranslations("transaction");
+  const openEdit = useQuickAddStore((s) => s.open);
 
   const accent = item.categoryColor ?? TYPE_FALLBACK_HEX[item.txType];
 
   return (
     <UnstyledButton
-      onClick={() =>
-        router.push(`/${params.locale}/transactions/${item.transactionId}`)
-      }
+      onClick={() => openEdit(item.transactionId)}
       style={{ padding: 12, borderRadius: 12, display: "block" }}
     >
       <Group justify="space-between" gap="md" wrap="nowrap" align="center">

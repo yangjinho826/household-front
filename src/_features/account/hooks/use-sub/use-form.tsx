@@ -17,9 +17,11 @@ import type {
 
 interface UseAccountFormOptions {
   accountId?: string; // 있으면 update, 없으면 create
+  /** 시트에서 사용 시 — 성공·취소 후 페이지 이동 대신 이 콜백(시트 close) 호출 */
+  onDone?: () => void;
 }
 
-export function useAccountForm({ accountId }: UseAccountFormOptions) {
+export function useAccountForm({ accountId, onDone }: UseAccountFormOptions) {
   const t = useTranslations("account");
   const tg = useTranslations("general.common");
   const te = useTranslations("error");
@@ -96,7 +98,8 @@ export function useAccountForm({ accountId }: UseAccountFormOptions) {
           color: "green",
         });
       }
-      router.replace(`/${routeParams.locale}/account`);
+      if (onDone) onDone();
+      else router.replace(`/${routeParams.locale}/account`);
     } catch (error) {
       notifications.show({
         title: tg("notificationstitle"),
@@ -120,13 +123,15 @@ export function useAccountForm({ accountId }: UseAccountFormOptions) {
           message: tg("confirmyescontent"),
           color: "green",
         });
-        router.replace(`/${routeParams.locale}/account`);
+        if (onDone) onDone();
+        else router.replace(`/${routeParams.locale}/account`);
       },
     });
   };
 
   const handleCancel = () => {
-    router.back();
+    if (onDone) onDone();
+    else router.back();
   };
 
   return {

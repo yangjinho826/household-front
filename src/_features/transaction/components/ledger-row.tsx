@@ -2,12 +2,12 @@
 
 import { Group, Stack, Text, UnstyledButton } from "@mantine/core";
 import { useTranslations } from "next-intl";
-import { useParams, useRouter } from "next/navigation";
 
 import IconBox from "_features/common/components/icon-box";
 import { TOKEN } from "_styles/design-tokens";
 import { fmt } from "_utilities/fmt";
 
+import { useQuickAddStore } from "../store";
 import type { AccountLedgerItemType, TxType } from "../types";
 
 // 카테고리 색 없을 때 tx_type 기준 fallback (tx-row 와 동일 팔레트)
@@ -30,9 +30,8 @@ export default function LedgerRow({
   /** 지금 보고 있는 계좌 — 이체 방향 판정 기준 */
   accountId: string;
 }) {
-  const router = useRouter();
-  const params = useParams<{ locale: string }>();
   const tt = useTranslations("transaction");
+  const openEdit = useQuickAddStore((s) => s.open);
 
   const accent = t.categoryColor ?? TYPE_FALLBACK_HEX[t.txType];
   // 이체 방향은 signedAmount 부호가 아니라 계좌 매칭으로 — 0원 이체도 정확하게.
@@ -44,9 +43,7 @@ export default function LedgerRow({
 
   return (
     <UnstyledButton
-      onClick={() =>
-        router.push(`/${params.locale}/transactions/${t.transactionId}`)
-      }
+      onClick={() => openEdit(t.transactionId)}
       style={{ padding: 12, borderRadius: 12, display: "block" }}
     >
       <Group justify="space-between" gap="md" wrap="nowrap" align="center">

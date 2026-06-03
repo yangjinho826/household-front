@@ -17,9 +17,14 @@ import type {
 
 interface UseHouseholdFormOptions {
   householdId?: string;
+  /** 시트에서 사용 시 — 성공·취소 후 페이지 이동 대신 이 콜백(시트 close) 호출 */
+  onDone?: () => void;
 }
 
-export function useHouseholdForm({ householdId }: UseHouseholdFormOptions) {
+export function useHouseholdForm({
+  householdId,
+  onDone,
+}: UseHouseholdFormOptions) {
   const t = useTranslations("household");
   const tg = useTranslations("general.common");
   const te = useTranslations("error");
@@ -91,7 +96,8 @@ export function useHouseholdForm({ householdId }: UseHouseholdFormOptions) {
           color: "green",
         });
       }
-      router.replace(`/${routeParams.locale}/household`);
+      if (onDone) onDone();
+      else router.replace(`/${routeParams.locale}/household`);
     } catch (error) {
       notifications.show({
         title: tg("notificationstitle"),
@@ -103,11 +109,13 @@ export function useHouseholdForm({ householdId }: UseHouseholdFormOptions) {
 
   const handleRemove = () => {
     if (!householdId) return;
+    // 가계부 삭제 = 모든 자식(통장·거래·종목 등) cascade soft-delete → 강한 경고.
     modals.openConfirmModal({
       centered: true,
-      title: tg("confirmtitle"),
-      labels: { confirm: tg("confirm"), cancel: tg("cancel") },
-      children: <span>{tg("want_to_delete")}</span>,
+      title: t("delete_confirm_title"),
+      labels: { confirm: tg("delete"), cancel: tg("cancel") },
+      confirmProps: { color: "red" },
+      children: <span>{t("delete_confirm_message")}</span>,
       onConfirm: async () => {
         await removeMutation.mutateAsync(householdId);
         notifications.show({
@@ -115,13 +123,15 @@ export function useHouseholdForm({ householdId }: UseHouseholdFormOptions) {
           message: tg("confirmyescontent"),
           color: "green",
         });
-        router.replace(`/${routeParams.locale}/household`);
+        if (onDone) onDone();
+        else router.replace(`/${routeParams.locale}/household`);
       },
     });
   };
 
   const handleCancel = () => {
-    router.back();
+    if (onDone) onDone();
+    else router.back();
   };
 
   return {

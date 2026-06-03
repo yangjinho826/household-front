@@ -9,6 +9,7 @@ import { useMemo } from "react";
 import AccountTable from "_features/account/components/table";
 import { ACCOUNT_TYPE_ORDER, isAccountType } from "_features/account/constants";
 import { useAccountSearch } from "_features/account/hooks/use-sub/use-search";
+import { useAccountSheetStore } from "_features/account/store";
 import type { AccountListItemType, AccountType } from "_features/account/types";
 import FilterChip from "_features/common/components/filter-chip";
 import { useEnumOptions } from "_features/enum/queries/use-query";
@@ -20,6 +21,7 @@ export default function AccountSection() {
   const tGeneral = useTranslations("general");
   const router = useRouter();
   const routeParams = useParams<{ locale: string }>();
+  const openAccountSheet = useAccountSheetStore((s) => s.open);
   const {
     accountType,
     setAccountType,
@@ -55,7 +57,7 @@ export default function AccountSection() {
         <ActionIcon
           size="lg"
           radius="xl"
-          onClick={() => router.push(`/${routeParams.locale}/account/new`)}
+          onClick={() => openAccountSheet()}
           aria-label={t("add")}
         >
           <IconPlus size={18} />

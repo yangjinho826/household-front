@@ -2,13 +2,15 @@
 
 import { ActionIcon, Group, Stack, Title } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
-import { useRouter, useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 
+import CategoryForm from "_features/category/components/form";
 import CategoryTable from "_features/category/components/table";
 import { useCategorySearch } from "_features/category/hooks/use-sub/use-search";
 import type { CategoryKind } from "_features/category/types";
 import FilterChip from "_features/common/components/filter-chip";
+import FormSheet from "_features/common/components/form-sheet";
 import { useEnumOptions } from "_features/enum/queries/use-query";
 import { InfiniteSentinel } from "_libraries/query/infinite-sentinel";
 
@@ -16,8 +18,14 @@ export default function CategorySection() {
   const t = useTranslations("category");
   const tKind = useTranslations("enum.category-kind");
   const tGeneral = useTranslations("general");
-  const router = useRouter();
-  const routeParams = useParams<{ locale: string }>();
+
+  const [opened, setOpened] = useState(false);
+  const [editId, setEditId] = useState<string | undefined>(undefined);
+  const openSheet = (id?: string) => {
+    setEditId(id);
+    setOpened(true);
+  };
+
   const {
     kind,
     setKind,
@@ -37,7 +45,7 @@ export default function CategorySection() {
         <ActionIcon
           size="lg"
           radius="xl"
-          onClick={() => router.push(`/${routeParams.locale}/category/new`)}
+          onClick={() => openSheet()}
           aria-label={t("add")}
         >
           <IconPlus size={18} />
@@ -60,18 +68,25 @@ export default function CategorySection() {
         ))}
       </Group>
 
-      <CategoryTable
-        items={items}
-        onClickRow={(id) =>
-          router.push(`/${routeParams.locale}/category/${id}`)
-        }
-      />
+      <CategoryTable items={items} onClickRow={(id) => openSheet(id)} />
 
       <InfiniteSentinel
         hasNextPage={hasNextPage}
         isFetchingNextPage={isFetchingNextPage}
         onLoadMore={fetchNextPage}
       />
+
+      <FormSheet
+        opened={opened}
+        onClose={() => setOpened(false)}
+        title={editId ? t("form_update_title") : t("form_create_title")}
+      >
+        <CategoryForm
+          categoryId={editId}
+          onDone={() => setOpened(false)}
+          hideCard
+        />
+      </FormSheet>
     </Stack>
   );
 }

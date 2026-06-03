@@ -14,9 +14,11 @@ import type { FixedBaseRequestType } from "../../types";
 
 interface UseFixedFormOptions {
   fixedId?: string;
+  /** 시트에서 사용 시 — 성공·취소 후 페이지 이동 대신 이 콜백(시트 close) 호출 */
+  onDone?: () => void;
 }
 
-export function useFixedForm({ fixedId }: UseFixedFormOptions) {
+export function useFixedForm({ fixedId, onDone }: UseFixedFormOptions) {
   const t = useTranslations("fixed");
   const tg = useTranslations("general.common");
   const te = useTranslations("error");
@@ -90,7 +92,8 @@ export function useFixedForm({ fixedId }: UseFixedFormOptions) {
           color: "green",
         });
       }
-      router.replace(`/${routeParams.locale}/fixed`);
+      if (onDone) onDone();
+      else router.replace(`/${routeParams.locale}/fixed`);
     } catch (error) {
       notifications.show({
         title: tg("notificationstitle"),
@@ -114,13 +117,15 @@ export function useFixedForm({ fixedId }: UseFixedFormOptions) {
           message: tg("confirmyescontent"),
           color: "green",
         });
-        router.replace(`/${routeParams.locale}/fixed`);
+        if (onDone) onDone();
+        else router.replace(`/${routeParams.locale}/fixed`);
       },
     });
   };
 
   const handleCancel = () => {
-    router.back();
+    if (onDone) onDone();
+    else router.back();
   };
 
   return {

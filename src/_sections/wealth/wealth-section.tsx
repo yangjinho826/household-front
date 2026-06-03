@@ -1,13 +1,15 @@
 "use client";
 
-import { Card, Group, Modal, Stack, Text, UnstyledButton } from "@mantine/core";
+import { Card, Group, Stack, Text, UnstyledButton } from "@mantine/core";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useRouter, useParams } from "next/navigation";
 import { useState } from "react";
 
 import { ACCOUNT_TYPE_MANTINE_COLOR } from "_features/account/constants";
+import { useAccountSheetStore } from "_features/account/store";
 import type { AccountListItemType } from "_features/account/types";
+import FormSheet from "_features/common/components/form-sheet";
 import SubHeader from "_features/layout/components/sub-header";
 import ManualAssetForm from "_features/manual-asset/components/form";
 import { useManualAssetList } from "_features/manual-asset/queries/use-query";
@@ -36,12 +38,13 @@ export default function WealthSection() {
   const tGeneral = useTranslations("general.common");
   const money = useMoney();
 
+  const openAccountSheet = useAccountSheetStore((s) => s.open);
+
   const { data: overviewRes } = useSuspenseQuery(queryKeys.wealth.overview({}));
   const { data: manualAssetRes } = useManualAssetList();
   const manualAssetItems = manualAssetRes.body.data;
 
-  // 부동산·연금 폼 모달 — modals.open() portal 은 QueryClientProvider 밖이라
-  // 트리 안(<Modal>)에서 직접 렌더해야 useQuery/useMutation 컨텍스트가 잡힘
+  // 수동자산 폼 시트 — 트리 안에서 직접 렌더해야 useQuery/useMutation 컨텍스트가 잡힘
   const [manualAssetFormOpen, setManualAssetFormOpen] = useState(false);
   const [manualAssetEdit, setManualAssetEdit] = useState<
     ManualAssetListItemType | undefined
@@ -49,13 +52,8 @@ export default function WealthSection() {
 
   const overview = overviewRes.body.data;
   const accounts: AccountListItemType[] = overview.accounts;
-  // 수동자산 전용계좌(부동산·연금·금)는 통장 리스트에서 제외 — 별도 수동자산 섹션에서 관리
-  const visibleAccounts = accounts.filter(
-    (a) =>
-      a.accountType !== "REAL_ESTATE" &&
-      a.accountType !== "PENSION" &&
-      a.accountType !== "COMMODITY",
-  );
+  // 수동자산 전용계좌(부동산·연금·금·적금)는 통장 리스트에서 제외 — 별도 수동자산 섹션에서 관리
+  const visibleAccounts = accounts.filter((a) => !a.isManualAsset);
 
   const openManualAssetForm = (asset?: ManualAssetListItemType) => {
     setManualAssetEdit(asset);
@@ -148,9 +146,7 @@ export default function WealthSection() {
         <Text size="sm" fw={700}>
           {tWealth("accounts_count", { count: visibleAccounts.length })}
         </Text>
-        <UnstyledButton
-          onClick={() => router.push(`/${routeParams.locale}/account/new`)}
-        >
+        <UnstyledButton onClick={() => openAccountSheet()}>
           <Text size="xs" fw={700} c="info.5">
             + {tGeneral("create")}
           </Text>
@@ -218,7 +214,7 @@ export default function WealthSection() {
         </Stack>
       </Card>
 
-      <Modal
+      <FormSheet
         opened={manualAssetFormOpen}
         onClose={() => setManualAssetFormOpen(false)}
         title={
@@ -226,13 +222,12 @@ export default function WealthSection() {
             ? `${tManual("section_title")} ${tGeneral("update")}`
             : `${tManual("section_title")} ${tGeneral("create")}`
         }
-        centered
       >
         <ManualAssetForm
           asset={manualAssetEdit}
           onClose={() => setManualAssetFormOpen(false)}
         />
-      </Modal>
+      </FormSheet>
     </Stack>
   );
 }

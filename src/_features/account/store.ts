@@ -12,3 +12,22 @@ export const useAccountStore = create<AccountStoreState>((set) => ({
   bumpDetailRefreshKey: () =>
     set((s) => ({ detailRefreshKey: s.detailRefreshKey + 1 })),
 }));
+
+/**
+ * 통장 추가/수정 시트 — 자산·통장 화면 곳곳의 트리거가 연다.
+ * UserShell 안 AccountSheet 가 구독. editId 있으면 수정, 없으면 생성.
+ */
+interface AccountSheetState {
+  opened: boolean;
+  editId: string | null;
+  /** 인자 없으면 생성, id 주면 해당 통장 수정 */
+  open: (editId?: string) => void;
+  close: () => void;
+}
+
+export const useAccountSheetStore = create<AccountSheetState>((set) => ({
+  opened: false,
+  editId: null,
+  open: (editId?: string) => set({ opened: true, editId: editId ?? null }),
+  close: () => set({ opened: false, editId: null }),
+}));

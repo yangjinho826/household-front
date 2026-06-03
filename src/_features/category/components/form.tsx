@@ -10,7 +10,7 @@ import {
   TextInput,
 } from "@mantine/core";
 import { useTranslations } from "next-intl";
-import { useMemo } from "react";
+import { Fragment, useMemo } from "react";
 
 import ColorPicker from "_features/common/components/color-picker";
 import IconPicker from "_features/common/components/icon-picker";
@@ -20,9 +20,17 @@ import { useCategoryForm } from "../hooks/use-sub/use-form";
 
 interface CategoryFormProps {
   categoryId?: string;
+  /** 시트에서 사용 시 — 성공·취소 후 호출(시트 close) */
+  onDone?: () => void;
+  /** 시트 안에서는 Card 래퍼 없이(이미 패딩 있음) */
+  hideCard?: boolean;
 }
 
-export default function CategoryForm({ categoryId }: CategoryFormProps) {
+export default function CategoryForm({
+  categoryId,
+  onDone,
+  hideCard = false,
+}: CategoryFormProps) {
   const t = useTranslations("category");
   const tKind = useTranslations("enum.category-kind");
   const tg = useTranslations("general.common");
@@ -34,7 +42,9 @@ export default function CategoryForm({ categoryId }: CategoryFormProps) {
     handleSubmit,
     handleRemove,
     handleCancel,
-  } = useCategoryForm({ categoryId });
+  } = useCategoryForm({ categoryId, onDone });
+
+  const Wrapper = hideCard ? Fragment : Card;
 
   const { data: kindData } = useEnumOptions("category-kind");
   const kindOptions = useMemo(
@@ -44,7 +54,7 @@ export default function CategoryForm({ categoryId }: CategoryFormProps) {
   );
 
   return (
-    <Card>
+    <Wrapper>
       <form onSubmit={form.onSubmit(handleSubmit)}>
         <Stack gap="sm">
           <Select
@@ -98,6 +108,6 @@ export default function CategoryForm({ categoryId }: CategoryFormProps) {
           )}
         </Stack>
       </form>
-    </Card>
+    </Wrapper>
   );
 }

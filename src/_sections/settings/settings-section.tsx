@@ -19,7 +19,10 @@ import { useRouter, useParams } from "next/navigation";
 
 import { useAuthContext } from "_features/auth/context";
 import { HouseholdSwitcher } from "_features/household/components/household-switcher";
-import { useHouseholdStore } from "_features/household/store";
+import {
+  useHouseholdStore,
+  useMembersSheetStore,
+} from "_features/household/store";
 import { queryKeys } from "_constants/queries";
 
 export default function SettingsSection() {
@@ -43,6 +46,7 @@ export default function SettingsSection() {
   const counts = overviewRes.body.data;
   const currentHousehold =
     households.find((h) => h.householdId === currentId) ?? households[0];
+  const openMembers = useMembersSheetStore((s) => s.open);
 
   const onLogout = async () => {
     try {
@@ -166,9 +170,7 @@ export default function SettingsSection() {
               <SettingsRow
                 label={t("member_manage")}
                 icon={IconUsers}
-                onClick={() =>
-                  navTo(`/household/${currentHousehold.householdId}/members`)
-                }
+                onClick={() => openMembers(currentHousehold.householdId)}
               />
             )}
           </Stack>
@@ -200,7 +202,7 @@ export default function SettingsSection() {
             <SettingsRow
               label={t("account_manage")}
               value={t("count_suffix", { count: counts.accountCount })}
-              onClick={() => navTo("/account")}
+              onClick={() => navTo("/wealth")}
             />
           </Stack>
         </Card>

@@ -3,16 +3,17 @@
 import { ActionIcon, Card, Group, Stack, Text, Title } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
-import { useRouter, useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { queryKeys } from "_constants/queries";
+import FormSheet from "_features/common/components/form-sheet";
 import MonthPicker, {
   defaultYearMonth,
 } from "_features/common/components/month-picker";
 import { useMonthLabel } from "_features/common/hooks/use-month-label";
 import { useMoney } from "_features/common/hooks/use-money";
+import FixedForm from "_features/fixed/components/form";
 import FixedTable from "_features/fixed/components/table";
 import { useFixedSearch } from "_features/fixed/hooks/use-sub/use-search";
 import { InfiniteSentinel } from "_libraries/query/infinite-sentinel";
@@ -21,14 +22,20 @@ export default function FixedSection() {
   const t = useTranslations("fixed");
   const monthLabel = useMonthLabel();
   const money = useMoney();
-  const router = useRouter();
-  const routeParams = useParams<{ locale: string }>();
   const {
     items,
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
   } = useFixedSearch();
+
+  // 추가/수정 시트 — editId 있으면 수정, 없으면 추가
+  const [opened, setOpened] = useState(false);
+  const [editId, setEditId] = useState<string | undefined>(undefined);
+  const openSheet = (id?: string) => {
+    setEditId(id);
+    setOpened(true);
+  };
 
   // 선택 월 — 기본 이번달 (YYYY-MM)
   const [month, setMonth] = useState<string>(() => defaultYearMonth());
@@ -49,7 +56,7 @@ export default function FixedSection() {
         <ActionIcon
           size="lg"
           radius="xl"
-          onClick={() => router.push(`/${routeParams.locale}/fixed/new`)}
+          onClick={() => openSheet()}
           aria-label={t("add")}
         >
           <IconPlus size={18} />
@@ -78,7 +85,7 @@ export default function FixedSection() {
       <FixedTable
         items={items}
         usagesByFixed={usagesByFixed}
-        onClickRow={(id) => router.push(`/${routeParams.locale}/fixed/${id}`)}
+        onClickRow={(id) => openSheet(id)}
       />
 
       <InfiniteSentinel
@@ -86,6 +93,14 @@ export default function FixedSection() {
         isFetchingNextPage={isFetchingNextPage}
         onLoadMore={fetchNextPage}
       />
+
+      <FormSheet
+        opened={opened}
+        onClose={() => setOpened(false)}
+        title={editId ? t("form_update_title") : t("form_create_title")}
+      >
+        <FixedForm fixedId={editId} onDone={() => setOpened(false)} hideCard />
+      </FormSheet>
     </Stack>
   );
 }

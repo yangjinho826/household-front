@@ -10,11 +10,10 @@ import {
 import { IconCheck, IconCrown, IconPlus, IconUsers } from "@tabler/icons-react";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useRouter, useParams } from "next/navigation";
 
 import { queryKeys } from "_constants/queries";
 
-import { useHouseholdStore } from "../store";
+import { useHouseholdStore, useHouseholdSheetStore } from "../store";
 
 interface HouseholdSwitcherProps {
   opened: boolean;
@@ -22,8 +21,6 @@ interface HouseholdSwitcherProps {
 }
 
 export function HouseholdSwitcher({ opened, onClose }: HouseholdSwitcherProps) {
-  const router = useRouter();
-  const routeParams = useParams<{ locale: string }>();
   const queryClient = useQueryClient();
   const t = useTranslations("household");
 
@@ -32,6 +29,7 @@ export function HouseholdSwitcher({ opened, onClose }: HouseholdSwitcherProps) {
 
   const currentId = useHouseholdStore((s) => s.currentHouseholdId);
   const setCurrentId = useHouseholdStore((s) => s.setCurrentHouseholdId);
+  const openSheet = useHouseholdSheetStore((s) => s.open);
 
   const onSelect = (id: string) => {
     if (id === currentId) {
@@ -40,13 +38,15 @@ export function HouseholdSwitcher({ opened, onClose }: HouseholdSwitcherProps) {
     }
     setCurrentId(id);
     onClose();
-    // 가계부 바뀌면 모든 서버 데이터 stale — 다음 요청부터 새 X-Household-Id 헤더로 자동 fetch
-    queryClient.invalidateQueries();
+    // 가계부 = 데이터 컨텍스트 완전 교체. invalidate 는 활성 쿼리만 refetch 하고
+    // enum 등 staleTime:Infinity 캐시는 그대로 남아 옛 가계부 데이터가 보인다.
+    // → 캐시 전체 제거 후 마운트된 쿼리부터 새 X-Household-Id 헤더로 재요청.
+    queryClient.clear();
   };
 
   const onCreateNew = () => {
     onClose();
-    router.push(`/${routeParams.locale}/household/new`);
+    openSheet();
   };
 
   return (

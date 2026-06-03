@@ -2,7 +2,6 @@
 
 import { ActionIcon, Card, Center, Loader, Stack, Text } from "@mantine/core";
 import { IconPencil } from "@tabler/icons-react";
-import { useParams, useRouter } from "next/navigation";
 import { Suspense } from "react";
 import {
   Bar,
@@ -16,6 +15,7 @@ import { useTranslations } from "next-intl";
 
 import { LEDGER_ACCOUNT_TYPES } from "_features/account/constants";
 import { useAccountReport } from "_features/account/queries/use-query";
+import { useAccountSheetStore } from "_features/account/store";
 import { useMonthLabel } from "_features/common/hooks/use-month-label";
 import { useMoney } from "_features/common/hooks/use-money";
 import SubHeader from "_features/layout/components/sub-header";
@@ -75,8 +75,7 @@ function FlowTooltip({
 }
 
 export default function AccountReportSection({ accountId }: Props) {
-  const router = useRouter();
-  const { locale } = useParams<{ locale: string }>();
+  const openAccountSheet = useAccountSheetStore((s) => s.open);
   const t = useTranslations("transaction");
   const tAccount = useTranslations("account");
   const tGeneral = useTranslations("general.common");
@@ -103,9 +102,7 @@ export default function AccountReportSection({ accountId }: Props) {
           <ActionIcon
             variant="subtle"
             aria-label={tGeneral("update")}
-            onClick={() =>
-              router.push(`/${locale}/account/${accountId}/edit`)
-            }
+            onClick={() => openAccountSheet(accountId)}
           >
             <IconPencil size={20} />
           </ActionIcon>

@@ -9,6 +9,7 @@ import {
   TextInput,
 } from "@mantine/core";
 import { useTranslations } from "next-intl";
+import { Fragment } from "react";
 
 import ColorPicker from "_features/common/components/color-picker";
 import IconPicker from "_features/common/components/icon-picker";
@@ -17,9 +18,17 @@ import { useFixedForm } from "../hooks/use-sub/use-form";
 
 interface FixedFormProps {
   fixedId?: string;
+  /** 시트에서 사용 시 — 성공·취소 후 호출(시트 close) */
+  onDone?: () => void;
+  /** 시트 안에서는 Card 래퍼 없이(이미 패딩 있음) */
+  hideCard?: boolean;
 }
 
-export default function FixedForm({ fixedId }: FixedFormProps) {
+export default function FixedForm({
+  fixedId,
+  onDone,
+  hideCard = false,
+}: FixedFormProps) {
   const t = useTranslations("fixed");
   const tg = useTranslations("general.common");
 
@@ -30,10 +39,12 @@ export default function FixedForm({ fixedId }: FixedFormProps) {
     handleSubmit,
     handleRemove,
     handleCancel,
-  } = useFixedForm({ fixedId });
+  } = useFixedForm({ fixedId, onDone });
+
+  const Wrapper = hideCard ? Fragment : Card;
 
   return (
-    <Card>
+    <Wrapper>
       <form onSubmit={form.onSubmit(handleSubmit)}>
         <Stack gap="sm">
           <TextInput
@@ -89,6 +100,6 @@ export default function FixedForm({ fixedId }: FixedFormProps) {
           )}
         </Stack>
       </form>
-    </Card>
+    </Wrapper>
   );
 }

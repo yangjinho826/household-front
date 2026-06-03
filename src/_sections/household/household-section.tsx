@@ -2,17 +2,16 @@
 
 import { ActionIcon, Group, Stack, Title } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
-import { useRouter, useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import HouseholdSearch from "_features/household/components/search";
 import HouseholdTable from "_features/household/components/table";
 import { useHouseholdSearch } from "_features/household/hooks/use-sub/use-search";
+import { useHouseholdSheetStore } from "_features/household/store";
 
 export default function HouseholdSection() {
   const t = useTranslations("household");
-  const router = useRouter();
-  const routeParams = useParams<{ locale: string }>();
+  const open = useHouseholdSheetStore((s) => s.open);
   const { searchform, onSearch, onReset, result } = useHouseholdSearch();
 
   const items = result?.items ?? [];
@@ -24,7 +23,7 @@ export default function HouseholdSection() {
         <ActionIcon
           size="lg"
           radius="xl"
-          onClick={() => router.push(`/${routeParams.locale}/household/new`)}
+          onClick={() => open()}
           aria-label={t("add")}
         >
           <IconPlus size={18} />
@@ -33,12 +32,7 @@ export default function HouseholdSection() {
 
       <HouseholdSearch form={searchform} onSearch={onSearch} onReset={onReset} />
 
-      <HouseholdTable
-        items={items}
-        onClickRow={(id) =>
-          router.push(`/${routeParams.locale}/household/${id}`)
-        }
-      />
+      <HouseholdTable items={items} onClickRow={(id) => open(id)} />
     </Stack>
   );
 }
