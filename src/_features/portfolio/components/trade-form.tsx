@@ -55,6 +55,7 @@ export default function TradeForm({
 }: TradeFormProps) {
   const te = useTranslations("error");
   const tg = useTranslations("general");
+  const t = useTranslations("portfolio");
   const tPt = useTranslations("enum.portfolio-tx-type");
   const { data: ptTypeData } = useEnumOptions("portfolio-tx-type");
   const {
@@ -76,9 +77,9 @@ export default function TradeForm({
       memo: editingTx?.memo ?? "",
     },
     validate: {
-      quantity: (v) => (v > 0 ? null : "수량을 입력해주세요"),
-      price: (v) => (v > 0 ? null : "단가를 입력해주세요"),
-      txDate: (v) => (v ? null : "거래일을 입력해주세요"),
+      quantity: (v) => (v > 0 ? null : t("quantity_required")),
+      price: (v) => (v > 0 ? null : t("price_required")),
+      txDate: (v) => (v ? null : t("tx_date_required")),
     },
   });
 
@@ -95,8 +96,8 @@ export default function TradeForm({
           memo: values.memo.trim() || null,
         });
         notifications.show({
-          title: "거래 수정 완료",
-          message: "거래가 수정되었습니다.",
+          title: t("edit_done_title"),
+          message: t("edit_done_msg"),
           color: editingTx.ptType === "BUY" ? "red" : "blue",
         });
       } else if (values.tradeType === "BUY") {
@@ -108,8 +109,8 @@ export default function TradeForm({
           memo: values.memo.trim() || null,
         });
         notifications.show({
-          title: "매수 기록 완료",
-          message: "매수 거래가 추가되었습니다.",
+          title: t("buy_done_title"),
+          message: t("buy_done_msg"),
           color: "red",
         });
       } else {
@@ -123,17 +124,17 @@ export default function TradeForm({
         });
         soldOut = res.body.data === null;
         notifications.show({
-          title: "매도 기록 완료",
+          title: t("sell_done_title"),
           message: soldOut
-            ? "전량 매도되어 보유 종목에서 제외됐어요."
-            : "매도 거래가 추가되었습니다.",
+            ? t("sell_done_soldout_msg")
+            : t("sell_done_msg"),
           color: "blue",
         });
       }
       onSuccess?.(soldOut);
     } catch (error) {
       notifications.show({
-        title: isEdit ? "거래 수정 실패" : "거래 기록 실패",
+        title: isEdit ? t("edit_fail_title") : t("record_fail_title"),
         message: getErrorMessage(error, te),
         color: "red",
       });
@@ -146,14 +147,14 @@ export default function TradeForm({
     if (!editingTx) return;
     modals.openConfirmModal({
       centered: true,
-      title: "거래 삭제",
-      labels: { confirm: "삭제", cancel: "취소" },
+      title: t("delete_title"),
+      labels: { confirm: tg("common.delete"), cancel: tg("common.cancel") },
       confirmProps: { color: "red" },
       children: (
         <span>
-          이 거래를 삭제할까요?
+          {t("delete_confirm_msg")}
           <br />
-          종목의 보유 수량과 평균가가 재계산됩니다.
+          {t("delete_recalc_msg")}
         </span>
       ),
       onConfirm: async () => {
@@ -161,14 +162,14 @@ export default function TradeForm({
         try {
           await removeTxMutation.mutateAsync(editingTx.txId);
           notifications.show({
-            title: "거래 삭제 완료",
-            message: "거래가 삭제되었습니다.",
+            title: t("delete_done_title"),
+            message: t("delete_done_msg"),
             color: "green",
           });
           onSuccess?.();
         } catch (error) {
           notifications.show({
-            title: "거래 삭제 실패",
+            title: t("delete_fail_title"),
             message: getErrorMessage(error, te),
             color: "red",
           });
@@ -203,7 +204,7 @@ export default function TradeForm({
         />
         <NumberInput
           {...form.getInputProps("quantity")}
-          label="수량"
+          label={t("quantity")}
           placeholder="0"
           min={0}
           decimalScale={4}
@@ -211,7 +212,7 @@ export default function TradeForm({
         />
         <NumberInput
           {...form.getInputProps("price")}
-          label={isBuy ? "매수가" : "매도가"}
+          label={isBuy ? t("label_buy_price") : t("label_sell_price")}
           placeholder="0"
           min={0}
           thousandSeparator=","
@@ -230,24 +231,24 @@ export default function TradeForm({
             )
           }
           error={form.errors.txDate}
-          label="거래일"
+          label={t("label_tx_date")}
           placeholder="YYYY-MM-DD"
           valueFormat="YYYY-MM-DD"
         />
         <Textarea
           {...form.getInputProps("memo")}
-          label="메모"
-          placeholder="(선택)"
+          label={t("label_memo")}
+          placeholder={t("memo_placeholder")}
           autosize
           minRows={1}
         />
 
         <Group justify="space-between" px={4}>
           <span style={{ fontSize: 12, color: "var(--mantine-color-gray-6)" }}>
-            {isBuy ? "매수금액" : "매도금액"}
+            {isBuy ? t("buy_amount") : t("sell_amount")}
           </span>
           <span style={{ fontSize: 14, fontWeight: 700 }}>
-            {new Intl.NumberFormat("ko-KR").format(Math.round(total))} 원
+            {new Intl.NumberFormat("ko-KR").format(Math.round(total))} {tg("won")}
           </span>
         </Group>
 
@@ -261,7 +262,7 @@ export default function TradeForm({
               onClick={onCancel}
               disabled={isPending}
             >
-              취소
+              {tg("common.cancel")}
             </Button>
           )}
           <Button
@@ -269,7 +270,7 @@ export default function TradeForm({
             loading={isPending}
             color={isBuy ? "danger" : "info"}
           >
-            {isEdit ? "거래 수정" : isBuy ? "매수 기록" : "매도 기록"}
+            {isEdit ? t("edit_trade") : isBuy ? t("buy_record") : t("sell_record")}
           </Button>
         </Group>
 
@@ -282,7 +283,7 @@ export default function TradeForm({
             disabled={isPending}
             fullWidth
           >
-            삭제
+            {tg("common.delete")}
           </Button>
         )}
       </Stack>
