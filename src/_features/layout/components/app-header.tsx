@@ -30,6 +30,7 @@ export default function AppHeader() {
   const currentId = useHouseholdStore((s) => s.currentHouseholdId);
   const [opened, switcher] = useDisclosure(false);
   const t = useTranslations("household");
+  const tGeneral = useTranslations("general");
 
   const { data: hData } = useSuspenseQuery(queryKeys.household.list());
   const households = hData.body.data.items;
@@ -89,14 +90,14 @@ export default function AppHeader() {
         </UnstyledButton>
 
         {!isSettings && (
-          <Tooltip label="설정" withArrow position="bottom">
+          <Tooltip label={tGeneral("settings")} withArrow position="bottom">
             <ActionIcon
               variant="subtle"
               color="gray"
               size="lg"
               radius="xl"
               onClick={() => router.push(`/${params.locale}/settings`)}
-              aria-label="설정"
+              aria-label={tGeneral("settings")}
             >
               <IconSettings size={20} />
             </ActionIcon>

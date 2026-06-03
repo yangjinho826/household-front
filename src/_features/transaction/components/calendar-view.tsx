@@ -11,7 +11,7 @@ import { todayIso } from "_utilities/fmt";
 
 import TxRow from "./tx-row";
 
-const DAY_LABELS = ["일", "월", "화", "수", "목", "금", "토"];
+const DAY_KEYS = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const;
 // 선택일 = 진한 세이지(흰 텍스트 대비), 오늘 = 연한 세이지 배경
 const SELECTED_BG = TOKEN.sageAction;
 const TODAY_BG = "#EEF1EA";
@@ -28,6 +28,7 @@ interface CalendarViewProps {
  */
 export default function TransactionCalendarView({ year, month }: CalendarViewProps) {
   const tGeneral = useTranslations("general");
+  const tTx = useTranslations("transaction");
   const today = todayIso(); // YYYY-MM-DD (KST)
   const monthPrefix = `${year}-${String(month).padStart(2, "0")}`;
 
@@ -83,16 +84,16 @@ export default function TransactionCalendarView({ year, month }: CalendarViewPro
       <Card p="md" h="100%">
         <Stack gap="sm">
           <SimpleGrid cols={7} spacing={4}>
-            {DAY_LABELS.map((d, i) => (
+            {DAY_KEYS.map((dayKey, i) => (
               <Text
-                key={d}
+                key={dayKey}
                 size="10px"
                 fw={700}
                 ta="center"
                 c={i === 0 ? "danger.5" : i === 6 ? "info.5" : "dimmed"}
                 py={4}
               >
-                {d}
+                {tGeneral(`weekday.${dayKey}`)}
               </Text>
             ))}
             {cells.map((day, idx) => {
@@ -169,17 +170,20 @@ export default function TransactionCalendarView({ year, month }: CalendarViewPro
         <Card p="md" h="100%">
           <Stack gap="sm" h="100%">
             <Text size="sm" fw={700}>
-              {selectedDate.slice(5).replace("-", "월 ")}일 거래
+              {tTx("date_tx", {
+                month: Number(selectedDate.slice(5, 7)),
+                day: Number(selectedDate.slice(8, 10)),
+              })}
             </Text>
             <div style={{ flex: 1, overflow: "auto" }}>
               {selectedTx.length === 0 ? (
                 <Text size="sm" c="dimmed" ta="center" py="lg">
-                  거래가 없습니다
+                  {tGeneral("empty")}
                 </Text>
               ) : (
                 <Stack gap={0}>
                   {selectedTx.map((tx) => (
-                    <TxRow key={tx.transactionId} t={tx} />
+                    <TxRow key={tx.transactionId} item={tx} />
                   ))}
                 </Stack>
               )}

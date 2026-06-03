@@ -17,6 +17,7 @@ import { InfiniteSentinel } from "_libraries/query/infinite-sentinel";
 export default function AccountSection() {
   const t = useTranslations("account");
   const tType = useTranslations("enum.account-type");
+  const tGeneral = useTranslations("general");
   const router = useRouter();
   const routeParams = useParams<{ locale: string }>();
   const {
@@ -63,7 +64,7 @@ export default function AccountSection() {
 
       <Group gap="xs">
         <FilterChip
-          label="전체"
+          label={tGeneral("all")}
           active={accountType === undefined}
           onClick={() => setAccountType(undefined)}
         />

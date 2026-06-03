@@ -1,6 +1,7 @@
 "use client";
 
 import { Group, Stack, Text, UnstyledButton } from "@mantine/core";
+import { useTranslations } from "next-intl";
 import { useRouter, useParams } from "next/navigation";
 
 import IconBox from "_features/common/components/icon-box";
@@ -31,43 +32,44 @@ const TYPE_FALLBACK_HEX: Record<TxType, string> = {
   TRANSFER: TOKEN.purple,
 };
 
-export default function TxRow({ t }: { t: TransactionListItemType }) {
+export default function TxRow({ item }: { item: TransactionListItemType }) {
   const router = useRouter();
   const params = useParams<{ locale: string }>();
   const money = useMoney();
+  const t = useTranslations("transaction");
 
-  const accent = t.categoryColor ?? TYPE_FALLBACK_HEX[t.txType];
+  const accent = item.categoryColor ?? TYPE_FALLBACK_HEX[item.txType];
 
   return (
     <UnstyledButton
       onClick={() =>
-        router.push(`/${params.locale}/transactions/${t.transactionId}`)
+        router.push(`/${params.locale}/transactions/${item.transactionId}`)
       }
       style={{ padding: 12, borderRadius: 12, display: "block" }}
     >
       <Group justify="space-between" gap="md" wrap="nowrap" align="center">
         <Group gap={12} wrap="nowrap" style={{ minWidth: 0, flex: 1 }}>
-          <IconBox icon={t.categoryIcon} color={accent} />
+          <IconBox icon={item.categoryIcon} color={accent} />
           <Stack gap={2} style={{ minWidth: 0, flex: 1 }}>
             <Text size="sm" fw={600} truncate>
-              {t.memo || t.categoryName || "거래"}
+              {item.memo || item.categoryName || t("tx_default_label")}
             </Text>
             <Text size="xs" c="dimmed" truncate>
-              {t.categoryName ?? "—"} · {t.accountName ?? "—"}
-              {t.toAccountName ? ` → ${t.toAccountName}` : ""}
+              {item.categoryName ?? "—"} · {item.accountName ?? "—"}
+              {item.toAccountName ? ` → ${item.toAccountName}` : ""}
             </Text>
           </Stack>
         </Group>
         <Text
           fw={800}
-          c={TYPE_COLOR[t.txType]}
+          c={TYPE_COLOR[item.txType]}
           style={{
             fontVariantNumeric: "tabular-nums",
             flexShrink: 0,
           }}
         >
-          {SIGN[t.txType]}
-          {money(t.amount)}
+          {SIGN[item.txType]}
+          {money(item.amount)}
         </Text>
       </Group>
     </UnstyledButton>

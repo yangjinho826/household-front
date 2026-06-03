@@ -31,6 +31,19 @@ export default function AccountLedgerView({
   filter = "all",
 }: AccountLedgerViewProps) {
   const tg = useTranslations("general.common");
+  const tGeneral = useTranslations("general");
+  const tTx = useTranslations("transaction");
+
+  const DOW_KEYS = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const;
+  const formatDate = (yyyymmdd: string): string => {
+    const [y, m, d] = yyyymmdd.split("-").map(Number) as [number, number, number];
+    const dayKey = DOW_KEYS[new Date(y, m - 1, d).getDay()] ?? "sun";
+    return tTx("date_with_weekday", {
+      month: m,
+      day: d,
+      weekday: tGeneral(`weekday.${dayKey}`),
+    });
+  };
 
   // 월 단위면 그 달 거래가 적어 한 번에(큰 limit), 전체면 무한 스크롤 30
   const isMonthly = year !== undefined && month !== undefined;
@@ -90,12 +103,4 @@ export default function AccountLedgerView({
       />
     </Stack>
   );
-}
-
-const DOW = ["일", "월", "화", "수", "목", "금", "토"] as const;
-
-function formatDate(yyyymmdd: string): string {
-  const [y, m, d] = yyyymmdd.split("-").map(Number) as [number, number, number];
-  const dow = DOW[new Date(y, m - 1, d).getDay()] ?? "";
-  return `${m}월 ${d}일 (${dow})`;
 }

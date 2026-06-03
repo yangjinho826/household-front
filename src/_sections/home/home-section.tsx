@@ -274,7 +274,7 @@ export default function HomeSection() {
           ) : (
             <Stack gap={0}>
               {txns.slice(0, 5).map((tx) => (
-                <TxRow key={tx.transactionId} t={tx} />
+                <TxRow key={tx.transactionId} item={tx} />
               ))}
             </Stack>
           )}

@@ -37,6 +37,7 @@ function FlowTooltip({
   label?: string;
 }) {
   const money = useMoney();
+  const t = useTranslations("transaction");
   if (!active || !payload?.length) return null;
   const income = payload.find((p) => p.dataKey === "income")?.value ?? 0;
   const expense = payload.find((p) => p.dataKey === "expense")?.value ?? 0;
@@ -59,7 +60,7 @@ function FlowTooltip({
         c="positive.6"
         style={{ fontVariantNumeric: "tabular-nums" }}
       >
-        수입 +{money(income)}
+        {t("summary_income")} +{money(income)}
       </Text>
       <Text
         size="xs"
@@ -67,7 +68,7 @@ function FlowTooltip({
         c="danger.5"
         style={{ fontVariantNumeric: "tabular-nums" }}
       >
-        지출 −{money(expense)}
+        {t("summary_expense")} −{money(expense)}
       </Text>
     </div>
   );
@@ -77,6 +78,8 @@ export default function AccountReportSection({ accountId }: Props) {
   const router = useRouter();
   const { locale } = useParams<{ locale: string }>();
   const t = useTranslations("transaction");
+  const tAccount = useTranslations("account");
+  const tGeneral = useTranslations("general.common");
   const monthLabel = useMonthLabel();
   const money = useMoney();
   const { data } = useAccountReport(accountId);
@@ -99,7 +102,7 @@ export default function AccountReportSection({ accountId }: Props) {
         right={
           <ActionIcon
             variant="subtle"
-            aria-label="수정"
+            aria-label={tGeneral("update")}
             onClick={() =>
               router.push(`/${locale}/account/${accountId}/edit`)
             }
@@ -113,7 +116,7 @@ export default function AccountReportSection({ accountId }: Props) {
       <Card radius="xl" p="xl" shadow="md">
         <Stack gap={4}>
           <Text size="xs" fw={500} c="dimmed">
-            현재 잔액
+            {tAccount("current_balance")}
           </Text>
           <Text
             size="2rem"
@@ -129,11 +132,11 @@ export default function AccountReportSection({ accountId }: Props) {
       <Card radius="lg" p="md">
         <Stack gap="sm">
           <Text size="sm" fw={700}>
-            월별 수입 · 지출
+            {tAccount("monthly_flow")}
           </Text>
           {chartData.length === 0 || !hasFlow ? (
             <Text size="sm" c="dimmed" ta="center" py="md">
-              표시할 수입·지출 내역이 없어요
+              {tAccount("empty_flow")}
             </Text>
           ) : (
             <div className="chart-trend-wrap">
@@ -178,7 +181,7 @@ export default function AccountReportSection({ accountId }: Props) {
           </Center>
         }
       >
-        <AccountBalanceTrend accountId={accountId} title="잔액 추이" />
+        <AccountBalanceTrend accountId={accountId} title={tAccount("balance_trend")} />
       </Suspense>
 
       {/* 거래 이력 — 각 행에 running balance. 거래계좌만 노출 */}

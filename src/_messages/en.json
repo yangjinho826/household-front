@@ -1,7 +1,9 @@
 {
   "app": {
     "title": "Personal",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "not_found": "Page not found.",
+    "go_home": "Go home"
   },
   "nav": {
     "home": "Home",
@@ -135,7 +137,9 @@
       "man": "{value}0k"
     },
     "etc_count": "+{count} more ({percent}%)",
-    "empty": "Nothing to show"
+    "empty": "Nothing to show",
+    "all": "All",
+    "settings": "Settings"
   },
   "account": {
     "list_title": "Accounts",
@@ -152,7 +156,11 @@
     "balance": "Start Balance",
     "balance_placeholder": "0",
     "color": "Color",
-    "icon": "Icon"
+    "icon": "Icon",
+    "current_balance": "Current balance",
+    "monthly_flow": "Monthly income & expense",
+    "empty_flow": "No income or expense to show",
+    "balance_trend": "Balance trend"
   },
   "category": {
     "list_title": "Categories",
@@ -311,7 +319,14 @@
     "balance_current": "Balance",
     "won": "KRW",
     "ledger_title": "Transaction history",
-    "tx_default_label": "Transaction"
+    "tx_default_label": "Transaction",
+    "date_tx": "{month}/{day} transactions",
+    "date_with_weekday": "{weekday}, {month}/{day}"
+  },
+  "wealth": {
+    "title": "Assets",
+    "allocation_trend": "Allocation trend",
+    "accounts_count": "Accounts ({count})"
   },
   "onboarding": {
     "welcome_title": "Welcome to your household",
@@ -418,6 +433,12 @@
     "default": "Failed to process the request.",
     "unknown": "An unknown error occurred.",
     "network": "Please check your network connection.",
+    "fallback_server_down": "Can't connect to the server",
+    "fallback_api": "Couldn't process your request",
+    "fallback_generic": "Something went wrong",
+    "fallback_retry_later": "Please try again in a moment.",
+    "fallback_unexpected": "An unexpected error occurred.",
+    "fallback_retry": "Try again",
     "CM001": "Bad request.",
     "CM002": "Authentication required.",
     "CM003": "Permission denied.",

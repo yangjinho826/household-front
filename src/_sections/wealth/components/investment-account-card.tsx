@@ -23,6 +23,7 @@ export default function InvestmentAccountCard({ account, portfolios }: Props) {
   const router = useRouter();
   const routeParams = useParams<{ locale: string }>();
   const t = useTranslations("general");
+  const tPortfolio = useTranslations("portfolio");
   const money = useMoney();
 
   // 백엔드가 통장 balance = cash + portfolio_valuation 으로 합산. 디테일 hero 와 동일 데이터 소스
@@ -98,7 +99,7 @@ export default function InvestmentAccountCard({ account, portfolios }: Props) {
           <Group gap={12} mt={4}>
             <Group gap={4}>
               <Text size="10px" c="dimmed" fw={600}>
-                현금
+                {tPortfolio("cash_label")}
               </Text>
               <Text
                 size="10px"
@@ -111,7 +112,7 @@ export default function InvestmentAccountCard({ account, portfolios }: Props) {
             <Text size="10px" c="dimmed">·</Text>
             <Group gap={4}>
               <Text size="10px" c="dimmed" fw={600}>
-                평가
+                {tPortfolio("meta_valuation")}
               </Text>
               <Text
                 size="10px"
@@ -124,7 +125,7 @@ export default function InvestmentAccountCard({ account, portfolios }: Props) {
             <Text size="10px" c="dimmed">·</Text>
             <Group gap={4}>
               <Text size="10px" c="dimmed" fw={600}>
-                종목
+                {tPortfolio("meta_stock_count")}
               </Text>
               <Text
                 size="10px"

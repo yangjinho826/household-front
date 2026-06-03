@@ -32,6 +32,8 @@ export default function WealthSection() {
   const routeParams = useParams<{ locale: string }>();
   const tAssetClass = useTranslations("enum.asset-class");
   const tManual = useTranslations("manual-asset");
+  const tWealth = useTranslations("wealth");
+  const tGeneral = useTranslations("general.common");
   const money = useMoney();
 
   const { data: overviewRes } = useSuspenseQuery(queryKeys.wealth.overview({}));
@@ -62,13 +64,13 @@ export default function WealthSection() {
 
   return (
     <Stack gap="md">
-      <SubHeader title="자산" back={`/${routeParams.locale}`} />
+      <SubHeader title={tWealth("title")} back={`/${routeParams.locale}`} />
 
       {overview.allocation.allocationTrend.length > 1 && (
         <Card radius="lg">
           <Stack gap="sm">
             <Text size="sm" fw={700}>
-              자산군 배분 추이
+              {tWealth("allocation_trend")}
             </Text>
             <AllocationTrendChart data={overview.allocation.allocationTrend} />
           </Stack>
@@ -81,7 +83,7 @@ export default function WealthSection() {
         </Text>
         <UnstyledButton onClick={() => openManualAssetForm()}>
           <Text size="xs" fw={700} c="info.5">
-            + 추가
+            + {tGeneral("create")}
           </Text>
         </UnstyledButton>
       </Group>
@@ -144,13 +146,13 @@ export default function WealthSection() {
 
       <Group justify="space-between" align="center" px={4}>
         <Text size="sm" fw={700}>
-          통장 ({visibleAccounts.length})
+          {tWealth("accounts_count", { count: visibleAccounts.length })}
         </Text>
         <UnstyledButton
           onClick={() => router.push(`/${routeParams.locale}/account/new`)}
         >
           <Text size="xs" fw={700} c="info.5">
-            + 추가
+            + {tGeneral("create")}
           </Text>
         </UnstyledButton>
       </Group>
@@ -221,8 +223,8 @@ export default function WealthSection() {
         onClose={() => setManualAssetFormOpen(false)}
         title={
           manualAssetEdit
-            ? `${tManual("section_title")} 수정`
-            : `${tManual("section_title")} 추가`
+            ? `${tManual("section_title")} ${tGeneral("update")}`
+            : `${tManual("section_title")} ${tGeneral("create")}`
         }
         centered
       >

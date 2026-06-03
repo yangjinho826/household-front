@@ -15,6 +15,7 @@ import { InfiniteSentinel } from "_libraries/query/infinite-sentinel";
 export default function CategorySection() {
   const t = useTranslations("category");
   const tKind = useTranslations("enum.category-kind");
+  const tGeneral = useTranslations("general");
   const router = useRouter();
   const routeParams = useParams<{ locale: string }>();
   const {
@@ -45,7 +46,7 @@ export default function CategorySection() {
 
       <Group gap="xs">
         <FilterChip
-          label="전체"
+          label={tGeneral("all")}
           active={kind === undefined}
           onClick={() => setKind(undefined)}
         />
