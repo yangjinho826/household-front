@@ -115,7 +115,15 @@
       "confirmyescontent": "작업이 완료되었습니다.",
       "register_has_been_completed": "등록되었습니다.",
       "update_has_been_completed": "수정되었습니다."
-    }
+    },
+    "money": "{amount}원",
+    "unit": {
+      "stock": "{count}주",
+      "count": "{count}개",
+      "man": "{value}만"
+    },
+    "etc_count": "외 {count}개 ({percent}%)",
+    "empty": "내역이 없어요"
   },
   "account": {
     "list_title": "통장",

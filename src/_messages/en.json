@@ -115,7 +115,15 @@
       "confirmyescontent": "Action completed.",
       "register_has_been_completed": "Registered.",
       "update_has_been_completed": "Updated."
-    }
+    },
+    "money": "₩{amount}",
+    "unit": {
+      "stock": "{count} shares",
+      "count": "{count}",
+      "man": "{value}0k"
+    },
+    "etc_count": "+{count} more ({percent}%)",
+    "empty": "Nothing to show"
   },
   "account": {
     "list_title": "Accounts",

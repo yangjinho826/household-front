@@ -1,6 +1,7 @@
 "use client";
 
 import { Group, Stack, Text } from "@mantine/core";
+import { useTranslations } from "next-intl";
 import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
 
 export interface DonutBreakdownItem {
@@ -36,6 +37,7 @@ export default function PortfolioDonut({
   topN = 3,
   orientation = "horizontal",
 }: Props) {
+  const t = useTranslations("general");
   const active = items.filter((i) => i.value > 0);
   if (active.length === 0) return null;
 
@@ -107,7 +109,7 @@ export default function PortfolioDonut({
       })}
       {rest.length > 0 && (
         <Text size="10px" c="dimmed" fw={600}>
-          외 {rest.length}개 ({restPct.toFixed(0)}%)
+          {t("etc_count", { count: rest.length, percent: restPct.toFixed(0) })}
         </Text>
       )}
     </Stack>
