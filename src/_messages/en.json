@@ -118,6 +118,17 @@
     },
     "money": "₩{amount}",
     "won": "₩",
+    "n_month": "{count}",
+    "year_month": "{month}/{year}",
+    "weekday": {
+      "sun": "Sun",
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat"
+    },
     "unit": {
       "stock": "{count} shares",
       "count": "{count}",

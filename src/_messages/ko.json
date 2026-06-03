@@ -118,6 +118,17 @@
     },
     "money": "{amount}원",
     "won": "원",
+    "n_month": "{count}월",
+    "year_month": "{year}년 {month}월",
+    "weekday": {
+      "sun": "일",
+      "mon": "월",
+      "tue": "화",
+      "wed": "수",
+      "thu": "목",
+      "fri": "금",
+      "sat": "토"
+    },
     "unit": {
       "stock": "{count}주",
       "count": "{count}개",

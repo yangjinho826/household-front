@@ -16,6 +16,7 @@ import { useTranslations } from "next-intl";
 
 import { LEDGER_ACCOUNT_TYPES } from "_features/account/constants";
 import { useAccountReport } from "_features/account/queries/use-query";
+import { useMonthLabel } from "_features/common/hooks/use-month-label";
 import { useMoney } from "_features/common/hooks/use-money";
 import SubHeader from "_features/layout/components/sub-header";
 import AccountLedgerView from "_features/transaction/components/account-ledger-view";
@@ -76,6 +77,7 @@ export default function AccountReportSection({ accountId }: Props) {
   const router = useRouter();
   const { locale } = useParams<{ locale: string }>();
   const t = useTranslations("transaction");
+  const monthLabel = useMonthLabel();
   const money = useMoney();
   const { data } = useAccountReport(accountId);
   const report = data.body.data;
@@ -83,7 +85,7 @@ export default function AccountReportSection({ accountId }: Props) {
 
   // 지출 = 일반지출 + 고정지출 합산 (막대 하나로)
   const chartData = report.monthlyFlows.map((f) => ({
-    month: `${Number(f.monthDate.slice(5, 7))}월`,
+    month: monthLabel(f.monthDate),
     income: f.income,
     expense: f.expense + f.fixedExpense,
   }));

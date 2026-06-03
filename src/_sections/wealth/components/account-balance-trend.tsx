@@ -4,6 +4,7 @@ import { Card, Group, Stack, Text } from "@mantine/core";
 import { useMemo } from "react";
 
 import { useAccountSnapshotYearly } from "_features/account-snapshot/queries/use-query";
+import { useMonthLabel } from "_features/common/hooks/use-month-label";
 
 import ValueTrendChart, { type TrendPoint } from "./value-trend-chart";
 
@@ -19,6 +20,7 @@ export default function AccountBalanceTrend({
   accountId,
   title = "자산 추이",
 }: Props) {
+  const monthLabel = useMonthLabel();
   const { data } = useAccountSnapshotYearly();
   const months = data.body.data.months;
 
@@ -45,12 +47,12 @@ export default function AccountBalanceTrend({
         const momPct =
           prev && prev > 0 ? ((b.balance - prev) / prev) * 100 : null;
         return {
-          month: `${Number(b.snapshotDate.slice(5, 7))}월`,
+          month: monthLabel(b.snapshotDate),
           value: b.balance,
           momPct,
         };
       }),
-    [balances],
+    [balances, monthLabel],
   );
 
   // 첫 박제월 대비 최근 자산 증감

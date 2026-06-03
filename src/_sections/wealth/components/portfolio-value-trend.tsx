@@ -3,6 +3,7 @@
 import { Card, Group, Stack, Text } from "@mantine/core";
 import { useMemo } from "react";
 
+import { useMonthLabel } from "_features/common/hooks/use-month-label";
 import { usePortfolioValueHistoryByItem } from "_features/portfolio/queries/use-query";
 
 import ValueTrendChart, { type TrendPoint } from "./value-trend-chart";
@@ -13,6 +14,7 @@ interface Props {
 
 // 종목 상세 — 그 종목의 월별 평가액(valuation) 추이
 export default function PortfolioValueTrend({ portfolioId }: Props) {
+  const monthLabel = useMonthLabel();
   const { data } = usePortfolioValueHistoryByItem(portfolioId);
   const history = data.body.data.history;
 
@@ -23,12 +25,12 @@ export default function PortfolioValueTrend({ portfolioId }: Props) {
         const momPct =
           prev && prev > 0 ? ((h.valuation - prev) / prev) * 100 : null;
         return {
-          month: `${Number(h.snapshotDate.slice(5, 7))}월`,
+          month: monthLabel(h.snapshotDate),
           value: h.valuation,
           momPct,
         };
       }),
-    [history],
+    [history, monthLabel],
   );
 
   // 첫 박제월 대비 최근 평가액 증감

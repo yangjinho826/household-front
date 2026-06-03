@@ -24,6 +24,7 @@ import {
 } from "recharts";
 
 import { useAccountSnapshotMutations } from "_features/account-snapshot/queries/use-mutations";
+import { useMonthLabel } from "_features/common/hooks/use-month-label";
 import { queryKeys } from "_constants/queries";
 import { getErrorMessage } from "_libraries/fetch/error-message";
 import { fmt } from "_utilities/fmt";
@@ -90,10 +91,7 @@ export default function TotalAssetHero() {
   const t = useTranslations("home");
   const tCommon = useTranslations("general.common");
   const te = useTranslations("error");
-
-  // "YYYY-MM-DD" → 월 라벨 (i18n n_month 키)
-  const monthLabel = (dateStr: string) =>
-    t("n_month", { count: Number(dateStr.slice(5, 7)) });
+  const monthLabel = useMonthLabel();
 
   const { data: overviewRes } = useSuspenseQuery(queryKeys.wealth.overview({}));
   const { createMutation } = useAccountSnapshotMutations();

@@ -14,6 +14,7 @@ import {
 import { ASSET_CLASS_COLOR } from "_features/portfolio/constants";
 import type { AssetClass } from "_features/portfolio/types";
 import type { AllocationTrendPoint } from "_features/wealth/types";
+import { useMonthLabel } from "_features/common/hooks/use-month-label";
 import { useMoney } from "_features/common/hooks/use-money";
 
 // 서버에선 false, 클라 마운트 후 true — hydration-safe. recharts SSR prerender 회피용.
@@ -33,7 +34,10 @@ interface ChartRow {
   [assetClass: string]: string | number;
 }
 
-function buildRows(data: AllocationTrendPoint[]): {
+function buildRows(
+  data: AllocationTrendPoint[],
+  monthLabel: (isoDate: string) => string,
+): {
   rows: ChartRow[];
   classes: AssetClass[];
 } {
@@ -45,7 +49,7 @@ function buildRows(data: AllocationTrendPoint[]): {
   const classes = ASSET_CLASS_ORDER.filter((c) => present.has(c));
 
   const rows = data.map((p) => {
-    const row: ChartRow = { month: `${Number(p.snapshotDate.slice(5, 7))}월` };
+    const row: ChartRow = { month: monthLabel(p.snapshotDate) };
     // 없는 슬라이스는 0 패딩 — 스택 영역 라인 끊김 방지
     for (const c of classes) row[c] = 0;
     for (const s of p.slices) row[s.assetClass] = s.valuation;
@@ -61,11 +65,12 @@ interface Props {
 // 월별 자산군 배분추이 — 스택 영역 차트. 표시 전용.
 export default function AllocationTrendChart({ data }: Props) {
   const tAssetClass = useTranslations("enum.asset-class");
+  const monthLabel = useMonthLabel();
   const money = useMoney();
   // recharts ResponsiveContainer 는 SSR prerender 에서 깨질 수 있어 클라 마운트 후에만 그림
   const mounted = useMounted();
 
-  const { rows, classes } = buildRows(data);
+  const { rows, classes } = buildRows(data, monthLabel);
 
   // 마운트 전엔 차트 영역만 확보 (레이아웃 시프트 방지)
   if (!mounted) return <div className="chart-trend-wrap" />;
