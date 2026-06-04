@@ -27,6 +27,12 @@ export function useTransactionMutations() {
       queryKey: queryKeys.account._def,
       refetchType: "all",
     });
+    // 투자·자산계좌 상세 overview(portfolio.byAccount) — 이체로 계좌 잔액이 바뀌면
+    // 이 쿼리도 stale. 누락 시 거래 후 계좌 상세 잔액이 옛날 값으로 남는다.
+    queryClient.invalidateQueries({
+      queryKey: queryKeys.portfolio._def,
+      refetchType: "all",
+    });
     queryClient.invalidateQueries({
       queryKey: queryKeys.accountSnapshot._def,
       refetchType: "all",
