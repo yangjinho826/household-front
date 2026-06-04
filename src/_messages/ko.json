@@ -170,10 +170,10 @@
       "name": "이름",
       "name_placeholder": "예: 우리집, 국민연금",
       "name_required_message": "이름을 입력하세요",
-      "valuation": "현재 총 평가액",
-      "valuation_placeholder": "현재 가치",
-      "valuation_update_help": "지금 총 평가액을 입력하면 차액이 평가조정으로 기록돼요",
-      "valuation_required_message": "평가액을 입력하세요"
+      "start_balance": "초기금",
+      "start_balance_placeholder": "최초 등록 금액",
+      "start_balance_update_help": "초기금만 수정돼요. 평가금 변동은 거래에서 평가조정으로 기록하세요",
+      "start_balance_required_message": "초기금을 입력하세요"
     }
   },
   "category": {
@@ -337,6 +337,16 @@
     "summary_no_expense": "지출 0원",
     "balance_current": "잔액",
     "won": "원",
+    "account_select": "통장 선택",
+    "valuation_new": "새 평가액",
+    "valuation_new_placeholder": "현재 총 평가액",
+    "valuation_direction": "방향",
+    "valuation_increase": "평가증가",
+    "valuation_decrease": "평가감소",
+    "valuation_amount": "변동 금액",
+    "valuation_no_change_message": "현재 잔액과 다른 금액을 입력하세요",
+    "valuation_hint_increase": "{amount}원 평가증가",
+    "valuation_hint_decrease": "{amount}원 평가감소",
     "ledger_title": "거래 이력",
     "tx_default_label": "거래",
     "date_tx": "{month}월 {day}일 거래",

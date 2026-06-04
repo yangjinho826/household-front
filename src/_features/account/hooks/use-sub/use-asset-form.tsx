@@ -9,9 +9,7 @@ import type {
   AccountListItemType,
   ManualAssetAccountType,
 } from "_features/account/types";
-import { useTransactionMutations } from "_features/transaction/queries/use-mutations";
 import { getErrorMessage } from "_libraries/fetch/error-message";
-import { todayIsoKst } from "_utilities/datetime";
 
 interface UseAssetFormOptions {
   /** 있으면 수정 모드 — 없으면 신규 등록 */
@@ -22,7 +20,7 @@ interface UseAssetFormOptions {
 interface AssetFormValues {
   name: string;
   accountType: ManualAssetAccountType;
-  valuation: number; // 현재 총 평가액(절대값). 수정 시 차액이 VALUATION 거래로 반영된다.
+  startBalance: number; // 초기금. 평가금 변동은 거래(+)의 평가조정으로 따로 반영한다.
 }
 
 export function useAssetForm({ account, onClose }: UseAssetFormOptions) {
@@ -35,7 +33,6 @@ export function useAssetForm({ account, onClose }: UseAssetFormOptions) {
     updateMutation: accountUpdate,
     removeMutation: accountRemove,
   } = useAccountMutations();
-  const { createMutation: txCreate } = useTransactionMutations();
 
   const isUpdate = Boolean(account);
 
@@ -43,7 +40,7 @@ export function useAssetForm({ account, onClose }: UseAssetFormOptions) {
     initialValues: {
       name: account?.name ?? "",
       accountType: (account?.accountType as ManualAssetAccountType) ?? "REAL_ESTATE",
-      valuation: account?.balance ?? 0,
+      startBalance: account?.startBalance ?? 0,
     },
     validateInputOnBlur: true,
     validate: zodResolver(
@@ -55,7 +52,7 @@ export function useAssetForm({ account, onClose }: UseAssetFormOptions) {
           "COMMODITY",
           "SAVINGS_ASSET",
         ]),
-        valuation: z.number().min(0, t("valuation_required_message")),
+        startBalance: z.number().min(0, t("start_balance_required_message")),
       }),
     ),
   });
@@ -63,45 +60,28 @@ export function useAssetForm({ account, onClose }: UseAssetFormOptions) {
   const handleSubmit = async () => {
     try {
       if (isUpdate && account) {
-        // 이름·타입 변경분만 account 수정 (평가액은 거래로 따로 반영)
-        const metaChanged =
-          form.values.name !== account.name ||
-          form.values.accountType !== account.accountType;
-        if (metaChanged) {
-          await accountUpdate.mutateAsync({
-            accountId: account.accountId,
-            name: form.values.name,
-            accountType: form.values.accountType,
-            startBalance: account.startBalance,
-            color: account.color,
-            icon: account.icon,
-            sortOrder: account.sortOrder,
-            isArchived: account.isArchived,
-          });
-        }
-        // 현재 총 평가액 절대값 → (새값 − 현재잔액) 차액을 평가조정 거래로 생성
-        const diff = form.values.valuation - account.balance;
-        if (diff !== 0) {
-          await txCreate.mutateAsync({
-            txType: "VALUATION",
-            amount: Math.abs(diff),
-            valuationDirection: diff > 0 ? "INCREASE" : "DECREASE",
-            txDate: todayIsoKst(),
-            accountId: account.accountId,
-            fixedExpenseId: null,
-          });
-        }
+        // 이름·타입·초기금 수정. 평가금 변동은 거래(+)의 평가조정으로 따로 반영한다.
+        await accountUpdate.mutateAsync({
+          accountId: account.accountId,
+          name: form.values.name,
+          accountType: form.values.accountType,
+          startBalance: form.values.startBalance,
+          color: account.color,
+          icon: account.icon,
+          sortOrder: account.sortOrder,
+          isArchived: account.isArchived,
+        });
         notifications.show({
           title: tg("notificationstitle"),
           message: tg("update_has_been_completed"),
           color: "green",
         });
       } else {
-        // 신규 자산 = 통장 생성. 초기 평가액이 곧 start_balance.
+        // 신규 자산 = 통장 생성. 초기금이 곧 start_balance.
         await accountCreate.mutateAsync({
           name: form.values.name,
           accountType: form.values.accountType,
-          startBalance: form.values.valuation,
+          startBalance: form.values.startBalance,
           color: null,
           icon: null,
           sortOrder: 0,
@@ -158,8 +138,7 @@ export function useAssetForm({ account, onClose }: UseAssetFormOptions) {
     isPending:
       accountCreate.isPending ||
       accountUpdate.isPending ||
-      accountRemove.isPending ||
-      txCreate.isPending,
+      accountRemove.isPending,
     handleSubmit,
     handleRemove,
     handleCancel,

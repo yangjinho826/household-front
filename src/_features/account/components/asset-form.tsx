@@ -53,10 +53,10 @@ export default function AssetForm({ account, onClose }: AssetFormProps) {
           placeholder={t("name_placeholder")}
         />
         <NumberInput
-          {...form.getInputProps("valuation")}
-          label={t("valuation")}
-          description={isUpdate ? t("valuation_update_help") : undefined}
-          placeholder={t("valuation_placeholder")}
+          {...form.getInputProps("startBalance")}
+          label={t("start_balance")}
+          description={isUpdate ? t("start_balance_update_help") : undefined}
+          placeholder={t("start_balance_placeholder")}
           thousandSeparator=","
           min={0}
           rightSection={

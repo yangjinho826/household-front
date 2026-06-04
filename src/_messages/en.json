@@ -170,10 +170,10 @@
       "name": "Name",
       "name_placeholder": "e.g. My home, Pension",
       "name_required_message": "Please enter a name",
-      "valuation": "Current total valuation",
-      "valuation_placeholder": "Current value",
-      "valuation_update_help": "Enter the current total valuation; the difference is recorded as a valuation adjustment",
-      "valuation_required_message": "Please enter the valuation"
+      "start_balance": "Initial balance",
+      "start_balance_placeholder": "Amount at registration",
+      "start_balance_update_help": "Only the initial balance is updated. Record valuation changes as adjustments in transactions.",
+      "start_balance_required_message": "Please enter the initial balance"
     }
   },
   "category": {
@@ -337,6 +337,16 @@
     "summary_no_expense": "No expenses",
     "balance_current": "Balance",
     "won": "KRW",
+    "account_select": "Select account",
+    "valuation_new": "New valuation",
+    "valuation_new_placeholder": "Current total valuation",
+    "valuation_direction": "Direction",
+    "valuation_increase": "Increase",
+    "valuation_decrease": "Decrease",
+    "valuation_amount": "Change amount",
+    "valuation_no_change_message": "Enter an amount different from the current balance",
+    "valuation_hint_increase": "+{amount} KRW valuation increase",
+    "valuation_hint_decrease": "-{amount} KRW valuation decrease",
     "ledger_title": "Transaction history",
     "tx_default_label": "Transaction",
     "date_tx": "{month}/{day} transactions",
