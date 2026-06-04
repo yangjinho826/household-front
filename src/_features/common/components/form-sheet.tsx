@@ -41,10 +41,14 @@ export default function FormSheet({
           borderTopRightRadius: 24,
           maxWidth: 448,
           margin: "0 auto",
-          maxHeight: "min(90dvh, calc(100dvh - var(--safe-bottom)))",
+          // BottomTab(z-index 500, 64px) 이 시트 위로 떠서 하단 버튼을 가로채는 걸 방지 —
+          // household-switcher 와 동일하게 BottomTab 높이까지 빼고 본문에 채워 끝 버튼을 띄운다.
+          maxHeight:
+            "min(90dvh, calc(100dvh - var(--bottom-tab-h) - var(--safe-bottom)))",
         },
         body: {
-          paddingBottom: "calc(var(--safe-bottom) + 16px)",
+          paddingBottom:
+            "calc(var(--bottom-tab-h) + var(--safe-bottom) + 16px)",
         },
       }}
     >
