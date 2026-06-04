@@ -15,6 +15,7 @@ import {
   formatProfitRate,
   profitColor,
 } from "_features/portfolio/utils";
+import { todayIsoKst } from "_utilities/datetime";
 
 interface Props {
   accountId: string;
@@ -32,14 +33,10 @@ export default function RealizedPnlRail({ accountId }: Props) {
   const [opened, { open, close }] = useDisclosure(false);
   // 레일 대표 = 최근 1년. 시트에 같은 기본 범위를 넘겨 일관(거기서 자유 변경).
   const [range] = useState(() => {
-    const to = new Date();
-    return { from: dayjs(to).subtract(1, "year").toDate(), to };
+    const to = todayIsoKst();
+    return { from: dayjs(to).subtract(1, "year").format("YYYY-MM-DD"), to };
   });
-  const { data } = useAccountRealizedPnl(
-    accountId,
-    dayjs(range.from).format("YYYY-MM-DD"),
-    dayjs(range.to).format("YYYY-MM-DD"),
-  );
+  const { data } = useAccountRealizedPnl(accountId, range.from, range.to);
   const { summary, rows } = data.body.data;
 
   if (rows.length === 0) return null;

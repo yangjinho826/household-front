@@ -17,23 +17,20 @@ import {
   formatProfitRate,
   profitColor,
 } from "_features/portfolio/utils";
+import { todayIsoKst } from "_utilities/datetime";
 
 interface Props {
   // 둘 중 하나 — 종목 단위(portfolioId) 또는 계좌 누적(accountId)
   portfolioId?: string;
   accountId?: string;
-  initialFrom?: Date;
-  initialTo?: Date;
+  initialFrom?: string;
+  initialTo?: string;
 }
 
-function toISO(d: Date | null): string | undefined {
-  return d ? dayjs(d).format("YYYY-MM-DD") : undefined;
-}
-
-// 기본 범위 = 최근 1년 (지정 없을 때)
-function defaultRange(initialFrom?: Date, initialTo?: Date): [Date, Date] {
-  const to = initialTo ?? new Date();
-  const from = initialFrom ?? dayjs(to).subtract(1, "year").toDate();
+// 기본 범위 = 최근 1년. mantine v8 — 날짜 값은 "YYYY-MM-DD" 문자열.
+function defaultRange(initialFrom?: string, initialTo?: string): [string, string] {
+  const to = initialTo ?? todayIsoKst();
+  const from = initialFrom ?? dayjs(to).subtract(1, "year").format("YYYY-MM-DD");
   return [from, to];
 }
 
@@ -64,8 +61,8 @@ export default function RealizedPnlPanel({
 }
 
 interface FetchProps {
-  initialFrom?: Date;
-  initialTo?: Date;
+  initialFrom?: string;
+  initialTo?: string;
 }
 
 function ItemRealizedPnl({
@@ -74,9 +71,9 @@ function ItemRealizedPnl({
   initialTo,
 }: FetchProps & { portfolioId: string }) {
   const [def] = useState(() => defaultRange(initialFrom, initialTo));
-  const [from, setFrom] = useState<Date | null>(def[0]);
-  const [to, setTo] = useState<Date | null>(def[1]);
-  const { data } = useItemRealizedPnl(portfolioId, toISO(from), toISO(to));
+  const [from, setFrom] = useState<string | null>(def[0]);
+  const [to, setTo] = useState<string | null>(def[1]);
+  const { data } = useItemRealizedPnl(portfolioId, from ?? undefined, to ?? undefined);
   return (
     <RealizedPnlView
       data={data.body.data}
@@ -94,9 +91,9 @@ function AccountRealizedPnl({
   initialTo,
 }: FetchProps & { accountId: string }) {
   const [def] = useState(() => defaultRange(initialFrom, initialTo));
-  const [from, setFrom] = useState<Date | null>(def[0]);
-  const [to, setTo] = useState<Date | null>(def[1]);
-  const { data } = useAccountRealizedPnl(accountId, toISO(from), toISO(to));
+  const [from, setFrom] = useState<string | null>(def[0]);
+  const [to, setTo] = useState<string | null>(def[1]);
+  const { data } = useAccountRealizedPnl(accountId, from ?? undefined, to ?? undefined);
   return (
     <RealizedPnlView
       data={data.body.data}
@@ -110,10 +107,10 @@ function AccountRealizedPnl({
 
 interface ViewProps {
   data: RealizedPnlResponseType;
-  from: Date | null;
-  to: Date | null;
-  onFromChange: (d: Date | null) => void;
-  onToChange: (d: Date | null) => void;
+  from: string | null;
+  to: string | null;
+  onFromChange: (d: string | null) => void;
+  onToChange: (d: string | null) => void;
 }
 
 function RealizedPnlView({
@@ -127,7 +124,7 @@ function RealizedPnlView({
   const tGeneral = useTranslations("general");
   const money = useMoney();
   const { summary, rows } = data;
-  const today = new Date();
+  const today = todayIsoKst();
 
   return (
     <Stack gap="sm">
@@ -137,7 +134,7 @@ function RealizedPnlView({
           size="xs"
           label={t("period_from")}
           value={from}
-          onChange={(d) => onFromChange(d ? dayjs(d).toDate() : null)}
+          onChange={onFromChange}
           valueFormat="YYYY-MM-DD"
           maxDate={to ?? today}
         />
@@ -145,7 +142,7 @@ function RealizedPnlView({
           size="xs"
           label={t("period_to")}
           value={to}
-          onChange={(d) => onToChange(d ? dayjs(d).toDate() : null)}
+          onChange={onToChange}
           valueFormat="YYYY-MM-DD"
           maxDate={today}
         />
