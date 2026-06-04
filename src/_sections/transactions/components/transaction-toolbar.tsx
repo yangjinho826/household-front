@@ -48,21 +48,23 @@ export default function TransactionToolbar({
   const { data: formOptions } = useSuspenseQuery(
     queryKeys.transaction.formOptions(),
   );
-  // 거래 탭은 계좌별 running balance 라 거래계좌(LIVING/SAVINGS/OTHER)만 선택 대상.
-  const ledgerAccounts = useMemo(
+  // 필터엔 전체 통장 노출 — 현금흐름/수동자산은 running balance 정확,
+  // INVESTMENT 는 매매현금이 ledger 밖이라 잔액만 숨긴다(거래는 표시).
+  const filterAccounts = formOptions.body.data.accounts;
+  // 자동 선택 기본값은 현금흐름 통장 우선(없으면 첫 통장).
+  const defaultAccount = useMemo(
     () =>
-      formOptions.body.data.accounts.filter((a) =>
-        LEDGER_ACCOUNT_TYPES.has(a.accountType),
-      ),
-    [formOptions],
+      filterAccounts.find((a) => LEDGER_ACCOUNT_TYPES.has(a.accountType)) ??
+      filterAccounts[0],
+    [filterAccounts],
   );
 
-  // "전체 계좌" 없이 계좌 선택 필수 — 선택 안 됐으면 첫 거래계좌 자동 선택.
+  // 계좌 선택 필수 — 선택 안 됐으면 기본 통장 자동 선택.
   useEffect(() => {
-    if (!accountId && ledgerAccounts.length > 0) {
-      onAccountChange(ledgerAccounts[0]!.accountId);
+    if (!accountId && defaultAccount) {
+      onAccountChange(defaultAccount.accountId);
     }
-  }, [accountId, ledgerAccounts, onAccountChange]);
+  }, [accountId, defaultAccount, onAccountChange]);
 
   return (
     <Card p="sm">
@@ -114,7 +116,7 @@ export default function TransactionToolbar({
             <Select
               value={accountId ?? null}
               onChange={(v) => v && onAccountChange(v)}
-              data={ledgerAccounts.map((a) => ({
+              data={filterAccounts.map((a) => ({
                 value: a.accountId,
                 label: a.name,
               }))}

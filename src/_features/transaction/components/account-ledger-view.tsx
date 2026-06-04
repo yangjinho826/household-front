@@ -18,6 +18,8 @@ interface AccountLedgerViewProps {
   month?: number;
   /** txType 필터 — 잔액은 백엔드가 박아주므로 클라이언트에서 걸러도 행별 잔액은 정확 */
   filter?: TransactionFilterMode;
+  /** running balance 표시 여부 — INVESTMENT 는 매매현금이 빠져 부정확이라 숨긴다 */
+  showBalance?: boolean;
 }
 
 /**
@@ -29,6 +31,7 @@ export default function AccountLedgerView({
   year,
   month,
   filter = "all",
+  showBalance = true,
 }: AccountLedgerViewProps) {
   const tg = useTranslations("general.common");
   const tGeneral = useTranslations("general");
@@ -88,7 +91,12 @@ export default function AccountLedgerView({
             <Card p="xs">
               <Stack gap={0}>
                 {txns.map((tx) => (
-                  <LedgerRow key={tx.transactionId} t={tx} accountId={accountId} />
+                  <LedgerRow
+                    key={tx.transactionId}
+                    t={tx}
+                    accountId={accountId}
+                    showBalance={showBalance}
+                  />
                 ))}
               </Stack>
             </Card>

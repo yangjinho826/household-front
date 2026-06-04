@@ -26,12 +26,16 @@ const TYPE_FALLBACK_HEX: Record<TxType, string> = {
 export default function LedgerRow({
   t,
   accountId,
+  showBalance = true,
 }: {
   t: AccountLedgerItemType;
   /** 지금 보고 있는 계좌 — 이체 방향 판정 기준 */
   accountId: string;
+  /** running balance 표시 여부 — INVESTMENT 는 숨김 */
+  showBalance?: boolean;
 }) {
   const tt = useTranslations("transaction");
+  const tTxType = useTranslations("enum.tx-type");
   const openEdit = useQuickAddStore((s) => s.open);
 
   const accent = t.categoryColor ?? TYPE_FALLBACK_HEX[t.txType];
@@ -41,6 +45,14 @@ export default function LedgerRow({
     t.txType === "TRANSFER" ? t.toAccountId === accountId : t.signedAmount >= 0;
   // 이체 상대 계좌 — 입금이면 출금처(accountName), 출금이면 입금처(toAccountName)
   const counterparty = isPositive ? t.accountName : t.toAccountName;
+
+  // 보조 라벨 — 이체는 상대계좌, 평가조정은 타입명, 그 외는 카테고리.
+  const subLabel =
+    t.txType === "TRANSFER"
+      ? `${isPositive ? "← " : "→ "}${counterparty ?? "—"}`
+      : t.txType === "VALUATION"
+        ? tTxType("VALUATION")
+        : (t.categoryName ?? "—");
 
   return (
     <UnstyledButton
@@ -55,9 +67,7 @@ export default function LedgerRow({
               {t.memo || t.categoryName || tt("tx_default_label")}
             </Text>
             <Text size="xs" c="dimmed" truncate>
-              {t.txType === "TRANSFER"
-                ? `${isPositive ? "← " : "→ "}${counterparty ?? "—"}`
-                : (t.categoryName ?? "—")}
+              {subLabel}
             </Text>
           </Stack>
         </Group>
@@ -71,14 +81,16 @@ export default function LedgerRow({
             {fmt(Math.abs(t.signedAmount))}
             {tt("won")}
           </Text>
-          <Text
-            size="xs"
-            c="dimmed"
-            style={{ fontVariantNumeric: "tabular-nums" }}
-          >
-            {tt("balance_current")} {fmt(t.balanceAfter)}
-            {tt("won")}
-          </Text>
+          {showBalance && (
+            <Text
+              size="xs"
+              c="dimmed"
+              style={{ fontVariantNumeric: "tabular-nums" }}
+            >
+              {tt("balance_current")} {fmt(t.balanceAfter)}
+              {tt("won")}
+            </Text>
+          )}
         </Stack>
       </Group>
     </UnstyledButton>
