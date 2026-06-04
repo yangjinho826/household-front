@@ -162,7 +162,19 @@
     "current_balance": "현재 잔액",
     "monthly_flow": "월별 수입 · 지출",
     "empty_flow": "표시할 수입·지출 내역이 없어요",
-    "balance_trend": "잔액 추이"
+    "balance_trend": "잔액 추이",
+    "asset": {
+      "section_title": "부동산·연금·금",
+      "empty": "등록된 자산이 없어요",
+      "type": "자산 종류",
+      "name": "이름",
+      "name_placeholder": "예: 우리집, 국민연금",
+      "name_required_message": "이름을 입력하세요",
+      "valuation": "현재 총 평가액",
+      "valuation_placeholder": "현재 가치",
+      "valuation_update_help": "지금 총 평가액을 입력하면 차액이 평가조정으로 기록돼요",
+      "valuation_required_message": "평가액을 입력하세요"
+    }
   },
   "category": {
     "list_title": "카테고리",
@@ -386,20 +398,6 @@
       "role_member": "멤버"
     }
   },
-  "manual-asset": {
-    "section_title": "부동산·연금",
-    "asset_class": "자산 종류",
-    "name": "이름",
-    "name_placeholder": "예: 우리집, 국민연금",
-    "name_required_message": "이름을 입력하세요",
-    "valuation": "평가액",
-    "valuation_placeholder": "현재 가치",
-    "valuation_required_message": "평가액을 입력하세요",
-    "valued_at": "평가 기준일",
-    "valued_at_help": "이 평가액이 언제 기준인지",
-    "valued_at_required_message": "평가 기준일을 선택하세요",
-    "empty": "등록된 부동산·연금이 없어요"
-  },
   "enum": {
     "account-type": {
       "LIVING": "생활",
@@ -407,6 +405,7 @@
       "INVESTMENT": "투자",
       "REAL_ESTATE": "부동산",
       "PENSION": "연금",
+      "COMMODITY": "금·원자재",
       "SAVINGS_ASSET": "적금",
       "OTHER": "기타"
     },
@@ -418,7 +417,8 @@
       "EXPENSE": "지출",
       "INCOME": "수입",
       "TRANSFER": "이체",
-      "FIXED_EXPENSE": "고정 지출"
+      "FIXED_EXPENSE": "고정 지출",
+      "VALUATION": "평가조정"
     },
     "portfolio-tx-type": {
       "BUY": "매수",

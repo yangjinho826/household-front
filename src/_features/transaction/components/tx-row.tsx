@@ -10,11 +10,13 @@ import { TOKEN } from "_styles/design-tokens";
 import { useQuickAddStore } from "../store";
 import type { TransactionListItemType, TxType } from "../types";
 
+// VALUATION 은 행에서 valuationDirection 으로 부호/색을 따로 정한다(아래 값은 fallback).
 const SIGN: Record<TxType, string> = {
   EXPENSE: "-",
   FIXED_EXPENSE: "-",
   INCOME: "+",
   TRANSFER: "→",
+  VALUATION: "±",
 };
 
 const TYPE_COLOR: Record<TxType, string> = {
@@ -22,6 +24,7 @@ const TYPE_COLOR: Record<TxType, string> = {
   FIXED_EXPENSE: "danger.5",
   INCOME: "info.5",
   TRANSFER: "purple.5",
+  VALUATION: "info.5",
 };
 
 // 카테고리 색상 없을 때 tx_type 기준 fallback
@@ -30,6 +33,7 @@ const TYPE_FALLBACK_HEX: Record<TxType, string> = {
   FIXED_EXPENSE: TOKEN.red,
   INCOME: TOKEN.blue,
   TRANSFER: TOKEN.purple,
+  VALUATION: TOKEN.purple,
 };
 
 export default function TxRow({ item }: { item: TransactionListItemType }) {
@@ -38,6 +42,19 @@ export default function TxRow({ item }: { item: TransactionListItemType }) {
   const openEdit = useQuickAddStore((s) => s.open);
 
   const accent = item.categoryColor ?? TYPE_FALLBACK_HEX[item.txType];
+
+  // 평가조정은 방향(INCREASE/DECREASE)으로 부호·색을 정한다.
+  const isValuation = item.txType === "VALUATION";
+  const sign = isValuation
+    ? item.valuationDirection === "DECREASE"
+      ? "-"
+      : "+"
+    : SIGN[item.txType];
+  const amountColor = isValuation
+    ? item.valuationDirection === "DECREASE"
+      ? "danger.5"
+      : "info.5"
+    : TYPE_COLOR[item.txType];
 
   return (
     <UnstyledButton
@@ -59,13 +76,13 @@ export default function TxRow({ item }: { item: TransactionListItemType }) {
         </Group>
         <Text
           fw={800}
-          c={TYPE_COLOR[item.txType]}
+          c={amountColor}
           style={{
             fontVariantNumeric: "tabular-nums",
             flexShrink: 0,
           }}
         >
-          {SIGN[item.txType]}
+          {sign}
           {money(item.amount)}
         </Text>
       </Group>

@@ -1,4 +1,12 @@
-export type TxType = "EXPENSE" | "INCOME" | "TRANSFER" | "FIXED_EXPENSE";
+export type TxType =
+  | "EXPENSE"
+  | "INCOME"
+  | "TRANSFER"
+  | "FIXED_EXPENSE"
+  | "VALUATION";
+
+/** 평가조정(VALUATION) 거래의 증감 방향 — 그 외 타입에는 없음 */
+export type ValuationDirection = "INCREASE" | "DECREASE";
 
 export interface TransactionSearchRequestType {
   searchTerm?: string;
@@ -21,6 +29,8 @@ export interface TransactionBaseRequestType {
   paidByUserId?: string | null;
   fixedExpenseId: string | null;
   memo?: string | null;
+  // VALUATION 거래에서만 — 평가액 증감 방향
+  valuationDirection?: ValuationDirection | null;
 }
 
 export type TransactionCreateRequest = TransactionBaseRequestType;
@@ -41,6 +51,7 @@ export interface TransactionListItemType {
   paidByUserId: string | null;
   fixedExpenseId: string | null;
   memo: string | null;
+  valuationDirection?: ValuationDirection | null;
   // 조인된 표시 필드 (백엔드 응답에 포함)
   accountName?: string | null;
   toAccountName?: string | null;
@@ -95,6 +106,7 @@ export interface TransactionDetailItemType {
   paidByUserId: string | null;
   fixedExpenseId: string | null;
   memo: string | null;
+  valuationDirection?: ValuationDirection | null;
   accountName?: string | null;
   toAccountName?: string | null;
   categoryName?: string | null;

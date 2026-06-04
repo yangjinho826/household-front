@@ -162,7 +162,19 @@
     "current_balance": "Current balance",
     "monthly_flow": "Monthly income & expense",
     "empty_flow": "No income or expense to show",
-    "balance_trend": "Balance trend"
+    "balance_trend": "Balance trend",
+    "asset": {
+      "section_title": "Real estate · Pension · Commodity",
+      "empty": "No assets registered yet",
+      "type": "Asset type",
+      "name": "Name",
+      "name_placeholder": "e.g. My home, Pension",
+      "name_required_message": "Please enter a name",
+      "valuation": "Current total valuation",
+      "valuation_placeholder": "Current value",
+      "valuation_update_help": "Enter the current total valuation; the difference is recorded as a valuation adjustment",
+      "valuation_required_message": "Please enter the valuation"
+    }
   },
   "category": {
     "list_title": "Categories",
@@ -386,20 +398,6 @@
       "role_member": "Member"
     }
   },
-  "manual-asset": {
-    "section_title": "Real estate & Pension",
-    "asset_class": "Type",
-    "name": "Name",
-    "name_placeholder": "e.g. My home, Pension",
-    "name_required_message": "Enter a name",
-    "valuation": "Valuation",
-    "valuation_placeholder": "Current value",
-    "valuation_required_message": "Enter valuation",
-    "valued_at": "Valued at",
-    "valued_at_help": "When this valuation is based on",
-    "valued_at_required_message": "Select a date",
-    "empty": "No real estate or pension yet"
-  },
   "enum": {
     "account-type": {
       "LIVING": "Living",
@@ -407,6 +405,7 @@
       "INVESTMENT": "Investment",
       "REAL_ESTATE": "Real estate",
       "PENSION": "Pension",
+      "COMMODITY": "Commodity",
       "SAVINGS_ASSET": "Savings",
       "OTHER": "Other"
     },
@@ -418,7 +417,8 @@
       "EXPENSE": "Expense",
       "INCOME": "Income",
       "TRANSFER": "Transfer",
-      "FIXED_EXPENSE": "Fixed Expense"
+      "FIXED_EXPENSE": "Fixed Expense",
+      "VALUATION": "Valuation"
     },
     "portfolio-tx-type": {
       "BUY": "Buy",

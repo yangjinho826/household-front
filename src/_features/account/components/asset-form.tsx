@@ -9,44 +9,42 @@ import {
   Text,
   TextInput,
 } from "@mantine/core";
-import { DateInput } from "@mantine/dates";
-import dayjs from "dayjs";
 import { useTranslations } from "next-intl";
+import { useMemo } from "react";
 
-import { useManualAssetForm } from "../hooks/use-sub/use-form";
-import type { ManualAssetListItemType } from "../types";
+import { MANUAL_ASSET_ACCOUNT_TYPES } from "_features/account/constants";
+import type { AccountListItemType } from "_features/account/types";
 
-interface ManualAssetFormProps {
-  asset?: ManualAssetListItemType;
+import { useAssetForm } from "../hooks/use-sub/use-asset-form";
+
+interface AssetFormProps {
+  /** 있으면 수정 모드 */
+  account?: AccountListItemType;
   onClose?: () => void;
 }
 
-export default function ManualAssetForm({
-  asset,
-  onClose,
-}: ManualAssetFormProps) {
-  const t = useTranslations("manual-asset");
-  const tAssetClass = useTranslations("enum.asset-class");
+export default function AssetForm({ account, onClose }: AssetFormProps) {
+  const t = useTranslations("account.asset");
+  const tType = useTranslations("enum.account-type");
   const tg = useTranslations("general.common");
   const tGeneral = useTranslations("general");
 
   const { form, isUpdate, isPending, handleSubmit, handleRemove, handleCancel } =
-    useManualAssetForm({ asset, onClose });
+    useAssetForm({ account, onClose });
 
-  const assetClassOptions = [
-    { value: "REAL_ESTATE", label: tAssetClass("REAL_ESTATE") },
-    { value: "PENSION", label: tAssetClass("PENSION") },
-    { value: "COMMODITY", label: tAssetClass("COMMODITY") },
-    { value: "SAVINGS", label: tAssetClass("SAVINGS") },
-  ];
+  const typeOptions = useMemo(
+    () =>
+      MANUAL_ASSET_ACCOUNT_TYPES.map((v) => ({ value: v, label: tType(v) })),
+    [tType],
+  );
 
   return (
     <form onSubmit={form.onSubmit(handleSubmit)}>
       <Stack gap="sm">
         <Select
-          {...form.getInputProps("assetClass")}
-          label={t("asset_class")}
-          data={assetClassOptions}
+          {...form.getInputProps("accountType")}
+          label={t("type")}
+          data={typeOptions}
           allowDeselect={false}
         />
         <TextInput
@@ -55,8 +53,9 @@ export default function ManualAssetForm({
           placeholder={t("name_placeholder")}
         />
         <NumberInput
-          {...form.getInputProps("currentValuation")}
+          {...form.getInputProps("valuation")}
           label={t("valuation")}
+          description={isUpdate ? t("valuation_update_help") : undefined}
           placeholder={t("valuation_placeholder")}
           thousandSeparator=","
           min={0}
@@ -65,22 +64,6 @@ export default function ManualAssetForm({
               {tGeneral("won")}
             </Text>
           }
-        />
-        <DateInput
-          value={
-            form.values.valuedAt ? dayjs(form.values.valuedAt).toDate() : null
-          }
-          onChange={(d) =>
-            form.setFieldValue(
-              "valuedAt",
-              d ? dayjs(d).format("YYYY-MM-DD") : "",
-            )
-          }
-          error={form.errors.valuedAt}
-          label={t("valued_at")}
-          description={t("valued_at_help")}
-          valueFormat="YYYY-MM-DD"
-          placeholder="YYYY-MM-DD"
         />
         <Group grow mt="md">
           <Button

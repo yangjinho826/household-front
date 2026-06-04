@@ -16,6 +16,7 @@ const TYPE_FALLBACK_HEX: Record<TxType, string> = {
   FIXED_EXPENSE: TOKEN.red,
   INCOME: TOKEN.blue,
   TRANSFER: TOKEN.purple,
+  VALUATION: TOKEN.purple,
 };
 
 /**

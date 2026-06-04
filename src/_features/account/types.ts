@@ -1,5 +1,6 @@
-// 백엔드 enum: LIVING / SAVINGS / INVESTMENT / REAL_ESTATE / PENSION / COMMODITY / OTHER
-// REAL_ESTATE / PENSION / COMMODITY 는 수동자산(부동산·연금·금) roll-up 전용 계좌 타입
+// 백엔드 enum: LIVING / SAVINGS / INVESTMENT / REAL_ESTATE / PENSION / COMMODITY / SAVINGS_ASSET / OTHER
+// REAL_ESTATE / PENSION / COMMODITY / SAVINGS_ASSET 는 수동자산(부동산·연금·금·적금) 전용 계좌 타입
+// — 거래(수입/지출) 대신 평가조정(VALUATION) 거래로 잔액이 변동된다.
 export type AccountType =
   | "LIVING"
   | "SAVINGS"
@@ -9,6 +10,13 @@ export type AccountType =
   | "COMMODITY"
   | "SAVINGS_ASSET"
   | "OTHER";
+
+/** 수동자산(부동산·연금·금·적금) 전용 통장 타입 — 거래 대신 평가조정으로 잔액 변동 */
+export type ManualAssetAccountType =
+  | "REAL_ESTATE"
+  | "PENSION"
+  | "COMMODITY"
+  | "SAVINGS_ASSET";
 
 export interface AccountSearchRequestType {
   searchTerm?: string;

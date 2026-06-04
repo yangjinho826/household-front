@@ -1,6 +1,14 @@
 import { TOKEN } from "_styles/design-tokens";
 
-import type { AccountType } from "./types";
+import type { AccountType, ManualAssetAccountType } from "./types";
+
+/** 수동자산 통장 타입 — 자산 폼 Select 옵션 순서. 백엔드 MANUAL_ASSET_ACCOUNT_TYPES 와 동일 집합 */
+export const MANUAL_ASSET_ACCOUNT_TYPES: ManualAssetAccountType[] = [
+  "REAL_ESTATE",
+  "PENSION",
+  "COMMODITY",
+  "SAVINGS_ASSET",
+];
 
 /** AccountType → Mantine 색상 키 (tossXxx) */
 export const ACCOUNT_TYPE_MANTINE_COLOR: Record<AccountType, string> = {

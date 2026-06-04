@@ -12,7 +12,6 @@ import {
 } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import dayjs from "dayjs";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 
@@ -43,12 +42,15 @@ export default function TransactionForm({
     staleTime: Infinity,
     gcTime: Infinity,
   });
+  // VALUATION(평가조정)은 수동자산 폼에서 차액으로 자동 생성 — 거래 폼에서 직접 선택 불가.
   const txTypeOptions = useMemo(
     () =>
-      (txTypeData.body.data ?? []).map((v) => ({
-        value: v,
-        label: tTxType(v),
-      })),
+      (txTypeData.body.data ?? [])
+        .filter((v) => v !== "VALUATION")
+        .map((v) => ({
+          value: v,
+          label: tTxType(v),
+        })),
     [txTypeData, tTxType],
   );
 
@@ -156,15 +158,8 @@ export default function TransactionForm({
             thousandSeparator=","
           />
           <DateInput
-            value={
-              form.values.txDate ? dayjs(form.values.txDate).toDate() : null
-            }
-            onChange={(d) =>
-              form.setFieldValue(
-                "txDate",
-                d ? dayjs(d).format("YYYY-MM-DD") : "",
-              )
-            }
+            value={form.values.txDate || null}
+            onChange={(value) => form.setFieldValue("txDate", value ?? "")}
             error={form.errors.txDate}
             label={t("tx_date")}
             placeholder="YYYY-MM-DD"

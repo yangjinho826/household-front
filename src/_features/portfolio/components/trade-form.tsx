@@ -12,7 +12,6 @@ import { DateInput } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
-import dayjs from "dayjs";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
@@ -221,15 +220,8 @@ export default function TradeForm({
           }
         />
         <DateInput
-          value={
-            form.values.txDate ? dayjs(form.values.txDate).toDate() : null
-          }
-          onChange={(d) =>
-            form.setFieldValue(
-              "txDate",
-              d ? dayjs(d).format("YYYY-MM-DD") : "",
-            )
-          }
+          value={form.values.txDate || null}
+          onChange={(value) => form.setFieldValue("txDate", value ?? "")}
           error={form.errors.txDate}
           label={t("label_tx_date")}
           placeholder="YYYY-MM-DD"

@@ -8,7 +8,6 @@ import { enums } from "_features/enum/queries/query-key";
 import { fixedExpenses } from "_features/fixed/queries/query-key";
 import { home } from "_features/home/queries/query-key";
 import { households } from "_features/household/queries/query-key";
-import { manualAssets } from "_features/manual-asset/queries/query-key";
 import { portfolios } from "_features/portfolio/queries/query-key";
 import { settings } from "_features/settings/queries/query-key";
 import { stats } from "_features/stats/queries/query-key";
@@ -25,7 +24,6 @@ export const queryKeys = mergeQueryKeys(
   transactions,
   households,
   accountSnapshots,
-  manualAssets,
   stats,
   home,
   wealth,

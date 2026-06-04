@@ -6,15 +6,15 @@ import { useTranslations } from "next-intl";
 import { useRouter, useParams } from "next/navigation";
 import { useState } from "react";
 
-import { ACCOUNT_TYPE_MANTINE_COLOR } from "_features/account/constants";
+import AssetForm from "_features/account/components/asset-form";
+import {
+  ACCOUNT_TYPE_HEX,
+  ACCOUNT_TYPE_MANTINE_COLOR,
+} from "_features/account/constants";
 import { useAccountSheetStore } from "_features/account/store";
 import type { AccountListItemType } from "_features/account/types";
 import FormSheet from "_features/common/components/form-sheet";
 import SubHeader from "_features/layout/components/sub-header";
-import ManualAssetForm from "_features/manual-asset/components/form";
-import { useManualAssetList } from "_features/manual-asset/queries/use-query";
-import type { ManualAssetListItemType } from "_features/manual-asset/types";
-import { ASSET_CLASS_COLOR } from "_features/portfolio/constants";
 import { useMoney } from "_features/common/hooks/use-money";
 import { queryKeys } from "_constants/queries";
 
@@ -32,8 +32,8 @@ const TYPE_COLOR = ACCOUNT_TYPE_MANTINE_COLOR;
 export default function WealthSection() {
   const router = useRouter();
   const routeParams = useParams<{ locale: string }>();
-  const tAssetClass = useTranslations("enum.asset-class");
-  const tManual = useTranslations("manual-asset");
+  const tType = useTranslations("enum.account-type");
+  const tAsset = useTranslations("account.asset");
   const tWealth = useTranslations("wealth");
   const tGeneral = useTranslations("general.common");
   const money = useMoney();
@@ -41,23 +41,22 @@ export default function WealthSection() {
   const openAccountSheet = useAccountSheetStore((s) => s.open);
 
   const { data: overviewRes } = useSuspenseQuery(queryKeys.wealth.overview({}));
-  const { data: manualAssetRes } = useManualAssetList();
-  const manualAssetItems = manualAssetRes.body.data;
 
   // 수동자산 폼 시트 — 트리 안에서 직접 렌더해야 useQuery/useMutation 컨텍스트가 잡힘
-  const [manualAssetFormOpen, setManualAssetFormOpen] = useState(false);
-  const [manualAssetEdit, setManualAssetEdit] = useState<
-    ManualAssetListItemType | undefined
+  const [assetFormOpen, setAssetFormOpen] = useState(false);
+  const [assetEdit, setAssetEdit] = useState<
+    AccountListItemType | undefined
   >(undefined);
 
   const overview = overviewRes.body.data;
   const accounts: AccountListItemType[] = overview.accounts;
-  // 수동자산 전용계좌(부동산·연금·금·적금)는 통장 리스트에서 제외 — 별도 수동자산 섹션에서 관리
+  // 수동자산 전용계좌(부동산·연금·금·적금)는 별도 자산 섹션에서, 나머지는 통장 리스트에서
+  const manualAssets = accounts.filter((a) => a.isManualAsset);
   const visibleAccounts = accounts.filter((a) => !a.isManualAsset);
 
-  const openManualAssetForm = (asset?: ManualAssetListItemType) => {
-    setManualAssetEdit(asset);
-    setManualAssetFormOpen(true);
+  const openAssetForm = (asset?: AccountListItemType) => {
+    setAssetEdit(asset);
+    setAssetFormOpen(true);
   };
 
   return (
@@ -77,9 +76,9 @@ export default function WealthSection() {
 
       <Group justify="space-between" align="center" px={4}>
         <Text size="sm" fw={700}>
-          {tManual("section_title")}
+          {tAsset("section_title")}
         </Text>
-        <UnstyledButton onClick={() => openManualAssetForm()}>
+        <UnstyledButton onClick={() => openAssetForm()}>
           <Text size="xs" fw={700} c="info.5">
             + {tGeneral("create")}
           </Text>
@@ -88,56 +87,55 @@ export default function WealthSection() {
 
       <Card radius="lg" p="xs">
         <Stack gap={0}>
-          {manualAssetItems.length === 0 ? (
+          {manualAssets.length === 0 ? (
             <Text size="xs" c="dimmed" ta="center" py="md">
-              {tManual("empty")}
+              {tAsset("empty")}
             </Text>
           ) : (
-            manualAssetItems.map((m) => (
-              <UnstyledButton
-                key={m.manualAssetId}
-                onClick={() => openManualAssetForm(m)}
-                style={{ padding: 12, borderRadius: 12 }}
-              >
-                <Group gap={12}>
-                  <div
-                    style={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: 12,
-                      background: `${ASSET_CLASS_COLOR[m.assetClass]}20`,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      flexShrink: 0,
-                    }}
-                  >
+            manualAssets.map((a) => {
+              const assetColor = a.color ?? ACCOUNT_TYPE_HEX[a.accountType];
+              return (
+                <UnstyledButton
+                  key={a.accountId}
+                  onClick={() => openAssetForm(a)}
+                  style={{ padding: 12, borderRadius: 12 }}
+                >
+                  <Group gap={12}>
+                    <div
+                      style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: 12,
+                        background: `${assetColor}20`,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                      }}
+                    >
+                      <Text size="sm" fw={700} style={{ color: assetColor }}>
+                        {a.name.slice(0, 1)}
+                      </Text>
+                    </div>
+                    <Stack gap={0} style={{ flex: 1, minWidth: 0 }}>
+                      <Text size="sm" fw={600} truncate>
+                        {a.name}
+                      </Text>
+                      <Text size="xs" c="dimmed">
+                        {tType(a.accountType)}
+                      </Text>
+                    </Stack>
                     <Text
                       size="sm"
                       fw={700}
-                      style={{ color: ASSET_CLASS_COLOR[m.assetClass] }}
+                      style={{ fontVariantNumeric: "tabular-nums" }}
                     >
-                      {m.name.slice(0, 1)}
+                      {money(a.balance)}
                     </Text>
-                  </div>
-                  <Stack gap={0} style={{ flex: 1, minWidth: 0 }}>
-                    <Text size="sm" fw={600} truncate>
-                      {m.name}
-                    </Text>
-                    <Text size="xs" c="dimmed">
-                      {tAssetClass(m.assetClass)}
-                    </Text>
-                  </Stack>
-                  <Text
-                    size="sm"
-                    fw={700}
-                    style={{ fontVariantNumeric: "tabular-nums" }}
-                  >
-                    {money(m.currentValuation)}
-                  </Text>
-                </Group>
-              </UnstyledButton>
-            ))
+                  </Group>
+                </UnstyledButton>
+              );
+            })
           )}
         </Stack>
       </Card>
@@ -215,17 +213,17 @@ export default function WealthSection() {
       </Card>
 
       <FormSheet
-        opened={manualAssetFormOpen}
-        onClose={() => setManualAssetFormOpen(false)}
+        opened={assetFormOpen}
+        onClose={() => setAssetFormOpen(false)}
         title={
-          manualAssetEdit
-            ? `${tManual("section_title")} ${tGeneral("update")}`
-            : `${tManual("section_title")} ${tGeneral("create")}`
+          assetEdit
+            ? `${tAsset("section_title")} ${tGeneral("update")}`
+            : `${tAsset("section_title")} ${tGeneral("create")}`
         }
       >
-        <ManualAssetForm
-          asset={manualAssetEdit}
-          onClose={() => setManualAssetFormOpen(false)}
+        <AssetForm
+          account={assetEdit}
+          onClose={() => setAssetFormOpen(false)}
         />
       </FormSheet>
     </Stack>
