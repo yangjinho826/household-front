@@ -70,6 +70,7 @@ export default function PortfolioSection() {
         label: t("etc_count", { count: rest.length }),
         value: restSum,
         color: TOKEN.warmGrayDeep,
+        pinToEnd: true,
         // 범례에서 "외 N개" 탭하면 펼쳐질 묶인 종목들
         children: rest.map((p) => ({
           key: p.portfolioId,
@@ -85,6 +86,7 @@ export default function PortfolioSection() {
         label: t("cash_slice"),
         value: summary.totalCash,
         color: TOKEN.warmGray,
+        pinToEnd: true,
       });
     }
     return items;

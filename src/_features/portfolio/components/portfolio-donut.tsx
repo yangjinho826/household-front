@@ -17,6 +17,8 @@ export interface DonutBreakdownItem {
   color: string;
   /** "외 N개" 처럼 묶인 항목의 펼침 상세 — 있으면 범례에서 탭하면 펼쳐짐 */
   children?: DonutBreakdownItem[];
+  /** true 면 값 크기와 무관하게 정렬에서 빼고 맨 뒤에 고정 (현금·"외" 묶음용) */
+  pinToEnd?: boolean;
 }
 
 /** 범례 한 줄 — children 있으면 탭해서 묶인 항목 펼침 */
@@ -125,11 +127,17 @@ export default function PortfolioDonut({
   const active = items.filter((i) => i.value > 0);
   if (active.length === 0) return null;
 
-  const sorted = [...active].sort((a, b) => b.value - a.value);
+  // pinToEnd 항목(현금·"외 N개" 묶음)은 값 크기와 무관하게 맨 뒤 고정.
+  // 나머지만 값 내림차순 정렬 → 묶음이 종목 사이로 끼어드는 것 방지.
+  const pinned = active.filter((i) => i.pinToEnd);
+  const sortable = active
+    .filter((i) => !i.pinToEnd)
+    .sort((a, b) => b.value - a.value);
+  const sorted = [...sortable, ...pinned];
   const total = sorted.reduce((s, i) => s + i.value, 0);
 
-  const top = sorted.slice(0, topN);
-  const rest = sorted.slice(topN);
+  const top = sortable.slice(0, topN);
+  const rest = sortable.slice(topN);
   const restSum = rest.reduce((s, i) => s + i.value, 0);
 
   // 상위 N개를 넘어가는 항목은 "외 N개" 한 줄로 묶되, 탭하면 펼쳐지도록 children 로 전달
@@ -177,6 +185,9 @@ export default function PortfolioDonut({
         <LegendRow key={it.key} item={it} total={total} />
       ))}
       {restItem && <LegendRow item={restItem} total={total} />}
+      {pinned.map((it) => (
+        <LegendRow key={it.key} item={it} total={total} />
+      ))}
     </Stack>
   );
 
