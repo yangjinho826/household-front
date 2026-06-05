@@ -9,9 +9,9 @@ import {
   Stack,
   Text,
   Textarea,
-  UnstyledButton,
 } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
+import { IconBuildingBank } from "@tabler/icons-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
@@ -158,64 +158,39 @@ export default function TransactionForm({
     );
   };
 
+  // 통장 선택 — 거래 툴바 계좌 필터와 동일한 Select 패턴. 가로 칩은 데스크톱
+  // 마우스로 넘기기 불편해 드롭다운으로 통일. 선택된 통장 색을 leftSection 점으로 살린다.
+  const selectedColor = selectedAccount
+    ? selectedAccount.color ?? ACCOUNT_TYPE_HEX[selectedAccount.accountType]
+    : null;
+
   const accountChips = (
-    <Stack gap={4}>
-      <Text size="sm" fw={500}>
-        {t("account_select")}
-      </Text>
-      {/* 가로 스크롤 한 줄 — 통장이 많아도 높이 고정, 옆으로 스와이프. */}
-      <div
-        style={{
-          display: "flex",
-          gap: 8,
-          overflowX: "auto",
-          paddingBottom: 4,
-          scrollbarWidth: "none",
-          msOverflowStyle: "none",
-          WebkitOverflowScrolling: "touch",
-        }}
-      >
-        {accounts.map((a) => {
-          const selected = a.accountId === form.values.accountId;
-          const color = a.color ?? ACCOUNT_TYPE_HEX[a.accountType];
-          return (
-            <UnstyledButton
-              key={a.accountId}
-              onClick={() => form.setFieldValue("accountId", a.accountId)}
-              style={{
-                flexShrink: 0,
-                padding: "6px 12px",
-                borderRadius: 999,
-                border: `1.5px solid ${selected ? color : "var(--mantine-color-gray-3)"}`,
-                background: selected ? `${color}18` : "transparent",
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                whiteSpace: "nowrap",
-              }}
-            >
-              <div
-                style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: 999,
-                  background: color,
-                  flexShrink: 0,
-                }}
-              />
-              <Text size="xs" fw={selected ? 700 : 500} c={selected ? undefined : "dimmed"}>
-                {a.name}
-              </Text>
-            </UnstyledButton>
-          );
-        })}
-      </div>
-      {form.errors.accountId && (
-        <Text size="xs" c="red">
-          {form.errors.accountId}
-        </Text>
-      )}
-    </Stack>
+    <Select
+      label={t("account_select")}
+      placeholder={t("account_placeholder")}
+      value={form.values.accountId || null}
+      onChange={(value) => value && form.setFieldValue("accountId", value)}
+      error={form.errors.accountId}
+      data={accounts.map((a) => ({ value: a.accountId, label: a.name }))}
+      allowDeselect={false}
+      searchable
+      leftSection={
+        selectedColor ? (
+          <div
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: 999,
+              background: selectedColor,
+            }}
+          />
+        ) : (
+          <IconBuildingBank size={15} />
+        )
+      }
+      radius="md"
+      comboboxProps={{ withinPortal: true }}
+    />
   );
 
   const valuationFields = isUpdate ? (
