@@ -21,12 +21,14 @@ import {
   ResponsiveContainer,
   Tooltip,
   XAxis,
+  YAxis,
 } from "recharts";
 
 import { useAccountSnapshotMutations } from "_features/account-snapshot/queries/use-mutations";
 import { useMonthLabel } from "_features/common/hooks/use-month-label";
 import { queryKeys } from "_constants/queries";
 import { getErrorMessage } from "_libraries/fetch/error-message";
+import { trendYDomain } from "_utilities/chart";
 import { fmt } from "_utilities/fmt";
 
 import SnapshotDrilldownPanel from "_sections/wealth/components/snapshot-drilldown-panel";
@@ -122,6 +124,12 @@ export default function TotalAssetHero() {
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [yearly.months],
+  );
+
+  // Y축 도메인 — 데이터 범위로 줌인(0-기준 스케일이면 수% 변동이 평평하게 눌림)
+  const yDomain = useMemo(
+    () => trendYDomain(trendData.map((d) => d.value)),
+    [trendData],
   );
 
   // 추이 기간 전체 증감 — 첫 박제월 대비 현재 총자산
@@ -326,6 +334,7 @@ export default function TotalAssetHero() {
                     strokeDasharray: "3 3",
                   }}
                 />
+                <YAxis hide domain={yDomain} />
                 <XAxis
                   dataKey="month"
                   tick={{ fontSize: 9, fill: "#9C8F82" }}

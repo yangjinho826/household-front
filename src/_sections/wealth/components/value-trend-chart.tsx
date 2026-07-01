@@ -8,9 +8,11 @@ import {
   ResponsiveContainer,
   Tooltip,
   XAxis,
+  YAxis,
 } from "recharts";
 
 import { useMoney } from "_features/common/hooks/use-money";
+import { trendYDomain } from "_utilities/chart";
 
 // 서버에선 false, 클라 마운트 후 true — hydration-safe. recharts SSR prerender 회피용.
 const noopSubscribe = () => () => {};
@@ -115,6 +117,7 @@ export default function ValueTrendChart({ data, color = "#7C9473" }: Props) {
             content={<TrendTooltip />}
             cursor={{ stroke: color, strokeWidth: 1, strokeDasharray: "3 3" }}
           />
+          <YAxis hide domain={trendYDomain(data.map((d) => d.value))} />
           <XAxis
             dataKey="month"
             tick={{ fontSize: 9, fill: "#9C8F82" }}

@@ -140,6 +140,10 @@ export interface RealizedPnlSummaryType {
 export interface RealizedPnlResponseType {
   summary: RealizedPnlSummaryType;
   rows: RealizedPnlRowType[];
+  // 실제 적용된 조회 기간 — from 미전송 시 백엔드가 첫 매도일까지 확장한 값.
+  // 프론트는 이 값으로 날짜 입력을 채운다.
+  effectiveFrom: string;
+  effectiveTo: string;
 }
 
 /** 매수/매도 거래 수정 — pt_type 변경 불가 (백엔드 제약) */
