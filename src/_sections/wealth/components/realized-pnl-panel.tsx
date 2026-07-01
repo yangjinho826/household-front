@@ -1,10 +1,8 @@
 "use client";
 
-import { Card, Group, Stack, Text } from "@mantine/core";
-import { DateInput } from "@mantine/dates";
-import dayjs from "dayjs";
+import { Card, Group, SegmentedControl, Stack, Text } from "@mantine/core";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useDeferredValue, useState } from "react";
 
 import {
   useAccountRealizedPnl,
@@ -17,136 +15,106 @@ import {
   formatProfitRate,
   profitColor,
 } from "_features/portfolio/utils";
-import { todayIsoKst } from "_utilities/datetime";
+import { nowKst, todayIsoKst } from "_utilities/datetime";
 
 interface Props {
   // 둘 중 하나 — 종목 단위(portfolioId) 또는 계좌 누적(accountId)
   portfolioId?: string;
   accountId?: string;
-  initialFrom?: string;
-  initialTo?: string;
 }
 
-// 기본 범위 = 최근 1년. mantine v8 — 날짜 값은 "YYYY-MM-DD" 문자열.
-function defaultRange(initialFrom?: string, initialTo?: string): [string, string] {
-  const to = initialTo ?? todayIsoKst();
-  const from = initialFrom ?? dayjs(to).subtract(1, "year").format("YYYY-MM-DD");
-  return [from, to];
+// 기간 프리셋 — 자유 캘린더 대신. 전체가 기본(레일 라벨과 일치).
+type Preset = "all" | "thisYear" | "lastYear";
+
+// 프리셋 → from/to. 전체는 from 생략(백엔드가 첫 매도일~오늘로 clamp).
+function presetRange(preset: Preset): { from?: string; to?: string } {
+  if (preset === "thisYear") {
+    return { from: nowKst().startOf("year").format("YYYY-MM-DD"), to: todayIsoKst() };
+  }
+  if (preset === "lastYear") {
+    const y = nowKst().subtract(1, "year");
+    return {
+      from: y.startOf("year").format("YYYY-MM-DD"),
+      to: y.endOf("year").format("YYYY-MM-DD"),
+    };
+  }
+  return { from: undefined, to: todayIsoKst() };
 }
 
 // 종목/계좌 useSuspenseQuery 는 조건부 호출 불가 → fetch 를 분리하고 뷰만 공유
-export default function RealizedPnlPanel({
-  portfolioId,
-  accountId,
-  initialFrom,
-  initialTo,
-}: Props) {
-  if (portfolioId)
-    return (
-      <ItemRealizedPnl
-        portfolioId={portfolioId}
-        initialFrom={initialFrom}
-        initialTo={initialTo}
-      />
-    );
-  if (accountId)
-    return (
-      <AccountRealizedPnl
-        accountId={accountId}
-        initialFrom={initialFrom}
-        initialTo={initialTo}
-      />
-    );
+export default function RealizedPnlPanel({ portfolioId, accountId }: Props) {
+  if (portfolioId) return <ItemRealizedPnl portfolioId={portfolioId} />;
+  if (accountId) return <AccountRealizedPnl accountId={accountId} />;
   return null;
 }
 
-interface FetchProps {
-  initialFrom?: string;
-  initialTo?: string;
-}
-
-function ItemRealizedPnl({
-  portfolioId,
-  initialFrom,
-  initialTo,
-}: FetchProps & { portfolioId: string }) {
-  const [def] = useState(() => defaultRange(initialFrom, initialTo));
-  const [from, setFrom] = useState<string | null>(def[0]);
-  const [to, setTo] = useState<string | null>(def[1]);
-  const { data } = useItemRealizedPnl(portfolioId, from ?? undefined, to ?? undefined);
+function ItemRealizedPnl({ portfolioId }: { portfolioId: string }) {
+  const [preset, setPreset] = useState<Preset>("all");
+  // 쿼리는 지연값으로 — 프리셋 전환 시 재-suspend 로 Drawer 가 깜빡이지 않게
+  const deferredPreset = useDeferredValue(preset);
+  const { from, to } = presetRange(deferredPreset);
+  const { data } = useItemRealizedPnl(portfolioId, from, to);
   return (
     <RealizedPnlView
       data={data.body.data}
-      from={from}
-      to={to}
-      onFromChange={setFrom}
-      onToChange={setTo}
+      preset={preset}
+      onPresetChange={setPreset}
+      isStale={preset !== deferredPreset}
     />
   );
 }
 
-function AccountRealizedPnl({
-  accountId,
-  initialFrom,
-  initialTo,
-}: FetchProps & { accountId: string }) {
-  const [def] = useState(() => defaultRange(initialFrom, initialTo));
-  const [from, setFrom] = useState<string | null>(def[0]);
-  const [to, setTo] = useState<string | null>(def[1]);
-  const { data } = useAccountRealizedPnl(accountId, from ?? undefined, to ?? undefined);
+function AccountRealizedPnl({ accountId }: { accountId: string }) {
+  const [preset, setPreset] = useState<Preset>("all");
+  const deferredPreset = useDeferredValue(preset);
+  const { from, to } = presetRange(deferredPreset);
+  const { data } = useAccountRealizedPnl(accountId, from, to);
   return (
     <RealizedPnlView
       data={data.body.data}
-      from={from}
-      to={to}
-      onFromChange={setFrom}
-      onToChange={setTo}
+      preset={preset}
+      onPresetChange={setPreset}
+      isStale={preset !== deferredPreset}
     />
   );
 }
 
 interface ViewProps {
   data: RealizedPnlResponseType;
-  from: string | null;
-  to: string | null;
-  onFromChange: (d: string | null) => void;
-  onToChange: (d: string | null) => void;
+  preset: Preset;
+  onPresetChange: (p: Preset) => void;
+  isStale: boolean;
 }
 
-function RealizedPnlView({
-  data,
-  from,
-  to,
-  onFromChange,
-  onToChange,
-}: ViewProps) {
+function RealizedPnlView({ data, preset, onPresetChange, isStale }: ViewProps) {
   const t = useTranslations("portfolio");
   const tGeneral = useTranslations("general");
   const money = useMoney();
   const { summary, rows } = data;
-  const today = todayIsoKst();
 
   return (
     <Stack gap="sm">
-      {/* 기간 자유 선택 — 시작일 ~ 종료일 (백엔드 fromDate/toDate) */}
-      <Group grow gap="xs">
-        <DateInput
-          size="xs"
-          label={t("period_from")}
-          value={from}
-          onChange={onFromChange}
-          valueFormat="YYYY-MM-DD"
-          maxDate={to ?? today}
-        />
-        <DateInput
-          size="xs"
-          label={t("period_to")}
-          value={to}
-          onChange={onToChange}
-          valueFormat="YYYY-MM-DD"
-          maxDate={today}
-        />
-      </Group>
+      {/* 기간 프리셋 — 전체 / 올해 / 작년 */}
+      <SegmentedControl
+        size="xs"
+        fullWidth
+        value={preset}
+        onChange={(v) => onPresetChange(v as Preset)}
+        data={[
+          { label: t("period_all"), value: "all" },
+          { label: t("period_this_year"), value: "thisYear" },
+          { label: t("period_last_year"), value: "lastYear" },
+        ]}
+      />
+
+      {/* 지연 로딩 중 살짝 흐리게 — 깜빡임 대신 부드러운 전환 */}
+      <Stack
+        gap="sm"
+        style={{
+          opacity: isStale ? 0.5 : 1,
+          transition: "opacity 0.15s ease",
+        }}
+      >
 
       {/* 요약 — 증권사 매매손익 헤더 */}
       <Card radius="lg" p="md">
@@ -248,6 +216,7 @@ function RealizedPnlView({
           )}
         </Stack>
       </Card>
+      </Stack>
     </Stack>
   );
 }

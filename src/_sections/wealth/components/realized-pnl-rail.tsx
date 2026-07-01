@@ -1,11 +1,16 @@
 "use client";
 
-import { Card, Drawer, Group, Stack, Text, UnstyledButton } from "@mantine/core";
+import {
+  Card,
+  Drawer,
+  Group,
+  Stack,
+  Text,
+  UnstyledButton,
+} from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconChevronRight } from "@tabler/icons-react";
-import dayjs from "dayjs";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
 
 import RealizedPnlPanel from "_sections/wealth/components/realized-pnl-panel";
 import { useMoney } from "_features/common/hooks/use-money";
@@ -15,7 +20,6 @@ import {
   formatProfitRate,
   profitColor,
 } from "_features/portfolio/utils";
-import { todayIsoKst } from "_utilities/datetime";
 
 interface Props {
   accountId: string;
@@ -23,20 +27,16 @@ interface Props {
 
 /**
  * 누적 매매수익 레일 — 종목비중 도넛 아래 얇은 카드.
- * "도넛=지금 보유 / 레일=팔고 지나간 성과" 대비. 대표값은 최근 1년,
- * 탭하면 바텀시트에서 날짜(년/월/일)를 자유롭게 선택해 매도내역을 본다.
- * 전량매도로 사라진 종목 성과까지 집계됨. 최근 1년 매도 없으면 레일 숨김.
+ * "도넛=지금 보유 / 레일=팔고 지나간 성과" 대비. 대표값은 전체 매도기간(백엔드가
+ * 첫 매도일~오늘로 잡음), 탭하면 바텀시트에서 날짜를 자유롭게 좁혀 매도내역을 본다.
+ * 전량매도로 사라진 종목 성과까지 집계됨. 매도 이력 없으면 레일 숨김.
  */
 export default function RealizedPnlRail({ accountId }: Props) {
   const t = useTranslations("portfolio");
   const money = useMoney();
   const [opened, { open, close }] = useDisclosure(false);
-  // 레일 대표 = 최근 1년. 시트에 같은 기본 범위를 넘겨 일관(거기서 자유 변경).
-  const [range] = useState(() => {
-    const to = todayIsoKst();
-    return { from: dayjs(to).subtract(1, "year").format("YYYY-MM-DD"), to };
-  });
-  const { data } = useAccountRealizedPnl(accountId, range.from, range.to);
+  // from/to 미전송 → 백엔드가 첫 매도일~오늘 전체로 집계. 시트도 동일 기본 범위.
+  const { data } = useAccountRealizedPnl(accountId);
   const { summary, rows } = data.body.data;
 
   if (rows.length === 0) return null;
@@ -52,7 +52,7 @@ export default function RealizedPnlRail({ accountId }: Props) {
                   {t("cumulative_realized")}
                 </Text>
                 <Text size="10px" c="dimmed">
-                  · {t("realized_recent_1y")}
+                  · {t("realized_all_period")}
                 </Text>
               </Group>
               <Group gap={6} wrap="nowrap">
@@ -115,11 +115,7 @@ export default function RealizedPnlRail({ accountId }: Props) {
           <Text size="md" fw={800}>
             {t("cumulative_realized")}
           </Text>
-          <RealizedPnlPanel
-            accountId={accountId}
-            initialFrom={range.from}
-            initialTo={range.to}
-          />
+          <RealizedPnlPanel accountId={accountId} />
         </Stack>
       </Drawer>
     </>
