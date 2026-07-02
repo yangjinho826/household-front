@@ -342,6 +342,15 @@ export default function TotalAssetHero() {
                   tickLine={false}
                   interval={1}
                 />
+                {/* 0 기준 스케일이면 시가평가로 생긴 월별 손실/변동이 평평하게
+                    뭉개짐 — 데이터 min/max ±2% 여백으로 타이트하게 (공용 차트와 동일) */}
+                <YAxis
+                  hide
+                  domain={[
+                    (dataMin: number) => Math.floor(dataMin * 0.98),
+                    (dataMax: number) => Math.ceil(dataMax * 1.02),
+                  ]}
+                />
               </AreaChart>
             </ResponsiveContainer>
           </div>

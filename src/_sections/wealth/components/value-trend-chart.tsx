@@ -113,6 +113,15 @@ export default function ValueTrendChart({ data, color = "#7C9473" }: Props) {
               strokeWidth: 2,
             }}
           />
+          {/* domain 을 데이터 min/max 에 ±2% 여백으로 타이트하게 —
+              미설정 시 0 기준 스케일이라 잔액 대비 소폭 변동이 평평하게 뭉개짐 */}
+          <YAxis
+            hide
+            domain={[
+              (dataMin: number) => Math.floor(dataMin * 0.98),
+              (dataMax: number) => Math.ceil(dataMax * 1.02),
+            ]}
+          />
           <Tooltip
             content={<TrendTooltip />}
             cursor={{ stroke: color, strokeWidth: 1, strokeDasharray: "3 3" }}
