@@ -37,6 +37,7 @@ interface TrendPoint {
   month: string;
   value: number;
   momPct: number | null; // 전월 대비 증감률
+  isCurrent?: boolean; // 실시간 현재점(박제 아님) — 클릭 드릴다운 제외/마커 구분용
 }
 
 // 추이 차트 점을 탭하면 그달 총자산 + 전월대비 증감을 보여줌
@@ -110,21 +111,27 @@ export default function TotalAssetHero() {
   const selectedMonth =
     selectedIdx !== null ? (yearly.months[selectedIdx] ?? null) : null;
 
-  const trendData = useMemo<TrendPoint[]>(
-    () =>
-      yearly.months.map((m, i) => {
-        const prev = i > 0 ? (yearly.months[i - 1]?.totalBalance ?? null) : null;
-        const momPct =
-          prev && prev > 0 ? ((m.totalBalance - prev) / prev) * 100 : null;
-        return {
-          month: monthLabel(m.snapshotDate), // "5월"
-          value: m.totalBalance,
-          momPct,
-        };
-      }),
+  const trendData = useMemo<TrendPoint[]>(() => {
+    const points: TrendPoint[] = yearly.months.map((m, i) => {
+      const prev = i > 0 ? (yearly.months[i - 1]?.totalBalance ?? null) : null;
+      const momPct =
+        prev && prev > 0 ? ((m.totalBalance - prev) / prev) * 100 : null;
+      return {
+        month: monthLabel(m.snapshotDate), // "5월"
+        value: m.totalBalance,
+        momPct,
+      };
+    });
+    // 그래프 종점 = 현재 실시간 total. periodPct(첫박제→현재)와 종점을 일치시켜
+    // "최근 N개월 추이" %가 그래프 기울기로 시각화되게 함(박제 끝점만 그리면 안 보임).
+    const last = yearly.months[yearly.months.length - 1]?.totalBalance;
+    const nowMom = last && last > 0 ? ((total - last) / last) * 100 : null;
+    if (yearly.months.length > 0) {
+      points.push({ month: t("trend_now"), value: total, momPct: nowMom, isCurrent: true });
+    }
+    return points;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [yearly.months],
-  );
+  }, [yearly.months, total]);
 
   // Y축 도메인 — 데이터 범위로 줌인(0-기준 스케일이면 수% 변동이 평평하게 눌림)
   const yDomain = useMemo(
@@ -138,7 +145,8 @@ export default function TotalAssetHero() {
     if (!first || first <= 0 || yearly.months.length < 2) return null;
     return ((total - first) / first) * 100;
   }, [yearly.months, total]);
-  const periodMonths = trendData.length;
+  // 박제 개월수 기준 — trendData 에는 현재점이 더해져 있어 그걸 쓰면 +1 부풀려짐
+  const periodMonths = yearly.months.length;
 
   // 전월 대비 증감 — 현재 총자산 vs 가장 최근 박제 스냅샷
   const lastSnapshot =
@@ -299,7 +307,9 @@ export default function TotalAssetHero() {
                     );
                     if (found >= 0) idx = found;
                   }
-                  if (idx !== null) {
+                  // 현재점(실시간)은 SnapshotMonth 구조가 아니라 드릴다운 대상 아님.
+                  // selectedIdx 는 yearly.months 를 인덱싱하므로 범위 밖은 걸러냄.
+                  if (idx !== null && idx < yearly.months.length) {
                     const target = idx;
                     setSelectedIdx((cur) => (cur === target ? null : target));
                   }
