@@ -41,6 +41,7 @@
     "diff_vs_record": "vs. {month} record",
     "trend_recent": "Last {count} months",
     "trend_prev": "MoM",
+    "trend_now": "Now",
     "snapshot_title": "Record {month} assets",
     "snapshot_save": "Record",
     "snapshot_overwrite": "Overwrite",

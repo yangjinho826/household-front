@@ -41,6 +41,7 @@
     "diff_vs_record": "{month} 기록 대비",
     "trend_recent": "최근 {count}개월 추이",
     "trend_prev": "전월",
+    "trend_now": "현재",
     "snapshot_title": "{month} 자산 기록",
     "snapshot_save": "기록하기",
     "snapshot_overwrite": "덮어쓰기",
