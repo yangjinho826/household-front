@@ -4,7 +4,6 @@ import {
   ActionIcon,
   Card,
   Group,
-  Modal,
   Stack,
   Text,
   UnstyledButton,
@@ -25,6 +24,7 @@ import {
 } from "recharts";
 
 import { useAccountSnapshotMutations } from "_features/account-snapshot/queries/use-mutations";
+import FormSheet from "_features/common/components/form-sheet";
 import { useMonthLabel } from "_features/common/hooks/use-month-label";
 import { queryKeys } from "_constants/queries";
 import { getErrorMessage } from "_libraries/fetch/error-message";
@@ -213,18 +213,18 @@ export default function TotalAssetHero() {
               <ActionIcon
                 variant="subtle"
                 color="gray"
-                size="sm"
+                size="lg"
                 onClick={() => setHidden((v) => !v)}
                 aria-label={hidden ? t("show_amount") : t("hide_amount")}
               >
-                {hidden ? <IconEyeOff size={14} /> : <IconEye size={14} />}
+                {hidden ? <IconEyeOff size={16} /> : <IconEye size={16} />}
               </ActionIcon>
             </Group>
             <UnstyledButton
               onClick={handleTakeSnapshot}
               disabled={createMutation.isPending}
               style={{
-                padding: "6px 12px",
+                padding: "8px 14px",
                 borderRadius: 999,
                 background: "var(--mantine-color-sage-0)",
                 opacity: createMutation.isPending ? 0.5 : 1,
@@ -343,6 +343,9 @@ export default function TotalAssetHero() {
                     strokeWidth: 1,
                     strokeDasharray: "3 3",
                   }}
+                  // 96px 차트에서 3줄 툴팁이 잘리지 않게 세로 이탈 허용
+                  allowEscapeViewBox={{ x: false, y: true }}
+                  wrapperStyle={{ zIndex: 5 }}
                 />
                 <YAxis hide domain={yDomain} />
                 <XAxis
@@ -367,10 +370,10 @@ export default function TotalAssetHero() {
         </Stack>
       </Card>
 
-      <Modal
+      {/* 드릴다운 — 다른 화면과 동일한 바텀시트 패턴(FormSheet). BottomTab 보정 포함 */}
+      <FormSheet
         opened={selectedMonth !== null}
         onClose={() => setSelectedIdx(null)}
-        centered
         title={
           selectedMonth
             ? t("drilldown_title", {
@@ -380,7 +383,7 @@ export default function TotalAssetHero() {
         }
       >
         {selectedMonth && <SnapshotDrilldownPanel month={selectedMonth} />}
-      </Modal>
+      </FormSheet>
     </>
   );
 }

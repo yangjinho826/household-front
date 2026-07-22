@@ -1,9 +1,7 @@
 "use client";
 
 import {
-  Button,
   Card,
-  Group,
   NumberInput,
   Select,
   Stack,
@@ -17,6 +15,7 @@ import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 
 import { ACCOUNT_TYPE_HEX } from "_features/account/constants";
+import FormActions from "_features/common/components/form-actions";
 import { queryKeys } from "_constants/queries";
 import { fmt } from "_utilities/fmt";
 
@@ -306,31 +305,16 @@ export default function TransactionForm({
           </>
         )}
 
-        <Group grow mt="md">
-          <Button
-            type="button"
-            variant="light"
-            onClick={handleCancel}
-            disabled={isPending}
-          >
-            {tg("cancel")}
-          </Button>
-          <Button type="submit" loading={isPending} disabled={!selectedAccount}>
-            {isUpdate ? tg("update") : tg("create")}
-          </Button>
-        </Group>
-        {isUpdate && (
-          <Button
-            type="button"
-            variant="light"
-            color="red"
-            onClick={handleRemove}
-            disabled={isPending}
-            fullWidth
-          >
-            {tg("delete")}
-          </Button>
-        )}
+        <FormActions
+          submitLabel={isUpdate ? tg("update") : tg("create")}
+          isPending={isPending}
+          submitDisabled={!selectedAccount}
+          onCancel={handleCancel}
+          cancelLabel={tg("cancel")}
+          onRemove={isUpdate ? handleRemove : undefined}
+          removeLabel={tg("delete")}
+          sticky={hideCard}
+        />
       </Stack>
     </form>
   );

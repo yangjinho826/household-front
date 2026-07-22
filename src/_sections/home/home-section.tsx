@@ -177,9 +177,10 @@ export default function HomeSection() {
       {/* [1] 총자산 hero — 월별 추이 / 드릴다운 / 지난달 박제 */}
       <TotalAssetHero />
 
-      {/* [2] 자산구성 + 투자 2열 — 둘 다 있으면 그리드, 하나면 풀폭 */}
+      {/* [2] 자산구성 + 투자 2열 — 둘 다 있으면 그리드, 하나면 풀폭.
+          소형 폰(<xs)은 1열 — 도넛+범례가 반 칸에서 짓눌리는 것 방지 */}
       {assetCard && investCard ? (
-        <SimpleGrid cols={2} spacing="md">
+        <SimpleGrid cols={{ base: 1, xs: 2 }} spacing="md">
           {assetCard}
           {investCard}
         </SimpleGrid>
@@ -212,7 +213,7 @@ export default function HomeSection() {
               {t("income")}
             </Text>
             <Text
-              size="md"
+              className="stat-amount"
               fw={700}
               c="info.5"
               style={{ fontVariantNumeric: "tabular-nums" }}
@@ -225,7 +226,7 @@ export default function HomeSection() {
               {t("expense")}
             </Text>
             <Text
-              size="md"
+              className="stat-amount"
               fw={700}
               c="danger.5"
               style={{ fontVariantNumeric: "tabular-nums" }}
@@ -238,7 +239,7 @@ export default function HomeSection() {
               {t("saving_rate")}
             </Text>
             <Text
-              size="md"
+              className="stat-amount"
               fw={700}
               style={{ fontVariantNumeric: "tabular-nums" }}
             >

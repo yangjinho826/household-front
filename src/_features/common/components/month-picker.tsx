@@ -32,12 +32,22 @@ export default function MonthPicker({ value, onChange }: MonthPickerProps) {
 
   return (
     <Group justify="space-between" align="center">
-      <ActionIcon variant="subtle" onClick={() => shift(-1)} aria-label="prev month">
-        <IconChevronLeft size={16} />
+      <ActionIcon
+        variant="subtle"
+        size="lg"
+        onClick={() => shift(-1)}
+        aria-label="prev month"
+      >
+        <IconChevronLeft size={18} />
       </ActionIcon>
       <Text fw={700}>{t("year_month", { year: String(year), month })}</Text>
-      <ActionIcon variant="subtle" onClick={() => shift(1)} aria-label="next month">
-        <IconChevronRight size={16} />
+      <ActionIcon
+        variant="subtle"
+        size="lg"
+        onClick={() => shift(1)}
+        aria-label="next month"
+      >
+        <IconChevronRight size={18} />
       </ActionIcon>
     </Group>
   );

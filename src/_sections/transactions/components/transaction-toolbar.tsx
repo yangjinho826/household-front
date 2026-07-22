@@ -1,6 +1,13 @@
 "use client";
 
-import { Card, Group, SegmentedControl, Select, Stack } from "@mantine/core";
+import {
+  Card,
+  Group,
+  ScrollArea,
+  SegmentedControl,
+  Select,
+  Stack,
+} from "@mantine/core";
 import { IconBuildingBank, IconCalendar, IconList } from "@tabler/icons-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
@@ -96,22 +103,25 @@ export default function TransactionToolbar({
         />
 
         {view === "list" && (
-          <Group justify="space-between" align="center" gap="xs" wrap="wrap">
-            <Group gap="xs">
-              <FilterChip
-                label={t("filter_all")}
-                active={filter === "all"}
-                onClick={() => onFilterChange("all")}
-              />
-              {txTypes.map((tp) => (
+          <Group justify="space-between" align="center" gap="xs" wrap="nowrap">
+            {/* 좁은 화면에서 칩이 줄바꿈/넘침 대신 가로 스크롤 — 스크롤바는 숨김 */}
+            <ScrollArea type="never" style={{ flex: 1, minWidth: 0 }}>
+              <Group gap="xs" wrap="nowrap">
                 <FilterChip
-                  key={tp}
-                  label={tTxType(tp)}
-                  active={filter === tp}
-                  onClick={() => onFilterChange(tp)}
+                  label={t("filter_all")}
+                  active={filter === "all"}
+                  onClick={() => onFilterChange("all")}
                 />
-              ))}
-            </Group>
+                {txTypes.map((tp) => (
+                  <FilterChip
+                    key={tp}
+                    label={tTxType(tp)}
+                    active={filter === tp}
+                    onClick={() => onFilterChange(tp)}
+                  />
+                ))}
+              </Group>
+            </ScrollArea>
 
             <Select
               value={accountId ?? null}
@@ -124,7 +134,8 @@ export default function TransactionToolbar({
               leftSection={<IconBuildingBank size={15} />}
               size="xs"
               radius="md"
-              w={160}
+              w={140}
+              style={{ flexShrink: 0 }}
               comboboxProps={{ withinPortal: true }}
             />
           </Group>

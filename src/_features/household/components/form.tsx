@@ -1,16 +1,11 @@
 "use client";
 
-import {
-  Button,
-  Card,
-  Group,
-  Stack,
-  TextInput,
-  Textarea,
-} from "@mantine/core";
+import { Card, Stack, TextInput, Textarea } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
 import { useTranslations } from "next-intl";
 import { Fragment } from "react";
+
+import FormActions from "_features/common/components/form-actions";
 
 import { useHouseholdForm } from "../hooks/use-sub/use-form";
 
@@ -69,31 +64,15 @@ export default function HouseholdForm({
             placeholder="YYYY-MM-DD"
             valueFormat="YYYY-MM-DD"
           />
-          <Group grow mt="md">
-            <Button
-              type="button"
-              variant="light"
-              onClick={handleCancel}
-              disabled={isPending}
-            >
-              {tg("cancel")}
-            </Button>
-            <Button type="submit" loading={isPending}>
-              {isUpdate ? tg("update") : tg("create")}
-            </Button>
-          </Group>
-          {isUpdate && (
-            <Button
-              type="button"
-              variant="light"
-              color="red"
-              onClick={handleRemove}
-              disabled={isPending}
-              fullWidth
-            >
-              {tg("delete")}
-            </Button>
-          )}
+          <FormActions
+            submitLabel={isUpdate ? tg("update") : tg("create")}
+            isPending={isPending}
+            onCancel={handleCancel}
+            cancelLabel={tg("cancel")}
+            onRemove={isUpdate ? handleRemove : undefined}
+            removeLabel={tg("delete")}
+            sticky={hideCard}
+          />
         </Stack>
       </form>
     </Wrapper>

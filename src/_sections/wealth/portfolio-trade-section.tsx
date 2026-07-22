@@ -5,7 +5,6 @@ import {
   Badge,
   Card,
   Center,
-  Drawer,
   Group,
   Loader,
   SimpleGrid,
@@ -21,6 +20,7 @@ import { useRouter, useParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
 
 import { queryKeys } from "_constants/queries";
+import FormSheet from "_features/common/components/form-sheet";
 import SubHeader from "_features/layout/components/sub-header";
 import TradeForm from "_features/portfolio/components/trade-form";
 import {
@@ -322,48 +322,19 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
         </>
       )}
 
-      {/* 거래 추가 시트(quick-add-sheet) 와 동일 패턴 — 핸들바 + 바텀시트.
-          모달 통일 (Image #1 케이스). */}
-      <Drawer
+      {/* 거래 추가 시트(quick-add-sheet) 와 동일 패턴 — FormSheet 이 BottomTab
+          높이 보정(maxHeight/paddingBottom)까지 처리한다. */}
+      <FormSheet
         opened={opened}
         onClose={handleCloseModal}
-        position="bottom"
-        size="auto"
-        withCloseButton={false}
-        styles={{
-          content: {
-            borderTopLeftRadius: 24,
-            borderTopRightRadius: 24,
-            maxWidth: 448,
-            margin: "0 auto",
-            maxHeight: "min(90dvh, calc(100dvh - var(--safe-bottom)))",
-          },
-          body: {
-            paddingBottom: "calc(var(--safe-bottom) + 16px)",
-          },
-        }}
+        title={
+          editingTx
+            ? t("edit_trade")
+            : initialType === "BUY"
+              ? t("buy_record")
+              : t("sell_record")
+        }
       >
-        <Group justify="center" pt={4} pb={8}>
-          <div
-            style={{
-              width: 40,
-              height: 4,
-              borderRadius: 2,
-              background: "var(--mantine-color-gray-3)",
-            }}
-          />
-        </Group>
-
-        <Stack gap={4} px="md" pb="xs">
-          <Text size="md" fw={800}>
-            {editingTx
-              ? t("edit_trade")
-              : initialType === "BUY"
-                ? t("buy_record")
-                : t("sell_record")}
-          </Text>
-        </Stack>
-
         <TradeForm
           key={editingTx?.txId ?? "new"}
           portfolioId={portfolio.portfolioId}
@@ -372,7 +343,7 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
           onSuccess={handleTradeSuccess}
           onCancel={handleCloseModal}
         />
-      </Drawer>
+      </FormSheet>
     </Stack>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { ActionIcon, Group, Stack, Title } from "@mantine/core";
+import { Button, Group, Stack, Title } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
 
@@ -20,14 +20,14 @@ export default function HouseholdSection() {
     <Stack gap="md">
       <Group justify="space-between" align="center">
         <Title order={3}>{t("list_title")}</Title>
-        <ActionIcon
-          size="lg"
+        <Button
+          size="sm"
           radius="xl"
+          leftSection={<IconPlus size={16} />}
           onClick={() => open()}
-          aria-label={t("add")}
         >
-          <IconPlus size={18} />
-        </ActionIcon>
+          {t("add")}
+        </Button>
       </Group>
 
       <HouseholdSearch form={searchform} onSearch={onSearch} onReset={onReset} />

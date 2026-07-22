@@ -92,6 +92,9 @@ export default function AllocationTrendChart({ data }: Props) {
             />
           ))}
           <Tooltip
+            // 자산군 수만큼 줄이 늘어나는 스택 툴팁 — 96px 차트에서 세로 이탈 허용해 잘림 방지
+            allowEscapeViewBox={{ x: false, y: true }}
+            wrapperStyle={{ zIndex: 5 }}
             content={({ active, payload, label }) => {
               if (!active || !payload?.length) return null;
               return (

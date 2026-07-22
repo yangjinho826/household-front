@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  Button,
   Group,
   NumberInput,
   SegmentedControl,
@@ -15,6 +14,7 @@ import { notifications } from "@mantine/notifications";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
+import FormActions from "_features/common/components/form-actions";
 import { useEnumOptions } from "_features/enum/queries/use-query";
 import { getErrorMessage } from "_libraries/fetch/error-message";
 import { todayIsoKst } from "_utilities/datetime";
@@ -246,38 +246,18 @@ export default function TradeForm({
 
         {/* 거래 추가 시트(transaction/form.tsx) 와 동일 패턴 — 취소 + 액션 2버튼.
             매수/매도 색상은 유지 (UX 핵심). */}
-        <Group grow mt="md">
-          {onCancel && (
-            <Button
-              type="button"
-              variant="light"
-              onClick={onCancel}
-              disabled={isPending}
-            >
-              {tg("common.cancel")}
-            </Button>
-          )}
-          <Button
-            type="submit"
-            loading={isPending}
-            color={isBuy ? "danger" : "info"}
-          >
-            {isEdit ? t("edit_trade") : isBuy ? t("buy_record") : t("sell_record")}
-          </Button>
-        </Group>
-
-        {isEdit && (
-          <Button
-            type="button"
-            variant="light"
-            color="red"
-            onClick={handleRemove}
-            disabled={isPending}
-            fullWidth
-          >
-            {tg("common.delete")}
-          </Button>
-        )}
+        <FormActions
+          submitLabel={
+            isEdit ? t("edit_trade") : isBuy ? t("buy_record") : t("sell_record")
+          }
+          submitColor={isBuy ? "danger" : "info"}
+          isPending={isPending}
+          onCancel={onCancel}
+          cancelLabel={tg("common.cancel")}
+          onRemove={isEdit ? handleRemove : undefined}
+          removeLabel={tg("common.delete")}
+          sticky
+        />
       </Stack>
     </form>
   );

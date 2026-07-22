@@ -125,8 +125,8 @@ export default function AccountReportSection({ accountId }: Props) {
         </Stack>
       </Card>
 
-      {/* 월별 수입/지출 추이 */}
-      <Card radius="lg" p="md">
+      {/* 월별 수입/지출 추이 — 툴팁 세로 이탈(allowEscapeViewBox) 허용, 카드가 잘라내지 않게 */}
+      <Card radius="lg" p="md" style={{ overflow: "visible" }}>
         <Stack gap="sm">
           <Text size="sm" fw={700}>
             {tAccount("monthly_flow")}
@@ -156,6 +156,8 @@ export default function AccountReportSection({ accountId }: Props) {
                   <Tooltip
                     content={<FlowTooltip />}
                     cursor={{ fill: "rgba(0,0,0,0.04)" }}
+                    allowEscapeViewBox={{ x: false, y: true }}
+                    wrapperStyle={{ zIndex: 5 }}
                   />
                   <XAxis
                     dataKey="month"

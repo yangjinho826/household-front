@@ -13,6 +13,7 @@ import {
 import { Fragment, useEffect, useMemo } from "react";
 import { useTranslations } from "next-intl";
 
+import FormActions from "_features/common/components/form-actions";
 import { useEnumOptions } from "_features/enum/queries/use-query";
 
 import { usePortfolioForm } from "../hooks/use-sub/use-form";
@@ -153,38 +154,17 @@ export default function PortfolioForm({
             }
             description={isUpdate ? undefined : t("current_price_help")}
           />
-          <Group grow mt="md">
-            <Button
-              type="button"
-              variant="light"
-              onClick={handleCancel}
-              disabled={isPending}
-            >
-              {tg("cancel")}
-            </Button>
-            <Button type="submit" loading={isPending}>
-              {isUpdate ? tg("update") : tg("create")}
-            </Button>
-          </Group>
-          {isUpdate && (
-            <Stack gap={4}>
-              <Button
-                type="button"
-                variant="light"
-                color="red"
-                onClick={handleRemove}
-                disabled={isPending || quantity > 0}
-                fullWidth
-              >
-                {tg("delete")}
-              </Button>
-              {quantity > 0 && (
-                <Text size="xs" c="dimmed" ta="center">
-                  {t("delete_blocked_holdings")}
-                </Text>
-              )}
-            </Stack>
-          )}
+          <FormActions
+            submitLabel={isUpdate ? tg("update") : tg("create")}
+            isPending={isPending}
+            onCancel={handleCancel}
+            cancelLabel={tg("cancel")}
+            onRemove={isUpdate ? handleRemove : undefined}
+            removeLabel={tg("delete")}
+            removeDisabled={quantity > 0}
+            removeHint={quantity > 0 ? t("delete_blocked_holdings") : undefined}
+            sticky={hideCard}
+          />
         </Stack>
       </form>
     </Wrapper>

@@ -1,6 +1,6 @@
 "use client";
 
-import { ActionIcon, Card, Group, Stack, Text, Title } from "@mantine/core";
+import { Button, Card, Group, Stack, Text, Title } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
@@ -53,14 +53,14 @@ export default function FixedSection() {
     <Stack gap="md">
       <Group justify="space-between" align="center">
         <Title order={3}>{t("list_title")}</Title>
-        <ActionIcon
-          size="lg"
+        <Button
+          size="sm"
           radius="xl"
+          leftSection={<IconPlus size={16} />}
           onClick={() => openSheet()}
-          aria-label={t("add")}
         >
-          <IconPlus size={18} />
-        </ActionIcon>
+          {t("add")}
+        </Button>
       </Group>
 
       <Card radius="lg" p="sm">
