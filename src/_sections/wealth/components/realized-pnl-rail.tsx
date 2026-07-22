@@ -1,17 +1,11 @@
 "use client";
 
-import {
-  Card,
-  Drawer,
-  Group,
-  Stack,
-  Text,
-  UnstyledButton,
-} from "@mantine/core";
+import { Card, Group, Stack, Text, UnstyledButton } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconChevronRight } from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
 
+import FormSheet from "_features/common/components/form-sheet";
 import RealizedPnlPanel from "_sections/wealth/components/realized-pnl-panel";
 import { useMoney } from "_features/common/hooks/use-money";
 import { useAccountRealizedPnl } from "_features/portfolio/queries/use-query";
@@ -82,42 +76,13 @@ export default function RealizedPnlRail({ accountId }: Props) {
         </Card>
       </UnstyledButton>
 
-      <Drawer
+      <FormSheet
         opened={opened}
         onClose={close}
-        position="bottom"
-        size="auto"
-        withCloseButton={false}
-        styles={{
-          content: {
-            borderTopLeftRadius: 24,
-            borderTopRightRadius: 24,
-            maxWidth: 448,
-            margin: "0 auto",
-            maxHeight: "min(90dvh, calc(100dvh - var(--safe-bottom)))",
-          },
-          body: {
-            paddingBottom: "calc(var(--safe-bottom) + 16px)",
-          },
-        }}
+        title={t("cumulative_realized")}
       >
-        <Group justify="center" pt={4} pb={8}>
-          <div
-            style={{
-              width: 40,
-              height: 4,
-              borderRadius: 2,
-              background: "var(--mantine-color-gray-3)",
-            }}
-          />
-        </Group>
-        <Stack gap="sm" px="md">
-          <Text size="md" fw={800}>
-            {t("cumulative_realized")}
-          </Text>
-          <RealizedPnlPanel accountId={accountId} />
-        </Stack>
-      </Drawer>
+        <RealizedPnlPanel accountId={accountId} />
+      </FormSheet>
     </>
   );
 }

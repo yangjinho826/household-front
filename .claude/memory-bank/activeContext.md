@@ -10,6 +10,15 @@
 
 ## Status
 
+### 반응형 UX 개선 — 작은 화면 CRUD 가려짐/발견성 (2026-07-22, front 미커밋)
+사용자 불만 "작아지면 추가/수정/삭제 선택이 안 보임" → Explore 3병렬 audit → 계획 승인(P1~P3 전체) → 구현+browse E2E 검증 완료. 계획=`~/.claude/plans/ux-tranquil-truffle.md`.
+- **P1-1 매매 Drawer→FormSheet**: `portfolio-trade-section`·`realized-pnl-rail`의 자체 Drawer가 `--bottom-tab-h` 보정 누락 → 하단 버튼이 탭바(z500)에 가려짐. FormSheet 재사용으로 일원화.
+- **P1-2 FormActions 신설**(`_features/common/components/form-actions.tsx`): 취소/저장/삭제 공통 블록 + sticky(bottom=`calc(--bottom-tab-h + --safe-bottom)`, 음수마진으로 body padding 파고듦). 8개 폼 교체(account/category/fixed/household/portfolio/transaction form + asset-form + trade-form). `sticky={hideCard}` — 페이지 모드는 일반 배치.
+- **P2**: 추가 진입점 6곳 ActionIcon 18px → `Button size=sm radius=xl` "＋ 추가" 라벨 버튼(360px에서 MonthPicker와 공존 OK). 거래 툴바 필터칩 ScrollArea type=never 가로스크롤 + Select w160→140 flexShrink0. **부작용 발견·수정**: ScrollArea 안 칩이 shrink돼 라벨 세로꺾임 → FilterChip에 whiteSpace nowrap+flexShrink 0.
+- **P3**: `.stat-amount`(clamp 13~18px) 3열 요약 금액(month-summary·home-section) / 차트 툴팁 `allowEscapeViewBox y` + 감싸는 Card `overflow:visible`(wealth-section·account-balance-trend·portfolio-value-trend·account-report·total-asset-hero) / 터치타깃(멤버삭제 28→40 hitbox·MonthPicker lg·hero blur토글 lg·박제 pill 8×14) / 홈 도넛 `cols={{base:1,xs:2}}` / 드릴다운 Modal→FormSheet / `--z-fab` 레거시 토큰 제거. DateInput 포털은 theme defaultProps에 이미 있어 스킵(개별 지정하면 zIndex 1100 덮어써서 오히려 회귀 — 주의).
+- 검증: typecheck/lint✅(test는 테스트파일 0개라 원래 exit1). browse E2E — 360×640/360×560 거래·매매 수정시트 삭제버튼 탭바 위 고정✅, 768 시트 중앙✅, 1280 페이지모드 non-sticky✅, 홈 1열 도넛✅.
+- 검증용 데이터: 로컬 DB에 `uitest@test.com / UItest1234!` 계정(가계부 UI검증, 테스트통장/테스트증권/테스트종목, 거래 1건) 생성됨 — QA 재사용 가능, 거슬리면 삭제.
+
 ### 투자 새로고침 + 종목 시트통일 + 전도메인 삭제가드 + 멤버 시트화 (2026-06-03, 미커밋, front+back)
 - **P1 투자 시세 수동 새로고침**: 백엔드 `market_price.refresh(session, markets, household_id?)` 에 household 스코프 추가(repo `find_active_distinct_code_market_by_household_and_markets`), `POST /portfolio/refresh-prices`(CurrentHousehold, 4시장, 가격은 시장공통이라 bulk update 는 전 가계부 적용·fetch 만 보유종목 한정). 프론트 투자메인 헤더 IconRefresh 버튼 → `refreshMutation`(invalidateAll).
 - **P2 종목 추가/수정 시트 통일**: `usePortfolioSheetStore(open(editId?,accountId?))` + `PortfolioSheet`(UserShell). PortfolioForm `defaultAccountId` prefill. 트리거 교체: 투자메인(+버튼), 계좌상세 account-portfolio-section:224(그 계좌 프리필), 종목매매 portfolio-trade-section handleEditPortfolio(수정). 페이지 라우트는 fallback 유지.
@@ -63,7 +72,7 @@ R1~R5a 전부 dev 커밋 완료. **dev→main 머지는 아직 안 함** — R5a
 
 ## Context
 
-- 이 컴퓨터: 백 **8000**(--reload), 프론트 **3000**, DB head = `3ef71953bb00`. 계정 yangjinho826@naver.com / wlsghdid2@ / household=`62cfbbe6-...`. 인증 = Bearer + `X-Household-Id` 헤더.
+- 이 컴퓨터: 백 **9000**(2026-07-22 확인 — next.config rewrites가 9000 프록시. `uv run uvicorn app.main:app --port 9000`, 선행조건=Docker Desktop 기동→`household-postgres` 컨테이너 5432), 프론트 **3000**, DB head = `3ef71953bb00`. 계정 yangjinho826@naver.com / wlsghdid2@ / household=`62cfbbe6-...`. 인증 = Bearer + `X-Household-Id` 헤더.
 - **로컬 DB는 항상 `alembic upgrade head` 선행** (드리프트 시 배분/거래 조용히 500 — R5a-1 QA 때 실제 발생).
 - **배분 정합 핵심**: 부동산/연금은 전용계좌(REAL_ESTATE/PENSION AccountType)로 roll-up. `_build_allocation`이 account_type→asset_class 매핑(전용계좌 balance를 해당 슬라이스로). ManualAsset 따로 합산 X → double-counting 구조적 불가.
 - **전용계좌 lazy 생성** (가계부당 부동산 1/연금 1, `_ensure_rollup_account`).
