@@ -1,6 +1,6 @@
 "use client";
 
-import { ActionIcon, Group, Stack, Title } from "@mantine/core";
+import { Button, Group, Stack, Title } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
@@ -42,14 +42,14 @@ export default function CategorySection() {
     <Stack gap="md">
       <Group justify="space-between" align="center">
         <Title order={3}>{t("list_title")}</Title>
-        <ActionIcon
-          size="lg"
+        <Button
+          size="sm"
           radius="xl"
+          leftSection={<IconPlus size={16} />}
           onClick={() => openSheet()}
-          aria-label={t("add")}
         >
-          <IconPlus size={18} />
-        </ActionIcon>
+          {t("add")}
+        </Button>
       </Group>
 
       <Group gap="xs">

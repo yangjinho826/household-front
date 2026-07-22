@@ -1,6 +1,15 @@
 "use client";
 
-import { ActionIcon, Card, Divider, Group, Stack, Text, Title } from "@mantine/core";
+import {
+  ActionIcon,
+  Button,
+  Card,
+  Divider,
+  Group,
+  Stack,
+  Text,
+  Title,
+} from "@mantine/core";
 import { IconPlus, IconRefresh } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
 import { useTranslations } from "next-intl";
@@ -112,14 +121,14 @@ export default function PortfolioSection() {
           >
             <IconRefresh size={18} />
           </ActionIcon>
-          <ActionIcon
+          <Button
+            size="sm"
             radius="xl"
-            size="lg"
+            leftSection={<IconPlus size={16} />}
             onClick={() => openSheet()}
-            aria-label={t("add_stock")}
           >
-            <IconPlus size={18} />
-          </ActionIcon>
+            {t("add_stock")}
+          </Button>
         </Group>
       </Group>
 

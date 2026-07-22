@@ -26,6 +26,10 @@ export default function FilterChip({ label, active, onClick }: FilterChipProps) 
           : "var(--mantine-color-gray-7)",
         fontSize: 12,
         fontWeight: 600,
+        // 좁은 flex 컨테이너(ScrollArea 안 nowrap Group)에서 칩이 눌려
+        // 라벨이 세로로 꺾이는 것 방지 — 칩은 항상 내용 크기 유지
+        whiteSpace: "nowrap",
+        flexShrink: 0,
       }}
     >
       {label}

@@ -1,6 +1,6 @@
 "use client";
 
-import { ActionIcon, Group, Stack, Title } from "@mantine/core";
+import { Button, Group, Stack, Title } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
@@ -47,14 +47,14 @@ export default function TransactionsSection() {
         <Title order={3}>{t("list_title")}</Title>
         <Group gap="xs" wrap="nowrap">
           <MonthPicker value={month} onChange={setMonth} />
-          <ActionIcon
-            size="lg"
+          <Button
+            size="sm"
             radius="xl"
+            leftSection={<IconPlus size={16} />}
             onClick={() => openQuickAdd()}
-            aria-label={t("add")}
           >
-            <IconPlus size={18} />
-          </ActionIcon>
+            {t("add")}
+          </Button>
         </Group>
       </Group>
 
