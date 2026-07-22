@@ -231,7 +231,8 @@ export default function MembersSection({
                     onClick={() =>
                       handleRemove(m.memberId, m.userName ?? t("this_member"))
                     }
-                    style={{ padding: 6, borderRadius: 8 }}
+                    // 터치타깃 28→40px — 음수 마진으로 시각 레이아웃은 그대로
+                    style={{ padding: 12, margin: -6, borderRadius: 8 }}
                   >
                     <IconTrash size={16} color="#EF4444" />
                   </UnstyledButton>

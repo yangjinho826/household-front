@@ -64,7 +64,8 @@ export default function WealthSection() {
       <SubHeader title={tWealth("title")} back={`/${routeParams.locale}`} />
 
       {overview.allocation.allocationTrend.length > 1 && (
-        <Card radius="lg">
+        // 툴팁이 96px 차트 위/아래로 이탈(allowEscapeViewBox)하므로 카드가 잘라내지 않게
+        <Card radius="lg" style={{ overflow: "visible" }}>
           <Stack gap="sm">
             <Text size="sm" fw={700}>
               {tWealth("allocation_trend")}

@@ -125,6 +125,9 @@ export default function ValueTrendChart({ data, color = "#7C9473" }: Props) {
           <Tooltip
             content={<TrendTooltip />}
             cursor={{ stroke: color, strokeWidth: 1, strokeDasharray: "3 3" }}
+            // 96px 저높이 차트에서 다줄 툴팁이 위/아래로 잘리지 않게 세로 이탈 허용
+            allowEscapeViewBox={{ x: false, y: true }}
+            wrapperStyle={{ zIndex: 5 }}
           />
           <YAxis hide domain={trendYDomain(data.map((d) => d.value))} />
           <XAxis

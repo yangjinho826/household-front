@@ -68,7 +68,8 @@ export default function AccountBalanceTrend({
   if (trend.length < 2) return null;
 
   return (
-    <Card radius="xl" p="md">
+    // 툴팁 세로 이탈(allowEscapeViewBox) 허용 — 카드가 잘라내지 않게
+    <Card radius="xl" p="md" style={{ overflow: "visible" }}>
       <Stack gap={6}>
         <Group justify="space-between" align="center" px={4}>
           <Text size="xs" fw={500} c="dimmed">

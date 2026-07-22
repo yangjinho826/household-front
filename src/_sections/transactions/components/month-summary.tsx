@@ -44,8 +44,7 @@ export default function MonthSummary({ year, month }: MonthSummaryProps) {
             {t("summary_income")}
           </Text>
           <Text
-            size="lg"
-            fw={800}
+            className="stat-amount"
             c="info.5"
             style={{ fontVariantNumeric: "tabular-nums" }}
           >
@@ -57,8 +56,7 @@ export default function MonthSummary({ year, month }: MonthSummaryProps) {
             {t("summary_expense")}
           </Text>
           <Text
-            size="lg"
-            fw={800}
+            className="stat-amount"
             c="danger.5"
             style={{ fontVariantNumeric: "tabular-nums" }}
           >
@@ -70,8 +68,7 @@ export default function MonthSummary({ year, month }: MonthSummaryProps) {
             {t("summary_saving_rate")}
           </Text>
           <Text
-            size="lg"
-            fw={800}
+            className="stat-amount"
             c={savingRate > 0 ? "positive.5" : "dimmed"}
             style={{ fontVariantNumeric: "tabular-nums" }}
           >

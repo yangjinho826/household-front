@@ -19,7 +19,6 @@
   --sidebar-w: 240px;
   --container-max: 448px; /* 휴대폰 박스 */
   --z-app-header: 30;
-  --z-fab: 200;
   --z-bottom-tab: 500;
 }
 
@@ -34,7 +33,7 @@
 @media (min-width: 1200px) {
   :root {
     --container-max: 1280px;
-    --bottom-tab-h: 0px; /* 데스크탑은 BottomTab 숨김 → 하단 여백/FAB 기준 0 */
+    --bottom-tab-h: 0px; /* 데스크탑은 BottomTab 숨김 → 하단 여백 기준 0 */
   }
 }
 
@@ -111,4 +110,17 @@ small,
 .brand-wordmark {
   font-family: "Noto Serif KR", Georgia, serif;
   letter-spacing: 0;
+}
+
+/* 3열 요약카드 금액 — 폰 좁은 셀(~100px)에서 큰 금액이 줄바꿈되는 것 방지.
+   컨테이너가 448px 로 캡이라 vw 기반 clamp 가 안전. 패드 이상은 고정 크기. */
+.stat-amount {
+  font-size: clamp(13px, 4.2vw, 18px);
+  font-weight: 800;
+  white-space: nowrap;
+}
+@media (min-width: 768px) {
+  .stat-amount {
+    font-size: 18px;
+  }
 }
