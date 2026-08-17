@@ -1,6 +1,6 @@
 "use client";
 
-import { Drawer, Group, Stack, Text } from "@mantine/core";
+import { Drawer, Group, Text } from "@mantine/core";
 import { Suspense } from "react";
 
 import { PageLoader } from "_features/common/components/page-loader";
@@ -9,6 +9,8 @@ interface FormSheetProps {
   opened: boolean;
   onClose: () => void;
   title: string;
+  /** 제목 우측 액션(아이콘 버튼 등). 하단 버튼을 늘리지 않고 보조 액션을 둘 자리. */
+  titleAction?: React.ReactNode;
   children: React.ReactNode;
 }
 
@@ -26,6 +28,7 @@ export default function FormSheet({
   opened,
   onClose,
   title,
+  titleAction,
   children,
 }: FormSheetProps) {
   return (
@@ -64,11 +67,12 @@ export default function FormSheet({
         />
       </Group>
 
-      <Stack gap={4} px="md" pb="xs">
+      <Group justify="space-between" align="center" wrap="nowrap" px="md" pb="xs">
         <Text size="md" fw={800}>
           {title}
         </Text>
-      </Stack>
+        {titleAction}
+      </Group>
 
       {opened && <Suspense fallback={<PageLoader />}>{children}</Suspense>}
     </Drawer>

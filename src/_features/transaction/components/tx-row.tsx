@@ -74,7 +74,7 @@ export default function TxRow({ item }: { item: TransactionListItemType }) {
 
   return (
     <UnstyledButton
-      onClick={() => openEdit(item.transactionId)}
+      onClick={() => openEdit(item.transactionId, item.txType)}
       style={{ padding: 12, borderRadius: 12, display: "block" }}
     >
       <Group justify="space-between" gap="md" wrap="nowrap" align="center">

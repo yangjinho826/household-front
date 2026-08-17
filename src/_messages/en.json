@@ -119,7 +119,8 @@
       "confirmyestitle": "Completed",
       "confirmyescontent": "Action completed.",
       "register_has_been_completed": "Registered.",
-      "update_has_been_completed": "Updated."
+      "update_has_been_completed": "Updated.",
+      "copy": "Copy"
     },
     "money": "₩{amount}",
     "won": "₩",
@@ -311,6 +312,7 @@
     "new_transaction": "New transaction",
     "form_create_title": "New Transaction",
     "form_update_title": "Edit Transaction",
+    "form_copy_title": "Copy Transaction",
     "add": "Add",
     "search_term": "Search",
     "search_term_placeholder": "Search by memo/category",

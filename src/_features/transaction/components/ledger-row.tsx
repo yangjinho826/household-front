@@ -67,7 +67,7 @@ export default function LedgerRow({
 
   return (
     <UnstyledButton
-      onClick={() => openEdit(t.transactionId)}
+      onClick={() => openEdit(t.transactionId, t.txType)}
       style={{ padding: 12, borderRadius: 12, display: "block" }}
     >
       <Group justify="space-between" gap="md" wrap="nowrap" align="center">
