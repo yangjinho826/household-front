@@ -129,7 +129,12 @@ export interface PortfolioTransactionItemType {
 export interface RealizedPnlRowType {
   txId: string;
   txDate: string;
-  name?: string; // 계좌 단위 응답에서 종목명 (종목 단위 응답은 없음)
+  /** 카드 탭 → 수정 시트에서 어떤 종목인지 특정하는 데 필요 */
+  portfolioItemId: string | null;
+  name?: string | null; // 계좌 단위 응답에서 종목명 (종목 단위 응답은 없음)
+  code: string;
+  market: Market;
+  memo: string | null;
   quantity: number;
   sellPrice: number;
   /** 거래금액 (gross) = 수량 × 단가 */
