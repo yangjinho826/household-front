@@ -60,3 +60,45 @@ export function formatProfitAmount(amount: number, formatter: (n: number) => str
   const sign = amount > 0 ? "+" : amount < 0 ? "-" : "";
   return `${sign}${formatter(Math.abs(amount))}`;
 }
+
+/**
+ * 거래통화 금액 표기 — "$230.38".
+ *
+ * 소수 2자리 고정. 달러 단가는 원화와 달리 센트가 유의미하다.
+ */
+export function formatCcy(amount: number, currency: string): string {
+  if (currency === "USD") {
+    return `$${amount.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
+  }
+  return amount.toLocaleString("ko-KR");
+}
+
+/**
+ * 토스증권식 이중 표기를 쓸지 판정. (훅 아님 — 순수 함수라 use 접두사를 쓰지 않는다)
+ *
+ * 거래통화가 원화가 아니고 **원본 값이 있을 때만** true. 마이그레이션 이전 거래는
+ * 원본 달러가가 저장된 적이 없어(당시 환율도 없음) null 이고, 그때는 억지로
+ * 환산해 보여주는 대신 원화 단독으로 폴백한다.
+ */
+export function isDualCurrency(
+  currency: string,
+  ...values: (number | null | undefined)[]
+): boolean {
+  return currency !== "KRW" && values.every((v) => v !== null && v !== undefined);
+}
+
+/**
+ * 종목 단위 이중 표기 판정 — 값마다 따로 판정하면 한 카드 안에서 평단은 원화,
+ * 현재가는 달러로 섞인다(레거시 거래가 있는 해외 종목). 백엔드가
+ * `profit_loss_ccy` 를 내는 조건(평단·현재가 둘 다 존재)과 같은 기준으로 맞춘다.
+ */
+export function isDualCurrencyItem(item: {
+  currency: string;
+  avgPriceCcy: number | null;
+  currentPriceCcy: number | null;
+}): boolean {
+  return isDualCurrency(item.currency, item.avgPriceCcy, item.currentPriceCcy);
+}

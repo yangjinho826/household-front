@@ -87,6 +87,7 @@ export interface PortfolioListItemType {
   code: string;
   market: Market;
   quantity: number;
+  // KRW — 합산·순자산의 기준
   avgPrice: number;
   currentPrice: number;
   cost: number;
@@ -94,6 +95,13 @@ export interface PortfolioListItemType {
   currentValue: number;
   profitLoss: number;
   profitLossRate: number;
+  // 거래통화 — 화면 주 표기와 환율 제외 수익률.
+  // null 이면 원본 달러가를 모르는 과거 데이터 → KRW 단독 표시로 폴백한다.
+  currency: string;
+  avgPriceCcy: number | null;
+  currentPriceCcy: number | null;
+  profitLossCcy: number | null;
+  profitLossRateCcy: number | null;
   isArchived: boolean;
   // 호환 필드 (mock — 향후 제거 가능)
   householdId?: string;
@@ -123,6 +131,13 @@ export interface PortfolioTransactionItemType {
   memo: string | null;
   /** 매도 실현손익 — SELL 만 값, BUY/미집계는 null */
   realizedPnl: number | null;
+  // 거래통화 — priceCcy 가 있으면 이 거래는 거래통화로 기록됐다는 뜻이고,
+  // 수정 입력도 같은 단위여야 한다(백엔드 update 가 같은 필드로 판정).
+  currency: string;
+  priceCcy: number | null;
+  feeCcy: number | null;
+  /** 거래 시점에 박제된 환율 — 수정 시 이 값으로 원화를 파생한다 */
+  fxRate: number | null;
 }
 
 /** 매매손익 — 매도 1건 (증권사 '매매손익' 테이블 행) */
@@ -144,6 +159,15 @@ export interface RealizedPnlRowType {
   settlement: number;
   realizedPnl: number;
   realizedRate: number;
+  // 거래통화 기준 — 원화 손익률에는 환차손익이 섞인다.
+  // 레거시 매도(원본 달러가 없음)는 전부 null → KRW 단독 표시로 폴백.
+  currency: string;
+  sellPriceCcy: number | null;
+  amountCcy: number | null;
+  feeCcy: number | null;
+  settlementCcy: number | null;
+  realizedPnlCcy: number | null;
+  realizedRateCcy: number | null;
 }
 
 /** 매매손익 요약 — 기간 내 매도 전체 합산 */
