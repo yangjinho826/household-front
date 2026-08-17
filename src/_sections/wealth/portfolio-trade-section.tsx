@@ -35,9 +35,11 @@ import type {
   PortfolioTxType,
 } from "_features/portfolio/types";
 import {
+  formatCcy,
   formatProfitAmount,
   formatProfitRate,
   profitColor,
+  isDualCurrency,
 } from "_features/portfolio/utils";
 import { useMoney } from "_features/common/hooks/use-money";
 
@@ -176,30 +178,20 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
                 {portfolio.quantity}
               </Text>
             </Stack>
-            <Stack gap={2}>
-              <Text size="10px" c="dimmed" fw={600}>
-                {t("avg_unit_price")}
-              </Text>
-              <Text
-                size="xs"
-                fw={700}
-                style={{ fontVariantNumeric: "tabular-nums" }}
-              >
-                {money(portfolio.avgPrice)}
-              </Text>
-            </Stack>
-            <Stack gap={2}>
-              <Text size="10px" c="dimmed" fw={600}>
-                {t("current_price")}
-              </Text>
-              <Text
-                size="xs"
-                fw={700}
-                style={{ fontVariantNumeric: "tabular-nums" }}
-              >
-                {money(portfolio.currentPrice)}
-              </Text>
-            </Stack>
+            <PriceCell
+              label={t("avg_unit_price")}
+              krw={portfolio.avgPrice}
+              ccy={portfolio.avgPriceCcy}
+              currency={portfolio.currency}
+              money={money}
+            />
+            <PriceCell
+              label={t("current_price")}
+              krw={portfolio.currentPrice}
+              ccy={portfolio.currentPriceCcy}
+              currency={portfolio.currency}
+              money={money}
+            />
           </SimpleGrid>
         </Stack>
       </Card>
@@ -338,12 +330,54 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
         <TradeForm
           key={editingTx?.txId ?? "new"}
           portfolioId={portfolio.portfolioId}
+          currency={portfolio.currency}
+          // 현재 환율 = 원화 현재가 / 달러 현재가. 별도 조회 없이 종목 데이터로 구한다.
+          fxRate={
+            portfolio.currentPriceCcy
+              ? portfolio.currentPrice / portfolio.currentPriceCcy
+              : null
+          }
           initialType={editingTx?.ptType ?? initialType}
           editingTx={editingTx ?? undefined}
           onSuccess={handleTradeSuccess}
           onCancel={handleCloseModal}
         />
       </FormSheet>
+    </Stack>
+  );
+}
+
+/**
+ * 단가 셀 — 거래통화가 있으면 토스증권식으로 달러를 주 표기, 원화를 보조로.
+ * 원본 달러가를 모르는 과거 데이터는 원화 단독으로 폴백한다.
+ */
+function PriceCell({
+  label,
+  krw,
+  ccy,
+  currency,
+  money,
+}: {
+  label: string;
+  krw: number;
+  ccy: number | null;
+  currency: string;
+  money: (n: number) => string;
+}) {
+  const dual = isDualCurrency(currency, ccy);
+  return (
+    <Stack gap={2}>
+      <Text size="10px" c="dimmed" fw={600}>
+        {label}
+      </Text>
+      <Text size="xs" fw={700} style={{ fontVariantNumeric: "tabular-nums" }}>
+        {dual ? formatCcy(ccy as number, currency) : money(krw)}
+      </Text>
+      {dual && (
+        <Text size="10px" c="dimmed" style={{ fontVariantNumeric: "tabular-nums" }}>
+          {money(krw)}
+        </Text>
+      )}
     </Stack>
   );
 }

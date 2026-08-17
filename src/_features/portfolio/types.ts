@@ -87,6 +87,7 @@ export interface PortfolioListItemType {
   code: string;
   market: Market;
   quantity: number;
+  // KRW — 합산·순자산의 기준
   avgPrice: number;
   currentPrice: number;
   cost: number;
@@ -94,6 +95,13 @@ export interface PortfolioListItemType {
   currentValue: number;
   profitLoss: number;
   profitLossRate: number;
+  // 거래통화 — 화면 주 표기와 환율 제외 수익률.
+  // null 이면 원본 달러가를 모르는 과거 데이터 → KRW 단독 표시로 폴백한다.
+  currency: string;
+  avgPriceCcy: number | null;
+  currentPriceCcy: number | null;
+  profitLossCcy: number | null;
+  profitLossRateCcy: number | null;
   isArchived: boolean;
   // 호환 필드 (mock — 향후 제거 가능)
   householdId?: string;
