@@ -66,17 +66,14 @@ export function formatProfitAmount(amount: number, formatter: (n: number) => str
  *
  * 소수 2자리 고정. 달러 단가는 원화와 달리 센트가 유의미하다.
  */
-export function formatCcy(amount: number | string, currency: string): string {
-  // 백엔드가 Decimal 을 JSON 문자열로 내린다. String.prototype.toLocaleString 은
-  // 문자열을 그대로 돌려주므로("230.3823") 반드시 숫자로 강제해야 자릿수가 맞는다.
-  const n = Number(amount);
+export function formatCcy(amount: number, currency: string): string {
   if (currency === "USD") {
-    return `$${n.toLocaleString("en-US", {
+    return `$${amount.toLocaleString("en-US", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     })}`;
   }
-  return n.toLocaleString("ko-KR");
+  return amount.toLocaleString("ko-KR");
 }
 
 /**
@@ -91,4 +88,17 @@ export function isDualCurrency(
   ...values: (number | null | undefined)[]
 ): boolean {
   return currency !== "KRW" && values.every((v) => v !== null && v !== undefined);
+}
+
+/**
+ * 종목 단위 이중 표기 판정 — 값마다 따로 판정하면 한 카드 안에서 평단은 원화,
+ * 현재가는 달러로 섞인다(레거시 거래가 있는 해외 종목). 백엔드가
+ * `profit_loss_ccy` 를 내는 조건(평단·현재가 둘 다 존재)과 같은 기준으로 맞춘다.
+ */
+export function isDualCurrencyItem(item: {
+  currency: string;
+  avgPriceCcy: number | null;
+  currentPriceCcy: number | null;
+}): boolean {
+  return isDualCurrency(item.currency, item.avgPriceCcy, item.currentPriceCcy);
 }

@@ -28,7 +28,7 @@ import {
   formatProfitAmount,
   formatProfitRate,
   profitColor,
-  isDualCurrency,
+  isDualCurrencyItem,
 } from "_features/portfolio/utils";
 import { PORTFOLIO_PALETTE, TOKEN } from "_styles/design-tokens";
 import { useMoney } from "_features/common/hooks/use-money";
@@ -275,8 +275,9 @@ export default function AccountPortfolioSection({ accountId }: Props) {
                           fw={700}
                           style={{ fontVariantNumeric: "tabular-nums" }}
                         >
-                          {/* 달러 종목은 달러 평단이 주 표기 — 원화는 아래 평가액에서 본다 */}
-                          {isDualCurrency(p.currency, p.avgPriceCcy)
+                          {/* 달러 종목은 달러 평단이 주 표기 — 원화는 아래 평가액에서 본다.
+                              판정은 종목 상세와 같은 기준(평단·현재가 둘 다 존재)을 쓴다. */}
+                          {isDualCurrencyItem(p)
                             ? formatCcy(p.avgPriceCcy as number, p.currency)
                             : money(p.avgPrice)}
                         </Text>

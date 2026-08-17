@@ -18,6 +18,7 @@ import type {
   RealizedPnlRowType,
 } from "_features/portfolio/types";
 import {
+  formatCcy,
   formatProfitAmount,
   formatProfitRate,
   profitColor,
@@ -77,6 +78,12 @@ function toEditingTx(row: RealizedPnlRowType): PortfolioTransactionItemType {
     txDate: row.txDate,
     memo: row.memo,
     realizedPnl: row.realizedPnl,
+    // 달러 매도를 원화 단가로 열면 그대로 저장 시 원화 평단이 환율만큼 찌그러진다.
+    currency: row.currency,
+    priceCcy: row.sellPriceCcy,
+    feeCcy: row.feeCcy,
+    // 매매손익 행에는 환율이 없다 — 박제 환율은 단가 비율로 되돌린다.
+    fxRate: row.sellPriceCcy ? row.sellPrice / row.sellPriceCcy : null,
   };
 }
 
@@ -276,8 +283,19 @@ interface SellCardProps {
 /**
  * 매도 1건 카드 — 증권사 거래내역과 같은 좌우 2열 구성.
  * 거래일자/거래수량/수수료 는 왼쪽, 거래금액/거래단가/정산금액 은 오른쪽.
+ *
+ * 거래통화 값이 있는 매도는 카드 전체를 그 통화로 읽는다 — 원화 손익률에는
+ * 환차손익이 섞여 종목 자체 성과가 아니다. 요약(합계)은 통화가 섞여 더할 수
+ * 없으므로 계속 원화 기준이라, 기준이 갈리는 걸 헤더 라벨로 드러낸다.
  */
 function SellCard({ row, onEdit, money, t, tGeneral }: SellCardProps) {
+  // 백엔드가 근거 있는 매도에만 ccy 를 채운다 — 하나만 봐도 전 필드가 함께 존재한다.
+  const dual = row.currency !== "KRW" && row.realizedPnlCcy !== null;
+  const amount = (krw: number, ccy: number | null) =>
+    dual ? formatCcy(ccy as number, row.currency) : money(krw);
+  const pnl = dual ? (row.realizedPnlCcy as number) : row.realizedPnl;
+  const rate = dual ? (row.realizedRateCcy as number) : row.realizedRate;
+
   return (
     <Card
       radius="lg"
@@ -292,9 +310,16 @@ function SellCard({ row, onEdit, money, t, tGeneral }: SellCardProps) {
     >
       <Stack gap="xs">
         <Group justify="space-between" align="baseline" wrap="nowrap">
-          <Text size="sm" fw={800} c="info.6">
-            {t("sell_record")}
-          </Text>
+          <Group gap={6} align="baseline" wrap="nowrap">
+            <Text size="sm" fw={800} c="info.6">
+              {t("sell_record")}
+            </Text>
+            {dual && (
+              <Text size="10px" c="dimmed" fw={600}>
+                {t("ccy_basis", { currency: row.currency })}
+              </Text>
+            )}
+          </Group>
           {row.name && (
             <Text size="sm" fw={700} truncate>
               {row.name}
@@ -309,14 +334,20 @@ function SellCard({ row, onEdit, money, t, tGeneral }: SellCardProps) {
               label={t("quantity")}
               value={tGeneral("unit.stock", { count: row.quantity })}
             />
-            <Field label={t("label_fee")} value={money(row.fee)} />
+            <Field label={t("label_fee")} value={amount(row.fee, row.feeCcy)} />
           </Stack>
           <Stack gap={2}>
-            <Field label={t("sell_amount")} value={money(row.amount)} />
-            <Field label={t("label_sell_price")} value={money(row.sellPrice)} />
+            <Field
+              label={t("sell_amount")}
+              value={amount(row.amount, row.amountCcy)}
+            />
+            <Field
+              label={t("label_sell_price")}
+              value={amount(row.sellPrice, row.sellPriceCcy)}
+            />
             <Field
               label={t("settlement_amount")}
-              value={money(row.settlement)}
+              value={amount(row.settlement, row.settlementCcy)}
               strong
             />
           </Stack>
@@ -330,18 +361,20 @@ function SellCard({ row, onEdit, money, t, tGeneral }: SellCardProps) {
             <Text
               size="sm"
               fw={800}
-              c={profitColor(row.realizedPnl)}
+              c={profitColor(pnl)}
               style={{ fontVariantNumeric: "tabular-nums" }}
             >
-              {formatProfitAmount(row.realizedPnl, money)}
+              {formatProfitAmount(pnl, (n) =>
+                dual ? formatCcy(n, row.currency) : money(n),
+              )}
             </Text>
             <Text
               size="xs"
               fw={700}
-              c={profitColor(row.realizedRate)}
+              c={profitColor(rate)}
               style={{ fontVariantNumeric: "tabular-nums" }}
             >
-              {formatProfitRate(row.realizedRate)}
+              {formatProfitRate(rate)}
             </Text>
           </Group>
         </Group>

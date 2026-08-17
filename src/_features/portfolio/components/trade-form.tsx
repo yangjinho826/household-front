@@ -76,12 +76,21 @@ export default function TradeForm({
 
   const isEdit = !!editingTx;
 
+  // 수정 모드의 입력 단위는 **그 거래가 기록된 방식**을 따른다 — 백엔드 update 도
+  // 같은 필드(price_ccy)로 판정하므로 양쪽이 어긋나지 않는다. 원본 달러가가 없는
+  // 과거 거래는 달러 칸에 원화를 넣게 되므로 원화로 편집한다.
+  const editsInCcy =
+    !!editingTx && editingTx.currency !== "KRW" && editingTx.priceCcy !== null;
+  const inputCurrency = editingTx ? (editsInCcy ? editingTx.currency : "KRW") : currency;
+  // 과거 거래는 그때 박제된 환율로 환산을 보여줘야 저장 결과와 일치한다.
+  const inputFxRate = editingTx ? (editsInCcy ? editingTx.fxRate : null) : fxRate;
+
   const form = useForm<FormValues>({
     initialValues: {
       tradeType: editingTx?.ptType ?? initialType,
       quantity: editingTx?.quantity ?? 0,
-      price: editingTx?.price ?? 0,
-      fee: editingTx?.fee ?? 0,
+      price: (editsInCcy ? editingTx?.priceCcy : editingTx?.price) ?? 0,
+      fee: (editsInCcy ? editingTx?.feeCcy : editingTx?.fee) ?? 0,
       txDate: editingTx?.txDate ?? todayIsoKst(),
       memo: editingTx?.memo ?? "",
     },
@@ -210,9 +219,9 @@ export default function TradeForm({
   const settlement = isBuy ? total + fee : total - fee;
   // 달러 입력이면 금액을 달러로 표기하고 원화 환산을 보조로 붙인다.
   // 환율을 모르면(과거 데이터) 환산을 생략한다 — 추정치를 돈처럼 보여주지 않는다.
-  const isForeign = currency !== "KRW";
+  const isForeign = inputCurrency !== "KRW";
   const unit = isForeign ? "$" : tg("won");
-  const toKrw = (v: number) => (fxRate ? v * fxRate : null);
+  const toKrw = (v: number) => (inputFxRate ? v * inputFxRate : null);
   const amountText = (v: number) =>
     isForeign ? `$${v.toFixed(2)}` : `${krw(v)} ${tg("won")}`;
   const krwSub = (v: number) => {
