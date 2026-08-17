@@ -26,18 +26,22 @@ export function OnboardingGuard({ children }: { children: ReactNode }) {
   const count = data.body.data.totalCount ?? items.length;
   const isOnboarding = pathname.includes("/onboarding/household");
 
-  // 첫 가계부 ID 를 store 에 hydrate (X-Household-Id 헤더 자동 첨부용)
+  // 구독으로 읽는다 — getState() 로 읽으면 교체돼도 리렌더가 안 걸려
+  // 아래 render 단계 차단이 풀리지 않는다.
+  const currentHouseholdId = useHouseholdStore((s) => s.currentHouseholdId);
+  const hasValidHousehold = items.some(
+    (h) => h.householdId === currentHouseholdId,
+  );
+
+  // 첫 가계부 ID 를 store 에 hydrate (X-Household-Id 헤더 자동 첨부용).
+  // 로그아웃이 비운 뒤(빈 문자열)와, 다른 계정의 가계부 id 가 남아 있는 경우 둘 다 여기서 복구된다.
   useEffect(() => {
-    if (items.length === 0) return;
-    const current = useHouseholdStore.getState().currentHouseholdId;
-    const exists = items.some((h) => h.householdId === current);
-    if (!exists) {
-      const first = items[0];
-      if (first) {
-        useHouseholdStore.setState({ currentHouseholdId: first.householdId });
-      }
+    if (items.length === 0 || hasValidHousehold) return;
+    const first = items[0];
+    if (first) {
+      useHouseholdStore.setState({ currentHouseholdId: first.householdId });
     }
-  }, [items]);
+  }, [items, hasValidHousehold]);
 
   useEffect(() => {
     if (count === 0 && !isOnboarding) {
@@ -54,7 +58,13 @@ export function OnboardingGuard({ children }: { children: ReactNode }) {
   // render 단계에서 미리 차단.
   const shouldRedirect =
     (count === 0 && !isOnboarding) || (count > 0 && isOnboarding);
-  if (shouldRedirect) {
+
+  // 가계부 ID 가 이 계정 것으로 바뀌기 전에 children 이 마운트되면, 자식들의
+  // useSuspenseQuery 가 **남의 가계부 id 로** 요청을 날려 HH001 로 죽는다.
+  // 위 effect 는 렌더 이후에 돌기 때문에 render 단계에서 막아야 한다.
+  const householdNotReady = items.length > 0 && !hasValidHousehold;
+
+  if (shouldRedirect || householdNotReady) {
     return <PageLoader />;
   }
 
