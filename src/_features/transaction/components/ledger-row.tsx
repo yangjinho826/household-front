@@ -1,6 +1,6 @@
 "use client";
 
-import { Group, Stack, Text, UnstyledButton } from "@mantine/core";
+import { Badge, Group, Stack, Text, UnstyledButton } from "@mantine/core";
 import { useTranslations } from "next-intl";
 
 import IconBox from "_features/common/components/icon-box";
@@ -46,13 +46,24 @@ export default function LedgerRow({
   // 이체 상대 계좌 — 입금이면 출금처(accountName), 출금이면 입금처(toAccountName)
   const counterparty = isPositive ? t.accountName : t.toAccountName;
 
-  // 보조 라벨 — 이체는 상대계좌, 평가조정은 타입명, 그 외는 카테고리.
+  const isFixedExpense = t.txType === "FIXED_EXPENSE";
+
+  const title =
+    t.memo ||
+    (isFixedExpense ? t.fixedExpenseName : null) ||
+    t.categoryName ||
+    tt("tx_default_label");
+
+  // 보조 라벨 — 이체는 상대계좌, 평가조정은 타입명, 고정지출은 항목명, 그 외는 카테고리.
+  // 제목이 이미 고정지출명이면 같은 이름을 반복하지 않고 카테고리를 보여준다.
   const subLabel =
     t.txType === "TRANSFER"
       ? `${isPositive ? "← " : "→ "}${counterparty ?? "—"}`
       : t.txType === "VALUATION"
         ? tTxType("VALUATION")
-        : (t.categoryName ?? "—");
+        : isFixedExpense && t.fixedExpenseName && t.fixedExpenseName !== title
+          ? t.fixedExpenseName
+          : (t.categoryName ?? "—");
 
   return (
     <UnstyledButton
@@ -64,11 +75,18 @@ export default function LedgerRow({
           <IconBox icon={t.categoryIcon} color={accent} />
           <Stack gap={2} style={{ minWidth: 0, flex: 1 }}>
             <Text size="sm" fw={600} truncate>
-              {t.memo || t.categoryName || tt("tx_default_label")}
+              {title}
             </Text>
-            <Text size="xs" c="dimmed" truncate>
-              {subLabel}
-            </Text>
+            <Group gap={4} wrap="nowrap" style={{ minWidth: 0 }}>
+              {isFixedExpense && (
+                <Badge size="xs" color="danger" variant="light" radius="sm">
+                  {tTxType("FIXED_EXPENSE")}
+                </Badge>
+              )}
+              <Text size="xs" c="dimmed" truncate>
+                {subLabel}
+              </Text>
+            </Group>
           </Stack>
         </Group>
         <Stack gap={2} align="flex-end" style={{ flexShrink: 0 }}>

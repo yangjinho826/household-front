@@ -58,6 +58,8 @@ export interface TransactionListItemType {
   categoryName?: string | null;
   categoryColor?: string | null;
   categoryIcon?: string | null;
+  // 보관/삭제된 고정지출에 물린 과거 거래도 이름이 내려온다
+  fixedExpenseName?: string | null;
 }
 
 /** 계좌별 거래 이력 행 — 거래 + 그 계좌 관점 부호 금액 + 거래 후 잔액(running balance) */
@@ -112,4 +114,5 @@ export interface TransactionDetailItemType {
   categoryName?: string | null;
   categoryColor?: string | null;
   categoryIcon?: string | null;
+  fixedExpenseName?: string | null;
 }
