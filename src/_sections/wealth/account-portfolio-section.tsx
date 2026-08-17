@@ -24,11 +24,9 @@ import RealizedPnlRail from "_sections/wealth/components/realized-pnl-rail";
 import { useAccountOverview } from "_features/portfolio/queries/use-query";
 import { usePortfolioSheetStore } from "_features/portfolio/store";
 import {
-  formatCcy,
   formatProfitAmount,
   formatProfitRate,
   profitColor,
-  isDualCurrencyItem,
 } from "_features/portfolio/utils";
 import { PORTFOLIO_PALETTE, TOKEN } from "_styles/design-tokens";
 import { useMoney } from "_features/common/hooks/use-money";
@@ -275,11 +273,7 @@ export default function AccountPortfolioSection({ accountId }: Props) {
                           fw={700}
                           style={{ fontVariantNumeric: "tabular-nums" }}
                         >
-                          {/* 달러 종목은 달러 평단이 주 표기 — 원화는 아래 평가액에서 본다.
-                              판정은 종목 상세와 같은 기준(평단·현재가 둘 다 존재)을 쓴다. */}
-                          {isDualCurrencyItem(p)
-                            ? formatCcy(p.avgPriceCcy as number, p.currency)
-                            : money(p.avgPrice)}
+                          {money(p.avgPrice)}
                         </Text>
                       </Group>
                     </Stack>

@@ -37,10 +37,6 @@ interface TradeFormProps {
   onSuccess?: (soldOut?: boolean) => void;
   /** 시트/모달에서 사용할 때 — 취소 버튼 노출 + 닫기 콜백 */
   onCancel?: () => void;
-  /** 종목의 거래통화. USD 면 입력 단위가 달러가 되고 원화 환산을 같이 보여준다 */
-  currency?: string;
-  /** 현재 환율(1 통화당 원). 종목의 currentPrice / currentPriceCcy 로 구해서 넘긴다 */
-  fxRate?: number | null;
 }
 
 interface FormValues {
@@ -58,8 +54,6 @@ export default function TradeForm({
   editingTx,
   onSuccess,
   onCancel,
-  currency = "KRW",
-  fxRate = null,
 }: TradeFormProps) {
   const te = useTranslations("error");
   const tg = useTranslations("general");
@@ -76,21 +70,12 @@ export default function TradeForm({
 
   const isEdit = !!editingTx;
 
-  // 수정 모드의 입력 단위는 **그 거래가 기록된 방식**을 따른다 — 백엔드 update 도
-  // 같은 필드(price_ccy)로 판정하므로 양쪽이 어긋나지 않는다. 원본 달러가가 없는
-  // 과거 거래는 달러 칸에 원화를 넣게 되므로 원화로 편집한다.
-  const editsInCcy =
-    !!editingTx && editingTx.currency !== "KRW" && editingTx.priceCcy !== null;
-  const inputCurrency = editingTx ? (editsInCcy ? editingTx.currency : "KRW") : currency;
-  // 과거 거래는 그때 박제된 환율로 환산을 보여줘야 저장 결과와 일치한다.
-  const inputFxRate = editingTx ? (editsInCcy ? editingTx.fxRate : null) : fxRate;
-
   const form = useForm<FormValues>({
     initialValues: {
       tradeType: editingTx?.ptType ?? initialType,
       quantity: editingTx?.quantity ?? 0,
-      price: (editsInCcy ? editingTx?.priceCcy : editingTx?.price) ?? 0,
-      fee: (editsInCcy ? editingTx?.feeCcy : editingTx?.fee) ?? 0,
+      price: editingTx?.price ?? 0,
+      fee: editingTx?.fee ?? 0,
       txDate: editingTx?.txDate ?? todayIsoKst(),
       memo: editingTx?.memo ?? "",
     },
@@ -217,18 +202,6 @@ export default function TradeForm({
   const isBuy = form.values.tradeType === "BUY";
   // 정산금액 — 매수는 수수료만큼 더 나가고, 매도는 그만큼 덜 들어온다.
   const settlement = isBuy ? total + fee : total - fee;
-  // 달러 입력이면 금액을 달러로 표기하고 원화 환산을 보조로 붙인다.
-  // 환율을 모르면(과거 데이터) 환산을 생략한다 — 추정치를 돈처럼 보여주지 않는다.
-  const isForeign = inputCurrency !== "KRW";
-  const unit = isForeign ? "$" : tg("won");
-  const toKrw = (v: number) => (inputFxRate ? v * inputFxRate : null);
-  const amountText = (v: number) =>
-    isForeign ? `$${v.toFixed(2)}` : `${krw(v)} ${tg("won")}`;
-  const krwSub = (v: number) => {
-    if (!isForeign) return null;
-    const won = toKrw(v);
-    return won === null ? null : `${krw(won)} ${tg("won")}`;
-  };
   const isPending =
     submitting ||
     buyMutation.isPending ||
@@ -264,7 +237,7 @@ export default function TradeForm({
           min={0}
           thousandSeparator=","
           rightSection={
-            <span style={{ fontSize: 11, color: "var(--mantine-color-gray-6)" }}>{unit}</span>
+            <span style={{ fontSize: 11, color: "var(--mantine-color-gray-6)" }}>{tg("won")}</span>
           }
         />
         <NumberInput
@@ -275,7 +248,7 @@ export default function TradeForm({
           min={0}
           thousandSeparator=","
           rightSection={
-            <span style={{ fontSize: 11, color: "var(--mantine-color-gray-6)" }}>{unit}</span>
+            <span style={{ fontSize: 11, color: "var(--mantine-color-gray-6)" }}>{tg("won")}</span>
           }
         />
         <DateInput
@@ -297,22 +270,37 @@ export default function TradeForm({
         {/* 거래금액 / 수수료 / 정산금액 — 증권사 거래내역과 같은 3줄.
             정산금액이 실제로 계좌를 드나드는 돈이라 굵게 강조한다. */}
         <Stack gap={4} px={4}>
-          <SummaryRow
-            label={isBuy ? t("buy_amount") : t("sell_amount")}
-            value={amountText(total)}
-            sub={krwSub(total)}
-          />
-          <SummaryRow
-            label={t("label_fee")}
-            value={`${isBuy ? "+" : "−"}${amountText(fee)}`}
-            sub={krwSub(fee)}
-          />
-          <SummaryRow
-            label={t("settlement_amount")}
-            value={amountText(settlement)}
-            sub={krwSub(settlement)}
-            strong
-          />
+          <Group justify="space-between">
+            <span style={{ fontSize: 12, color: "var(--mantine-color-gray-6)" }}>
+              {isBuy ? t("buy_amount") : t("sell_amount")}
+            </span>
+            <span style={{ fontSize: 13, fontVariantNumeric: "tabular-nums" }}>
+              {krw(total)} {tg("won")}
+            </span>
+          </Group>
+          <Group justify="space-between">
+            <span style={{ fontSize: 12, color: "var(--mantine-color-gray-6)" }}>
+              {t("label_fee")}
+            </span>
+            <span style={{ fontSize: 13, fontVariantNumeric: "tabular-nums" }}>
+              {isBuy ? "+" : "−"}
+              {krw(fee)} {tg("won")}
+            </span>
+          </Group>
+          <Group justify="space-between">
+            <span style={{ fontSize: 12, color: "var(--mantine-color-gray-6)" }}>
+              {t("settlement_amount")}
+            </span>
+            <span
+              style={{
+                fontSize: 15,
+                fontWeight: 800,
+                fontVariantNumeric: "tabular-nums",
+              }}
+            >
+              {krw(settlement)} {tg("won")}
+            </span>
+          </Group>
         </Stack>
 
         {/* 거래 추가 시트(transaction/form.tsx) 와 동일 패턴 — 취소 + 액션 2버튼.
@@ -331,48 +319,5 @@ export default function TradeForm({
         />
       </Stack>
     </form>
-  );
-}
-
-/** 요약 한 줄 — 달러 종목이면 아래에 원화 환산을 작게 붙인다. */
-function SummaryRow({
-  label,
-  value,
-  sub,
-  strong = false,
-}: {
-  label: string;
-  value: string;
-  sub: string | null;
-  strong?: boolean;
-}) {
-  return (
-    <Group justify="space-between" align="flex-start">
-      <span style={{ fontSize: 12, color: "var(--mantine-color-gray-6)" }}>
-        {label}
-      </span>
-      <Stack gap={0} align="flex-end">
-        <span
-          style={{
-            fontSize: strong ? 15 : 13,
-            fontWeight: strong ? 800 : 400,
-            fontVariantNumeric: "tabular-nums",
-          }}
-        >
-          {value}
-        </span>
-        {sub && (
-          <span
-            style={{
-              fontSize: 11,
-              color: "var(--mantine-color-gray-6)",
-              fontVariantNumeric: "tabular-nums",
-            }}
-          >
-            {sub}
-          </span>
-        )}
-      </Stack>
-    </Group>
   );
 }
