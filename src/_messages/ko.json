@@ -305,7 +305,13 @@
     "label_sell_price": "매도가",
     "label_tx_date": "거래일",
     "label_memo": "메모",
-    "memo_placeholder": "(선택)"
+    "memo_placeholder": "(선택)",
+    "label_fee": "수수료",
+    "fee_buy_hint": "매수 수수료는 평단가에 포함됩니다",
+    "fee_sell_hint": "매도 수수료는 실현손익에서 차감됩니다",
+    "fee_negative": "수수료는 0 이상이어야 합니다",
+    "settlement_amount": "정산금액",
+    "total_fee": "제비용"
   },
   "transaction": {
     "list_title": "거래",

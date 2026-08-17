@@ -36,6 +36,8 @@ export interface PortfolioBuyRequest {
   portfolioId: string;
   quantity: number;
   price: number;
+  /** 매수 수수료 — 매수원가에 가산돼 평단이 올라간다 */
+  fee?: number;
   txDate?: string;
   memo?: string | null;
 }
@@ -45,6 +47,8 @@ export interface PortfolioSellRequest {
   portfolioId: string;
   quantity: number;
   sellPrice: number;
+  /** 매도 수수료 — 실현손익에서 차감된다 */
+  fee?: number;
   txDate?: string;
   memo?: string | null;
 }
@@ -110,7 +114,11 @@ export interface PortfolioTransactionItemType {
   ptType: PortfolioTxType;
   quantity: number;
   price: number;
+  /** 거래금액 (gross) = 수량 × 단가 */
   total: number;
+  fee: number;
+  /** 정산금액 (net) — 매수는 금액+수수료 출금, 매도는 금액−수수료 입금 */
+  settlementAmount: number;
   txDate: string;
   memo: string | null;
   /** 매도 실현손익 — SELL 만 값, BUY/미집계는 null */
@@ -124,6 +132,11 @@ export interface RealizedPnlRowType {
   name?: string; // 계좌 단위 응답에서 종목명 (종목 단위 응답은 없음)
   quantity: number;
   sellPrice: number;
+  /** 거래금액 (gross) = 수량 × 단가 */
+  amount: number;
+  fee: number;
+  /** 정산금액 = 거래금액 − 수수료 */
+  settlement: number;
   realizedPnl: number;
   realizedRate: number;
 }
@@ -134,6 +147,8 @@ export interface RealizedPnlSummaryType {
   totalRate: number;
   sellAmount: number;
   buyAmount: number;
+  /** 제비용 — sellAmount/buyAmount 는 gross, totalRealized 는 net 이라 그 차이를 드러낸다 */
+  totalFee: number;
 }
 
 /** 종목 매매손익 응답 */
@@ -151,6 +166,7 @@ export interface PortfolioTxUpdateRequest {
   txId: string;
   quantity?: number | null;
   price?: number | null;
+  fee?: number | null;
   txDate?: string | null;
   memo?: string | null;
 }
