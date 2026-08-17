@@ -39,7 +39,7 @@ import {
   formatProfitAmount,
   formatProfitRate,
   profitColor,
-  isDualCurrencyItem,
+  isDualCurrency,
 } from "_features/portfolio/utils";
 import { useMoney } from "_features/common/hooks/use-money";
 
@@ -58,8 +58,6 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
 
   const { data: itemData } = usePortfolioItem(portfolioId);
   const portfolio = itemData.body.data;
-  // 카드 전체가 같은 기준을 쓰도록 종목 단위로 한 번만 판정한다.
-  const dualCurrency = isDualCurrencyItem(portfolio);
 
   // 수정 시트에서 삭제(archive)하면 시트만 닫혀 archive 된 종목 상세에 잔류 →
   // archive 감지 시 계좌로 복귀(어디서 archive 했든 일관 처리).
@@ -167,34 +165,6 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
             </Text>
           </Group>
 
-          {/* 거래통화 기준 손익 — 위 원화 손익에는 환차손익이 섞여 있다.
-              자산 추이 그래프는 원화 기준이라 두 수익률이 갈릴 수 있어 기준을 명시한다. */}
-          {dualCurrency && portfolio.profitLossCcy !== null && (
-            <Group gap={6}>
-              <Text size="11px" c="dimmed" fw={600}>
-                {t("ccy_basis", { currency: portfolio.currency })}
-              </Text>
-              <Text
-                size="11px"
-                fw={700}
-                c={profitColor(portfolio.profitLossCcy)}
-                style={{ fontVariantNumeric: "tabular-nums" }}
-              >
-                {formatProfitAmount(portfolio.profitLossCcy, (n) =>
-                  formatCcy(n, portfolio.currency),
-                )}
-              </Text>
-              <Text
-                size="11px"
-                fw={700}
-                c={profitColor(portfolio.profitLossCcy)}
-                style={{ fontVariantNumeric: "tabular-nums" }}
-              >
-                ({formatProfitRate(portfolio.profitLossRateCcy ?? 0)})
-              </Text>
-            </Group>
-          )}
-
           <SimpleGrid cols={3} spacing="xs" mt="sm">
             <Stack gap={2}>
               <Text size="10px" c="dimmed" fw={600}>
@@ -213,7 +183,6 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
               krw={portfolio.avgPrice}
               ccy={portfolio.avgPriceCcy}
               currency={portfolio.currency}
-              dual={dualCurrency}
               money={money}
             />
             <PriceCell
@@ -221,7 +190,6 @@ export default function PortfolioTradeSection({ portfolioId }: Props) {
               krw={portfolio.currentPrice}
               ccy={portfolio.currentPriceCcy}
               currency={portfolio.currency}
-              dual={dualCurrency}
               money={money}
             />
           </SimpleGrid>
@@ -388,17 +356,15 @@ function PriceCell({
   krw,
   ccy,
   currency,
-  dual,
   money,
 }: {
   label: string;
   krw: number;
   ccy: number | null;
   currency: string;
-  /** 종목 단위 판정 결과 — 셀마다 따로 판정하면 한 카드에 원화/달러가 섞인다 */
-  dual: boolean;
   money: (n: number) => string;
 }) {
+  const dual = isDualCurrency(currency, ccy);
   return (
     <Stack gap={2}>
       <Text size="10px" c="dimmed" fw={600}>

@@ -268,7 +268,6 @@
     "holding_qty": "Quantity",
     "avg_unit_price": "Avg price",
     "avg_short": "Avg",
-    "ccy_basis": "In {currency}",
     "transactions": "Transactions",
     "trade_buy": "Buy",
     "trade_sell": "Sell",
