@@ -24,6 +24,8 @@ interface TxFormValues extends TransactionBaseRequestType {
 
 interface UseTransactionFormOptions {
   transactionId?: string;
+  /** 복사 원본 거래 id — 값만 가져오고 저장은 생성으로 간다(날짜는 오늘). */
+  copyFromId?: string;
   /** 폼 옵션의 통장 목록 — 선택 통장 타입으로 평가조정 분기를 결정한다. */
   accounts: AccountListItemType[];
   /**
@@ -35,6 +37,7 @@ interface UseTransactionFormOptions {
 
 export function useTransactionForm({
   transactionId,
+  copyFromId,
   accounts,
   onDone,
 }: UseTransactionFormOptions) {
@@ -127,17 +130,22 @@ export function useTransactionForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.values.accountId]);
 
+  // 수정과 복사는 "기존 거래 값으로 폼을 채운다"가 같다 — 다른 건 저장 경로(update vs create)와
+  // 날짜뿐이라 로딩 로직을 하나로 둔다.
+  const sourceId = transactionId ?? copyFromId;
+
   useEffect(() => {
-    if (!transactionId) return;
+    if (!sourceId) return;
     let cancelled = false;
     (async () => {
-      const res = await fetchDetail(transactionId);
+      const res = await fetchDetail(sourceId);
       if (cancelled || !res) return;
       const d = res.body.data;
       form.setValues({
         txType: d.txType,
         amount: d.amount,
-        txDate: d.txDate,
+        // 복사는 "같은 지출을 이번 달에 또" 가 목적이라 날짜만 오늘로.
+        txDate: transactionId ? d.txDate : todayDate,
         accountId: d.accountId,
         toAccountId: d.toAccountId,
         categoryId: d.categoryId,
@@ -151,8 +159,10 @@ export function useTransactionForm({
     return () => {
       cancelled = true;
     };
+    // transactionId 도 의존성 — 같은 거래를 수정→복사로 전환하면 sourceId 는 그대로라
+    // 이것 없이는 날짜를 오늘로 바꾸는 재실행이 일어나지 않는다.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [transactionId]);
+  }, [sourceId, transactionId]);
 
   const handleSubmit = async () => {
     try {

@@ -1,6 +1,6 @@
 "use client";
 
-import { Group, Stack, Text, UnstyledButton } from "@mantine/core";
+import { Badge, Group, Stack, Text, UnstyledButton } from "@mantine/core";
 import { useTranslations } from "next-intl";
 
 import IconBox from "_features/common/components/icon-box";
@@ -39,6 +39,7 @@ const TYPE_FALLBACK_HEX: Record<TxType, string> = {
 export default function TxRow({ item }: { item: TransactionListItemType }) {
   const money = useMoney();
   const t = useTranslations("transaction");
+  const tTxType = useTranslations("enum.tx-type");
   const openEdit = useQuickAddStore((s) => s.open);
 
   const accent = item.categoryColor ?? TYPE_FALLBACK_HEX[item.txType];
@@ -56,9 +57,24 @@ export default function TxRow({ item }: { item: TransactionListItemType }) {
       : "info.5"
     : TYPE_COLOR[item.txType];
 
+  // 고정지출은 어떤 항목(월세/통신비…)인지가 카테고리보다 중요 — 제목에 이름을 올린다.
+  const isFixedExpense = item.txType === "FIXED_EXPENSE";
+  const title =
+    item.memo ||
+    (isFixedExpense ? item.fixedExpenseName : null) ||
+    item.categoryName ||
+    t("tx_default_label");
+  // 제목이 이미 고정지출명이면(메모 없음/메모=항목명) 서브라인엔 카테고리를 —
+  // 같은 이름을 두 줄에 반복하면 한 줄을 통째로 버리는 셈이다.
+  const subLabel = isFixedExpense
+    ? (item.fixedExpenseName && item.fixedExpenseName !== title
+        ? item.fixedExpenseName
+        : (item.categoryName ?? "—"))
+    : (item.categoryName ?? "—");
+
   return (
     <UnstyledButton
-      onClick={() => openEdit(item.transactionId)}
+      onClick={() => openEdit(item.transactionId, item.txType)}
       style={{ padding: 12, borderRadius: 12, display: "block" }}
     >
       <Group justify="space-between" gap="md" wrap="nowrap" align="center">
@@ -66,12 +82,19 @@ export default function TxRow({ item }: { item: TransactionListItemType }) {
           <IconBox icon={item.categoryIcon} color={accent} />
           <Stack gap={2} style={{ minWidth: 0, flex: 1 }}>
             <Text size="sm" fw={600} truncate>
-              {item.memo || item.categoryName || t("tx_default_label")}
+              {title}
             </Text>
-            <Text size="xs" c="dimmed" truncate>
-              {item.categoryName ?? "—"} · {item.accountName ?? "—"}
-              {item.toAccountName ? ` → ${item.toAccountName}` : ""}
-            </Text>
+            <Group gap={4} wrap="nowrap" style={{ minWidth: 0 }}>
+              {isFixedExpense && (
+                <Badge size="xs" color="danger" variant="light" radius="sm">
+                  {tTxType("FIXED_EXPENSE")}
+                </Badge>
+              )}
+              <Text size="xs" c="dimmed" truncate>
+                {subLabel} · {item.accountName ?? "—"}
+                {item.toAccountName ? ` → ${item.toAccountName}` : ""}
+              </Text>
+            </Group>
           </Stack>
         </Group>
         <Text

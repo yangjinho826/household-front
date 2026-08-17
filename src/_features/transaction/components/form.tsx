@@ -23,6 +23,8 @@ import { useTransactionForm } from "../hooks/use-sub/use-form";
 
 interface TransactionFormProps {
   transactionId?: string;
+  /** 복사 원본 거래 id — 값만 채운 생성 모드 (날짜는 오늘) */
+  copyFromId?: string;
   /** 성공/취소 후 호출. 시트 모드용. 없으면 라우트 이동 (기존 동작). */
   onDone?: () => void;
   /** true 면 외곽 Card 제거 — Drawer/시트 안에서 사용할 때 padding 이중 방지 */
@@ -31,6 +33,7 @@ interface TransactionFormProps {
 
 export default function TransactionForm({
   transactionId,
+  copyFromId,
   onDone,
   hideCard = false,
 }: TransactionFormProps) {
@@ -71,7 +74,7 @@ export default function TransactionForm({
     handleSubmit,
     handleRemove,
     handleCancel,
-  } = useTransactionForm({ transactionId, accounts, onDone });
+  } = useTransactionForm({ transactionId, copyFromId, accounts, onDone });
 
   const txType = form.values.txType;
   const isValuation = txType === "VALUATION";
