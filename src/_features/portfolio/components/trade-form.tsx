@@ -20,6 +20,8 @@ import { getErrorMessage } from "_libraries/fetch/error-message";
 import { todayIsoKst } from "_utilities/datetime";
 
 import { usePortfolioMutations } from "../queries/use-mutations";
+
+const krw = (n: number) => new Intl.NumberFormat("ko-KR").format(Math.round(n));
 import type {
   PortfolioTransactionItemType,
   PortfolioTxType,
@@ -41,6 +43,7 @@ interface FormValues {
   tradeType: PortfolioTxType;
   quantity: number;
   price: number;
+  fee: number;
   txDate: string;
   memo: string;
 }
@@ -72,25 +75,35 @@ export default function TradeForm({
       tradeType: editingTx?.ptType ?? initialType,
       quantity: editingTx?.quantity ?? 0,
       price: editingTx?.price ?? 0,
+      fee: editingTx?.fee ?? 0,
       txDate: editingTx?.txDate ?? todayIsoKst(),
       memo: editingTx?.memo ?? "",
     },
     validate: {
       quantity: (v) => (v > 0 ? null : t("quantity_required")),
       price: (v) => (v > 0 ? null : t("price_required")),
+      fee: (v) => (v >= 0 ? null : t("fee_negative")),
       txDate: (v) => (v ? null : t("tx_date_required")),
     },
   });
 
-  const handleSubmit = async (values: FormValues) => {
+  const handleSubmit = async (raw: FormValues) => {
     setSubmitting(true);
     let soldOut = false;
+    // NumberInput 이 문자열을 흘려보낼 수 있어 요청 직전에 숫자로 고정한다.
+    const values: FormValues = {
+      ...raw,
+      quantity: Number(raw.quantity) || 0,
+      price: Number(raw.price) || 0,
+      fee: Number(raw.fee) || 0,
+    };
     try {
       if (editingTx) {
         await updateTxMutation.mutateAsync({
           txId: editingTx.txId,
           quantity: values.quantity,
           price: values.price,
+          fee: values.fee,
           txDate: values.txDate,
           memo: values.memo.trim() || null,
         });
@@ -104,6 +117,7 @@ export default function TradeForm({
           portfolioId,
           quantity: values.quantity,
           price: values.price,
+          fee: values.fee,
           txDate: values.txDate,
           memo: values.memo.trim() || null,
         });
@@ -118,6 +132,7 @@ export default function TradeForm({
           portfolioId,
           quantity: values.quantity,
           sellPrice: values.price,
+          fee: values.fee,
           txDate: values.txDate,
           memo: values.memo.trim() || null,
         });
@@ -179,8 +194,14 @@ export default function TradeForm({
     });
   };
 
-  const total = (form.values.quantity || 0) * (form.values.price || 0);
+  // Mantine NumberInput 은 편집 중 값을 문자열("0500")로 준다. 곱셈은 숫자로
+  // 강제되지만 덧셈은 문자열 연결이 되므로("10000"+"500"→"10000500") 반드시 Number 로 캐스팅한다.
+  const num = (v: number | string) => Number(v) || 0;
+  const total = num(form.values.quantity) * num(form.values.price);
+  const fee = num(form.values.fee);
   const isBuy = form.values.tradeType === "BUY";
+  // 정산금액 — 매수는 수수료만큼 더 나가고, 매도는 그만큼 덜 들어온다.
+  const settlement = isBuy ? total + fee : total - fee;
   const isPending =
     submitting ||
     buyMutation.isPending ||
@@ -219,6 +240,17 @@ export default function TradeForm({
             <span style={{ fontSize: 11, color: "var(--mantine-color-gray-6)" }}>{tg("won")}</span>
           }
         />
+        <NumberInput
+          {...form.getInputProps("fee")}
+          label={t("label_fee")}
+          description={isBuy ? t("fee_buy_hint") : t("fee_sell_hint")}
+          placeholder="0"
+          min={0}
+          thousandSeparator=","
+          rightSection={
+            <span style={{ fontSize: 11, color: "var(--mantine-color-gray-6)" }}>{tg("won")}</span>
+          }
+        />
         <DateInput
           value={form.values.txDate || null}
           onChange={(value) => form.setFieldValue("txDate", value ?? "")}
@@ -235,14 +267,41 @@ export default function TradeForm({
           minRows={1}
         />
 
-        <Group justify="space-between" px={4}>
-          <span style={{ fontSize: 12, color: "var(--mantine-color-gray-6)" }}>
-            {isBuy ? t("buy_amount") : t("sell_amount")}
-          </span>
-          <span style={{ fontSize: 14, fontWeight: 700 }}>
-            {new Intl.NumberFormat("ko-KR").format(Math.round(total))} {tg("won")}
-          </span>
-        </Group>
+        {/* 거래금액 / 수수료 / 정산금액 — 증권사 거래내역과 같은 3줄.
+            정산금액이 실제로 계좌를 드나드는 돈이라 굵게 강조한다. */}
+        <Stack gap={4} px={4}>
+          <Group justify="space-between">
+            <span style={{ fontSize: 12, color: "var(--mantine-color-gray-6)" }}>
+              {isBuy ? t("buy_amount") : t("sell_amount")}
+            </span>
+            <span style={{ fontSize: 13, fontVariantNumeric: "tabular-nums" }}>
+              {krw(total)} {tg("won")}
+            </span>
+          </Group>
+          <Group justify="space-between">
+            <span style={{ fontSize: 12, color: "var(--mantine-color-gray-6)" }}>
+              {t("label_fee")}
+            </span>
+            <span style={{ fontSize: 13, fontVariantNumeric: "tabular-nums" }}>
+              {isBuy ? "+" : "−"}
+              {krw(fee)} {tg("won")}
+            </span>
+          </Group>
+          <Group justify="space-between">
+            <span style={{ fontSize: 12, color: "var(--mantine-color-gray-6)" }}>
+              {t("settlement_amount")}
+            </span>
+            <span
+              style={{
+                fontSize: 15,
+                fontWeight: 800,
+                fontVariantNumeric: "tabular-nums",
+              }}
+            >
+              {krw(settlement)} {tg("won")}
+            </span>
+          </Group>
+        </Stack>
 
         {/* 거래 추가 시트(transaction/form.tsx) 와 동일 패턴 — 취소 + 액션 2버튼.
             매수/매도 색상은 유지 (UX 핵심). */}
