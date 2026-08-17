@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, Group, SegmentedControl, Stack, Text } from "@mantine/core";
+import { Card, Group, Stack, Text } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
 import { useTranslations } from "next-intl";
 import { useDeferredValue, useState } from "react";
@@ -22,7 +22,7 @@ import {
   formatProfitRate,
   profitColor,
 } from "_features/portfolio/utils";
-import { nowKst, todayIsoKst } from "_utilities/datetime";
+import { todayIsoKst } from "_utilities/datetime";
 
 interface Props {
   // 둘 중 하나 — 종목 단위(portfolioId) 또는 계좌 누적(accountId)
@@ -30,28 +30,11 @@ interface Props {
   accountId?: string;
 }
 
-// 기간 — 프리셋 3개 + 직접 지정. 전체가 기본(레일 라벨과 일치).
-type Preset = "all" | "thisYear" | "lastYear" | "custom";
-
+// 기간 — 증권사 매매손익처럼 **당일부터** 시작하고 날짜로 직접 좁힌다.
+// 프리셋(전체/올해/작년)은 두지 않는다 — 누적 성과는 레일이 이미 보여준다.
 interface Range {
-  from?: string;
-  to?: string;
-}
-
-// 프리셋 → from/to. 전체는 from 생략(백엔드가 첫 매도일~오늘로 clamp).
-function presetRange(preset: Preset, custom: Range): Range {
-  if (preset === "thisYear") {
-    return { from: nowKst().startOf("year").format("YYYY-MM-DD"), to: todayIsoKst() };
-  }
-  if (preset === "lastYear") {
-    const y = nowKst().subtract(1, "year");
-    return {
-      from: y.startOf("year").format("YYYY-MM-DD"),
-      to: y.endOf("year").format("YYYY-MM-DD"),
-    };
-  }
-  if (preset === "custom") return custom;
-  return { from: undefined, to: todayIsoKst() };
+  from: string;
+  to: string;
 }
 
 /**
@@ -88,19 +71,18 @@ export default function RealizedPnlPanel({ portfolioId, accountId }: Props) {
 }
 
 function usePeriod() {
-  const [preset, setPreset] = useState<Preset>("all");
-  const [custom, setCustom] = useState<Range>({});
-  // 쿼리는 지연값으로 — 프리셋 전환 시 재-suspend 로 Drawer 가 깜빡이지 않게
-  const deferredPreset = useDeferredValue(preset);
-  const deferredCustom = useDeferredValue(custom);
-  const range = presetRange(deferredPreset, deferredCustom);
+  // 기본 = 당일. 과거를 보려면 시작일을 직접 넓힌다.
+  const [range, setRange] = useState<Range>(() => ({
+    from: todayIsoKst(),
+    to: todayIsoKst(),
+  }));
+  // 쿼리는 지연값으로 — 날짜 변경 시 재-suspend 로 Drawer 가 깜빡이지 않게
+  const deferredRange = useDeferredValue(range);
   return {
-    preset,
-    setPreset,
-    custom,
-    setCustom,
-    range,
-    isStale: preset !== deferredPreset || custom !== deferredCustom,
+    range: deferredRange,
+    draft: range,
+    setRange,
+    isStale: range !== deferredRange,
   };
 }
 
@@ -130,40 +112,27 @@ function RealizedPnlView({ data, period }: ViewProps) {
 
   return (
     <Stack gap="sm">
-      {/* 기간 — 전체 / 올해 / 작년 / 직접 */}
-      <SegmentedControl
-        size="xs"
-        fullWidth
-        value={period.preset}
-        onChange={(v) => period.setPreset(v as Preset)}
-        data={[
-          { label: t("period_all"), value: "all" },
-          { label: t("period_this_year"), value: "thisYear" },
-          { label: t("period_last_year"), value: "lastYear" },
-          { label: t("period_custom"), value: "custom" },
-        ]}
-      />
-
-      {period.preset === "custom" && (
-        <Group grow gap="xs">
-          <DatePickerInput
-            size="xs"
-            valueFormat="YYYY-MM-DD"
-            placeholder={data.effectiveFrom}
-            value={period.custom.from ?? null}
-            onChange={(v) =>
-              period.setCustom((c) => ({ ...c, from: v ?? undefined }))
-            }
-          />
-          <DatePickerInput
-            size="xs"
-            valueFormat="YYYY-MM-DD"
-            placeholder={data.effectiveTo}
-            value={period.custom.to ?? null}
-            onChange={(v) => period.setCustom((c) => ({ ...c, to: v ?? undefined }))}
-          />
-        </Group>
-      )}
+      {/* 기간 — 날짜 두 개로만 좁힌다. 기본은 당일. */}
+      <Group grow gap="xs">
+        <DatePickerInput
+          size="xs"
+          valueFormat="YYYY-MM-DD"
+          label={t("period_from")}
+          value={period.draft.from}
+          maxDate={period.draft.to}
+          onChange={(v) =>
+            v && period.setRange((r) => ({ ...r, from: v }))
+          }
+        />
+        <DatePickerInput
+          size="xs"
+          valueFormat="YYYY-MM-DD"
+          label={t("period_to")}
+          value={period.draft.to}
+          minDate={period.draft.from}
+          onChange={(v) => v && period.setRange((r) => ({ ...r, to: v }))}
+        />
+      </Group>
 
       {/* 지연 로딩 중 살짝 흐리게 — 깜빡임 대신 부드러운 전환 */}
       <Stack

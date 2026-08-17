@@ -275,9 +275,6 @@
     "sell_record": "Record sell",
     "edit_trade": "Edit transaction",
     "no_transactions": "No transactions",
-    "period_all": "All",
-    "period_this_year": "This year",
-    "period_last_year": "Last year",
     "realized_pnl": "Realized P&L",
     "sell_amount": "Sell amount",
     "buy_amount": "Buy amount",
@@ -311,8 +308,7 @@
     "fee_sell_hint": "Sell fee is deducted from realized P&L",
     "fee_negative": "Fee must be 0 or greater",
     "settlement_amount": "Settlement",
-    "total_fee": "Total fees",
-    "period_custom": "Custom"
+    "total_fee": "Total fees"
   },
   "transaction": {
     "list_title": "Transactions",
