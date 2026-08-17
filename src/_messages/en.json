@@ -311,7 +311,8 @@
     "fee_sell_hint": "Sell fee is deducted from realized P&L",
     "fee_negative": "Fee must be 0 or greater",
     "settlement_amount": "Settlement",
-    "total_fee": "Total fees"
+    "total_fee": "Total fees",
+    "period_custom": "Custom"
   },
   "transaction": {
     "list_title": "Transactions",
