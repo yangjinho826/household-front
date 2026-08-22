@@ -1,4 +1,4 @@
-# household-front
+# moeum-front
 
 스택: `personal-frontend`
 

@@ -27,7 +27,7 @@
 
 > 워드마크 PNG는 폰트 fallback(고딕)으로 렌더됨. 실제 워드마크는 **Noto Serif KR 700**(앱에서 로드)으로 표시된다.
 
-## 적용 위치 (household-front)
+## 적용 위치 (moeum-front)
 
 - `public/icon.svg` ← `mark.svg` (metadata 메인 favicon)
 - `public/icon-192.png` `icon-512.png` `apple-touch-icon.png` `favicon-32.png`
