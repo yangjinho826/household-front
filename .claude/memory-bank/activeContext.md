@@ -10,6 +10,15 @@
 
 ## Status
 
+### 프로젝트 이름 정리 — `household` → `moeum` (2026-08-22, B·C 레이어만)
+브랜드는 이미 "모음"인데 레포·디렉토리·문서에 옛 이름이 남아 거슬린다는 요청. 범위를 4레이어로 쪼개 **B(문서·주석)·C(디렉토리·레포명)만 실행**, D(인프라 식별자)·E(도메인 모델)는 보류.
+- **C**: GitHub 레포 `household-front` → `moeum-front` + 로컬 디렉토리 rename. `deploy.yml`/`rollback.yml` 이 레포명이 아니라 GHCR 이미지명·서버 경로를 하드코딩하고 있어 배포 무영향(착수 전 실측).
+- **B**: README·CLAUDE.md·`design/logo-20260603/README.md` 프로젝트명 표기 + `package.json` name (`private: true`, lockfile·코드 참조 0 → 안전).
+- **경로 부수 정리**: `~/.claude/memory/moeum-front`, `~/.gstack/projects/yangjinho826-moeum-front` 로 이동하고 `.claude/settings*.json` 하드코딩 경로 갱신.
+- **미치환(의도적)**: `docker-compose.yml`(`household-net`·`BACKEND_URL: http://household-back:8000`)·`nginx.conf`(`household.jinho826.com`)·`.env.local.example` = D. i18n `"가계부"`/`household` 키 = E(도메인).
+- 코드 내 `household` 는 전부 도메인 개념(공유 가계부 단위)이라 이번 범위 밖.
+
+
 ### 반응형 UX 개선 — 작은 화면 CRUD 가려짐/발견성 (2026-07-22, front 미커밋)
 사용자 불만 "작아지면 추가/수정/삭제 선택이 안 보임" → Explore 3병렬 audit → 계획 승인(P1~P3 전체) → 구현+browse E2E 검증 완료. 계획=`~/.claude/plans/ux-tranquil-truffle.md`.
 - **P1-1 매매 Drawer→FormSheet**: `portfolio-trade-section`·`realized-pnl-rail`의 자체 Drawer가 `--bottom-tab-h` 보정 누락 → 하단 버튼이 탭바(z500)에 가려짐. FormSheet 재사용으로 일원화.

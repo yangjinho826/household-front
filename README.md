@@ -1,4 +1,4 @@
-# household-front
+# moeum-front
 
 Next.js 15 + React 19 + TypeScript strict + shadcn/ui + Tailwind 3 + 토스 디자인 시스템.
 

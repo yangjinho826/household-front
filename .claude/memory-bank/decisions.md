@@ -49,3 +49,4 @@
 2026-06-03: 로고 = 겹치는 세 원 → 중앙 핵 수렴(B안) — ㅁ상자+코인(A)·워드마크 "모"(C) 탈락 (codex는 16px 식별성으로 C 추천했으나 사용자가 B 선택. "여러 자산이 한곳으로 모임" 컨셉이 브랜드명 '모음'과 직결)
 2026-06-03: i18n 대량 치환 = 인프라 메인 선작업 → 컴포넌트 서브에이전트 병렬 (ko/en.json 단일파일 동시편집이 병렬 충돌 원인. 헬퍼·공통키는 메인이 먼저, 컴포넌트 치환만 파일별 병렬 위임=json read-only라 안전. 같은 NS 신설 필요한 개별텍스트는 단독 agent 순차)
 2026-06-03: favicon = app/icon.svg 단일 정본 — metadata.icons.icon "/icon.svg" 수동지정 제거 (Next14가 app/icon.svg를 /icon.svg 라우트로 자동 등록하는데 metadata에 같은 경로 지정 시 충돌→500. 컨벤션 우선)
+2026-08-22: 프로젝트 이름 정리 범위 — `household` → `moeum` 을 4레이어로 쪼개 B(문서·주석)·C(디렉토리·레포명)만 실행, D·E 보류 (레포·디렉토리·README/CLAUDE.md·`package.json` name 까지만. `package.json` 은 `private: true` + lockfile·코드 참조 0 이라 D 로 분류했다가 안전 확인 후 포함. 반대로 `docker-compose.yml` 의 `household-net`·`BACKEND_URL: http://household-back:8000` 과 `nginx.conf` 의 `household.jinho826.com` 은 백엔드 컨테이너/도메인과 짝이라 한쪽만 바꾸면 즉시 깨져 D 로 남김. i18n 의 `household`/"가계부" 키는 브랜드명이 아니라 도메인 개념이라 E)
